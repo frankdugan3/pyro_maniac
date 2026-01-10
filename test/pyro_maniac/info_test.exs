@@ -4,6 +4,7 @@ defmodule PyroManiac.InfoTest do
 
   alias Ash.DataLayer.Ets
   alias Ash.Notifier.PubSub
+  alias PyroManiac.Test.Support.LiveViewBackend
 
   require Ash.Query
 
@@ -121,7 +122,7 @@ defmodule PyroManiac.InfoTest do
   defmodule UserPage do
     @moduledoc false
 
-    use PyroManiac, resource: PyroManiac.InfoTest.User
+    use PyroManiac, resource: PyroManiac.InfoTest.User, backends: [LiveViewBackend]
 
     data_table do
       action_type [:read] do

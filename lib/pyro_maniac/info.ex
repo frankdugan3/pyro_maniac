@@ -34,17 +34,11 @@ defmodule PyroManiac.Info do
       iex> data_table_for(PyroManiac.InfoTest.UserPage, :list) |> Map.get(:name)
       :list
   """
-  @spec data_table_for(PyroManiac.t(), atom()) ::
-          [
-            DataTable
-          ]
-          | nil
-  def data_table_for(pyro_or_resource, action_name) do
-    pyro_or_resource
-    |> Extension.get_entities([:data_table])
-    |> Enum.find(fn action ->
-      action.name == action_name
-    end)
+  @spec data_table_for(PyroManiac.t(), atom()) :: DataTable | nil
+  def data_table_for(pyro_maniac, action_name) do
+    pyro_maniac
+    |> Extension.get_persisted(:data_table_actions_by_name, %{})
+    |> Map.get(action_name)
   end
 
   @doc """

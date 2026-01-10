@@ -4,7 +4,7 @@ defmodule PyroManiac.Dsl.Entity do
   defmacro __using__(opts) do
     schema = opts[:schema] || raise "Need to specify entity schema"
     entities = opts[:entities] || []
-    struct_fields = Keyword.keys(opts[:schema]) ++ Keyword.keys(entities)
+    struct_fields = [:__spark_metadata__] ++ Keyword.keys(opts[:schema]) ++ Keyword.keys(entities)
 
     quote do
       @moduledoc @moduledoc <> Spark.Options.docs(unquote(schema))
@@ -21,6 +21,9 @@ defmodule PyroManiac.Dsl.Entity do
       @entity_opts unquote(opts)
                    |> Keyword.put(:entities, @entities)
                    |> Keyword.put(:target, __MODULE__)
+                   |> Keyword.update(:auto_set_fields, [__spark_metadata__: nil], fn fields ->
+                     Keyword.put(fields, :__spark_metadata__, nil)
+                   end)
 
       @entity struct!(Spark.Dsl.Entity, @entity_opts)
 

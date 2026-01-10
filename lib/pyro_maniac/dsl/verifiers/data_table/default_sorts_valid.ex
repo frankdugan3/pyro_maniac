@@ -18,7 +18,7 @@ defmodule PyroManiac.Dsl.Verifiers.DataTable.DefaultSortsValid do
       context =
         context
         |> Map.put(:action, action)
-        |> Map.put(:columns, MapSet.new(action.columns, & &1.source))
+        |> Map.put(:columns, action.columns |> Map.values() |> MapSet.new(& &1.source))
 
       case Ash.Sort.parse_input(context.resource, action.default_sort) do
         {:ok, []} ->

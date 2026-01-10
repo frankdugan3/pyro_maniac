@@ -15,7 +15,10 @@ defmodule PyroManiac.Dsl.Verifiers.DataTable.DefaultDisplaysValid do
     }
 
     for %Action{} = action <- Verifier.get_entities(dsl, [:data_table]) do
-      columns = MapSet.new(action.columns, & &1.name)
+      columns =
+        action.columns
+        |> Map.values()
+        |> MapSet.new(& &1.name)
 
       if Enum.empty?(action.default_display) do
         raise DslError.exception(

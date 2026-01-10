@@ -5,14 +5,23 @@ defmodule PyroManiac.Theme.Dsl.Transformers.ApplyPrefix do
   use PyroManiac.Dsl.Transformers
 
   alias PyroManiac.Theme.BaseClass
+  alias PyroManiac.Theme.Transformers.ApplyTheme
+  alias Spark.Dsl.Extension
   alias Spark.Dsl.Transformer
 
   @impl true
+  def after?(ApplyTheme), do: true
   def after?(_), do: false
 
   @impl true
   def transform(dsl) do
-    prefix = Transformer.get_option(dsl, [:theme], :prefix, "")
+    default_prefix =
+      case Extension.get_persisted(dsl, :theme) do
+        nil -> ""
+        theme -> Extension.get_opt(theme, [:theme], :prefix, "")
+      end
+
+    prefix = Transformer.get_option(dsl, [:theme], :prefix, default_prefix)
 
     dsl =
       dsl

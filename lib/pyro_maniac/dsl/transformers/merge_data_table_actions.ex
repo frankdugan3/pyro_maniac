@@ -13,7 +13,6 @@ defmodule PyroManiac.Dsl.Transformers.MergeDataTableActions do
   @impl true
   def after?(module) when module in @ash_resource_transformers, do: true
 
-  @impl true
   def after?(_), do: false
 
   @impl true
@@ -147,25 +146,17 @@ defmodule PyroManiac.Dsl.Transformers.MergeDataTableActions do
   end
 
   defp merge_columns(columns, context) do
-    Enum.map(columns, fn
-      %Column{} = column ->
-        column
-        # |> expand_resource_field_type(context)
-        |> expand_column_description(context)
-        |> expand_column_sortable(context)
+    Enum.reduce(columns, %{}, fn
+      %Column{} = column, acc ->
+        Map.put(
+          acc,
+          column.name,
+          column
+          |> expand_column_description(context)
+          |> expand_column_sortable(context)
+        )
     end)
   end
-
-  # defp expand_resource_field_type(column, context) do
-  #   {name, path} = List.pop_at(column.source, -1)
-  #
-  #   type =
-  #     context.resource
-  #     |> PyroManiac.Info.resource_by_path(path)
-  #     |> resource_field_type(name)
-  #
-  #   Map.put(column, :resource_field_type, type)
-  # end
 
   defp expand_action_description(action, context) do
     description = Map.get(action, :description, context.default_description)

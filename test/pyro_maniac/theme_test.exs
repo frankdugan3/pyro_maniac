@@ -2,10 +2,11 @@ defmodule PyroManiac.ThemeTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
+  import ExUnit.CaptureIO
+
   alias PyroManiac.Theme.BaseClass
   alias PyroManiac.Theme.BEM
   alias Spark.Dsl.Extension
-  alias Spark.Error.DslError
 
   doctest PyroManiac.Theme, import: true
 
@@ -25,27 +26,25 @@ defmodule PyroManiac.ThemeTest do
     end
 
     test "validates base class implementation" do
-      [missing | implemented] = PyroManiac.Theme.base_class_names()
+      [missing | implemented] = BEM.base_class_names()
 
-      assert_raise DslError,
-                   """
-                   [PyroManiac.ThemeTest.CustomTheme.MissingBaseClass]
-                   theme -> base_class:
-                     The following base classes are not defined:
+      output =
+        capture_io(:stderr, fn ->
+          defmodule CustomTheme.MissingBaseClass do
+            use PyroManiac.Theme
 
-                     #{inspect(missing)}
-                   """,
-                   fn ->
-                     defmodule CustomTheme.MissingBaseClass do
-                       use PyroManiac.Theme
+            theme do
+              for name <- implemented do
+                base_class name, "#{name}"
+              end
+            end
+          end
+        end)
 
-                       theme do
-                         for name <- implemented do
-                           base_class name, "#{name}"
-                         end
-                       end
-                     end
-                   end
+      assert output =~ "[PyroManiac.ThemeTest.CustomTheme.MissingBaseClass]"
+      assert output =~ "theme -> base_class"
+      assert output =~ "The following base classes are not defined:"
+      assert output =~ inspect(missing)
     end
   end
 end

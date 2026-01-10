@@ -69,7 +69,6 @@ defmodule PyroManiac.Dsl do
       __MODULE__.Verifiers.DataTable.DefaultSortsValid,
       __MODULE__.Verifiers.DataTable.NoDuplicateActions,
       __MODULE__.Verifiers.DataTable.NoDuplicateColumnLabels,
-      __MODULE__.Verifiers.DataTable.NoDuplicateColumns,
       __MODULE__.Verifiers.Form.AllAcceptedIncluded,
       __MODULE__.Verifiers.Form.AllArgumentsIncluded,
       __MODULE__.Verifiers.Form.AllFieldsInAction,
@@ -77,5 +76,9 @@ defmodule PyroManiac.Dsl do
       __MODULE__.Verifiers.Form.NoDuplicateActions,
       __MODULE__.Verifiers.Form.NoDuplicateFieldLabels,
       __MODULE__.Verifiers.Form.NoDuplicateFields
+    ],
+    # quokka:sort
+    persisters: [
+      __MODULE__.Persisters.DataTable
     ]
 end

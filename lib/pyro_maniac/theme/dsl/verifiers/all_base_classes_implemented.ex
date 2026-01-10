@@ -11,7 +11,7 @@ defmodule PyroManiac.Theme.Dsl.Verifiers.AllBaseClassesImplemented do
   @impl true
   def verify(dsl) do
     module = Verifier.get_persisted(dsl, :module, nil)
-    to_implement = PyroManiac.Theme.base_class_names() |> MapSet.new()
+    to_implement = Verifier.get_option(dsl, [:theme], :base_class_names) |> MapSet.new()
 
     implemented =
       dsl

@@ -12,14 +12,7 @@ defmodule PyroManiac.Theme.BaseClass do
       name: [
         doc: "UI component for class",
         required: true,
-        type: {
-          :one_of,
-          # quokka:sort
-          [
-            :data_table,
-            :form
-          ]
-        }
+        type: :atom
       ],
       prefixed: [type: :string, private?: true],
       value: [
@@ -28,4 +21,40 @@ defmodule PyroManiac.Theme.BaseClass do
         type: :string
       ]
     ]
+
+  @doc """
+  The default base class names requiring implementation. These are what the built-in PyroManiac backends require for compatible themes.
+  """
+  def default_base_class_names do
+    ~w[
+      data_table
+        data_table__caption
+        data_table__header
+        data_table__header_row
+        data_table__body
+        data_table__body_row
+        data_table__footer
+        data_table__footer_row
+        data_table__footer_cell
+        data_table__column__header
+        data_table__column__cell
+      form
+        form__step
+        form__field
+        form__field__input
+        form__field_group
+      pagination
+        pagination__navigator
+        pagination__first
+        pagination__previous
+        pagination__next
+        pagination__last
+        pagination__limit
+        pagination__limit_label
+        pagination__limit_input
+        pagination__reset
+      scroll_to_top
+      icon
+    ]a
+  end
 end

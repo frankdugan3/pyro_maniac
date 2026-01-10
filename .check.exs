@@ -29,6 +29,7 @@
     # {:my_task, "mix my_task", env: %{"MIX_ENV" => "prod"}},
     # {:my_tool, ["my_tool", "arg with spaces"]}
 
-    {:spark_formatter, "mix spark.formatter --check --extensions AshPyro.Extensions.Resource"}
+    {:spark_formatter,
+     "mix spark.formatter --check --extensions PyroManiac.Dsl,PyroManiac.Theme.Dsl"}
   ]
 ]

@@ -13,7 +13,7 @@ defmodule PyroManiac.Dsl.Verifiers.DataTable.AllColumnsValid do
     resource = Verifier.get_persisted(dsl, :resource, nil)
 
     for %Action{} = action <- Verifier.get_entities(dsl, [:data_table]) do
-      for %Column{} = column <- action.columns do
+      for %Column{} = column <- action.columns |> Map.values() do
         {name, path} = List.pop_at(column.source, -1)
 
         source_resource = PyroManiac.Info.resource_by_path(resource, path)

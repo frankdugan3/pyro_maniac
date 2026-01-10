@@ -10,6 +10,11 @@ defmodule PyroManiac do
         type: {:spark, Ash.Resource},
         doc: "The Ash resource",
         required: true
+      ],
+      backends: [
+        type: {:wrap_list, :module},
+        doc: "The backends to render UI.",
+        required: true
       ]
     ],
     default_extensions: [extensions: [PyroManiac.Dsl]]
@@ -31,8 +36,9 @@ defmodule PyroManiac do
 
   @impl Spark.Dsl
   def handle_opts(opts) do
-    quote bind_quoted: [resource: opts[:resource]] do
+    quote bind_quoted: [resource: opts[:resource], backends: opts[:backends]] do
       @persist {:resource, resource}
+      @persist {:backends, backends}
     end
   end
 end

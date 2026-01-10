@@ -88,6 +88,7 @@ defmodule PyroManiac.Dsl.Verifiers.DataTable.AllPublicIncluded do
 
     defined =
       action.columns
+      |> Map.values()
       |> Enum.reduce(MapSet.new(), fn
         %Column{source: [key]}, acc -> MapSet.put(acc, key)
         _, acc -> acc
@@ -102,6 +103,7 @@ defmodule PyroManiac.Dsl.Verifiers.DataTable.AllPublicIncluded do
 
     defined =
       action.columns
+      |> Map.values()
       |> Enum.reduce(MapSet.new(), fn
         %Column{source: source}, acc -> MapSet.put(acc, source)
         _, acc -> acc

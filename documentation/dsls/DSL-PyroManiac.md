@@ -23,6 +23,8 @@ Configure the appearance of data tables in the `PyroManiac.Dsl` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
+| [`class`](#data_table-class){: #data_table-class } | `nil \| String.t \| (map -> String.t)` |  | The default class for the data table. |
+| [`description`](#data_table-description){: #data_table-description } | `String.t \| :inherit` |  | The default description for data tables. |
 | [`exclude`](#data_table-exclude){: #data_table-exclude } | `list(atom)` | `[]` | The actions to exclude from data tables. |
 
 
@@ -50,12 +52,20 @@ Configure the appearance of the data table for specific action(s).
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#data_table-action-label){: #data_table-action-label } | `String.t` |  | The label for this data table (defaults to capitalized name). |
-| [`description`](#data_table-action-description){: #data_table-action-description } | `String.t` |  | The description for this data table (defaults to action's description). |
+| [`body_class`](#data_table-action-body_class){: #data_table-action-body_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table tbody classes. |
+| [`body_row_class`](#data_table-action-body_row_class){: #data_table-action-body_row_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table tbody > tr classes. |
+| [`caption_class`](#data_table-action-caption_class){: #data_table-action-caption_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table caption classes. |
 | [`class`](#data_table-action-class){: #data_table-action-class } | `nil \| String.t \| (map -> String.t)` |  | Customize data table classes. |
-| [`default_display`](#data_table-action-default_display){: #data_table-action-default_display } | `list(atom)` | `[]` | The columns to display by default. |
+| [`default_display`](#data_table-action-default_display){: #data_table-action-default_display } | `list(atom)` |  | The columns to display by default. |
 | [`default_sort`](#data_table-action-default_sort){: #data_table-action-default_sort } | `String.t \| list({atom, :asc \| :desc \| :asc_nils_first \| :asc_nils_last \| :desc_nils_first \| :desc_nils_last}) \| list(atom) \| list(String.t) \| nil` |  | The columns to sort on by default. |
+| [`description`](#data_table-action-description){: #data_table-action-description } | `String.t \| :inherit` |  | The description for this data table. |
 | [`exclude`](#data_table-action-exclude){: #data_table-action-exclude } | `list(atom)` | `[]` | The fields to exclude from columns. |
+| [`footer_cell_class`](#data_table-action-footer_cell_class){: #data_table-action-footer_cell_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table tfoot -> tr -> td classes. |
+| [`footer_class`](#data_table-action-footer_class){: #data_table-action-footer_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table tfoot classes. |
+| [`footer_row_class`](#data_table-action-footer_row_class){: #data_table-action-footer_row_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table tfoot -> tr classes. |
+| [`header_class`](#data_table-action-header_class){: #data_table-action-header_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table thead classes. |
+| [`header_row_class`](#data_table-action-header_row_class){: #data_table-action-header_row_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table thead > tr classes. |
+| [`label`](#data_table-action-label){: #data_table-action-label } | `String.t` |  | The label for this data table (defaults to capitalized name). |
 
 
 ### data_table.action.column
@@ -79,15 +89,15 @@ Declare non-default behavior for a specific data table column in the `PyroManiac
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`header_class`](#data_table-action-column-header_class){: #data_table-action-column-header_class } | `nil \| String.t \| (map -> String.t)` |  | Customize header class. |
 | [`cell_class`](#data_table-action-column-cell_class){: #data_table-action-column-cell_class } | `nil \| String.t \| (map -> String.t)` |  | Customize cell class. |
-| [`description`](#data_table-action-column-description){: #data_table-action-column-description } | `String.t` |  | Override the default extracted description. |
+| [`description`](#data_table-action-column-description){: #data_table-action-column-description } | `String.t \| :inherit` |  | Description of column. |
+| [`header_class`](#data_table-action-column-header_class){: #data_table-action-column-header_class } | `nil \| String.t \| (map -> String.t)` |  | Customize header class. |
+| [`keyset_sortable?`](#data_table-action-column-keyset_sortable?){: #data_table-action-column-keyset_sortable? } | `boolean` | `true` | Enable keyset-paged sorting. Note: If technically unsortable, automatically set to false. |
 | [`label`](#data_table-action-column-label){: #data_table-action-column-label } | `String.t` |  | The label of the column (defaults to capitalized name). |
-| [`path`](#data_table-action-column-path){: #data_table-action-column-path } | `list(atom)` |  | Append to the root path (nested paths are appended). |
 | [`render_cell_data`](#data_table-action-column-render_cell_data){: #data_table-action-column-render_cell_data } | `(map -> any)` | `&PyroManiac.DataTable.Column.render_cell_data/1` |  |
-| [`sortable?`](#data_table-action-column-sortable?){: #data_table-action-column-sortable? } | `boolean` | `true` | Set to false to disable sorting. Note: If it it is not technically sortable, it will automatically be set to false. |
+| [`sortable?`](#data_table-action-column-sortable?){: #data_table-action-column-sortable? } | `boolean` | `true` | Enable unpaged and offset-paged sorting. Note: If technically unsortable, automatically set to false. |
+| [`source`](#data_table-action-column-source){: #data_table-action-column-source } | `list(atom)` |  | Source path for data (defaults to name). |
 | [`type`](#data_table-action-column-type){: #data_table-action-column-type } | `:default` | `:default` | The type of the the column. |
-| [`resource_field_type`](#data_table-action-column-resource_field_type){: #data_table-action-column-resource_field_type } | `:attribute \| :calculation \| :aggregate \| :has_one \| :belongs_to \| :has_many \| :many_to_many` |  |  |
 
 
 
@@ -100,6 +110,9 @@ Target: `PyroManiac.DataTable.Column`
 
 
 
+### Introspection
+
+Target: `PyroManiac.DataTable.Action`
 
 ### data_table.action_type
 ```elixir
@@ -124,10 +137,19 @@ Configure the default data table appearance for actions of type(s). Will be igno
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#data_table-action_type-class){: #data_table-action_type-class } | `nil \| String.t \| (map -> String.t)` |  | Customize data table classes. |
-| [`default_display`](#data_table-action_type-default_display){: #data_table-action_type-default_display } | `list(atom)` | `[]` | The columns to display by default. |
+| [`body_class`](#data_table-action_type-body_class){: #data_table-action_type-body_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table tbody classes. |
+| [`body_row_class`](#data_table-action_type-body_row_class){: #data_table-action_type-body_row_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table tbody > tr classes. |
+| [`caption_class`](#data_table-action_type-caption_class){: #data_table-action_type-caption_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table caption classes. |
+| [`class`](#data_table-action_type-class){: #data_table-action_type-class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table classes. |
+| [`default_display`](#data_table-action_type-default_display){: #data_table-action_type-default_display } | `list(atom)` |  | The columns to display by default. |
 | [`default_sort`](#data_table-action_type-default_sort){: #data_table-action_type-default_sort } | `String.t \| list({atom, :asc \| :desc \| :asc_nils_first \| :asc_nils_last \| :desc_nils_first \| :desc_nils_last}) \| list(atom) \| list(String.t) \| nil` |  | The columns to sort on by default. |
+| [`description`](#data_table-action_type-description){: #data_table-action_type-description } | `String.t \| :inherit` |  | The description for this data table. |
 | [`exclude`](#data_table-action_type-exclude){: #data_table-action_type-exclude } | `list(atom)` | `[]` | The fields to exclude from columns. |
+| [`footer_cell_class`](#data_table-action_type-footer_cell_class){: #data_table-action_type-footer_cell_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table tfoot -> tr -> td classes. |
+| [`footer_class`](#data_table-action_type-footer_class){: #data_table-action_type-footer_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table tfoot classes. |
+| [`footer_row_class`](#data_table-action_type-footer_row_class){: #data_table-action_type-footer_row_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table tfoot -> tr classes. |
+| [`header_class`](#data_table-action_type-header_class){: #data_table-action_type-header_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table thead classes. |
+| [`header_row_class`](#data_table-action_type-header_row_class){: #data_table-action_type-header_row_class } | `nil \| String.t \| (map -> String.t)` |  | Additional data table thead > tr classes. |
 
 
 ### data_table.action_type.column
@@ -151,15 +173,15 @@ Declare non-default behavior for a specific data table column in the `PyroManiac
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`header_class`](#data_table-action_type-column-header_class){: #data_table-action_type-column-header_class } | `nil \| String.t \| (map -> String.t)` |  | Customize header class. |
 | [`cell_class`](#data_table-action_type-column-cell_class){: #data_table-action_type-column-cell_class } | `nil \| String.t \| (map -> String.t)` |  | Customize cell class. |
-| [`description`](#data_table-action_type-column-description){: #data_table-action_type-column-description } | `String.t` |  | Override the default extracted description. |
+| [`description`](#data_table-action_type-column-description){: #data_table-action_type-column-description } | `String.t \| :inherit` |  | Description of column. |
+| [`header_class`](#data_table-action_type-column-header_class){: #data_table-action_type-column-header_class } | `nil \| String.t \| (map -> String.t)` |  | Customize header class. |
+| [`keyset_sortable?`](#data_table-action_type-column-keyset_sortable?){: #data_table-action_type-column-keyset_sortable? } | `boolean` | `true` | Enable keyset-paged sorting. Note: If technically unsortable, automatically set to false. |
 | [`label`](#data_table-action_type-column-label){: #data_table-action_type-column-label } | `String.t` |  | The label of the column (defaults to capitalized name). |
-| [`path`](#data_table-action_type-column-path){: #data_table-action_type-column-path } | `list(atom)` |  | Append to the root path (nested paths are appended). |
 | [`render_cell_data`](#data_table-action_type-column-render_cell_data){: #data_table-action_type-column-render_cell_data } | `(map -> any)` | `&PyroManiac.DataTable.Column.render_cell_data/1` |  |
-| [`sortable?`](#data_table-action_type-column-sortable?){: #data_table-action_type-column-sortable? } | `boolean` | `true` | Set to false to disable sorting. Note: If it it is not technically sortable, it will automatically be set to false. |
+| [`sortable?`](#data_table-action_type-column-sortable?){: #data_table-action_type-column-sortable? } | `boolean` | `true` | Enable unpaged and offset-paged sorting. Note: If technically unsortable, automatically set to false. |
+| [`source`](#data_table-action_type-column-source){: #data_table-action_type-column-source } | `list(atom)` |  | Source path for data (defaults to name). |
 | [`type`](#data_table-action_type-column-type){: #data_table-action_type-column-type } | `:default` | `:default` | The type of the the column. |
-| [`resource_field_type`](#data_table-action_type-column-resource_field_type){: #data_table-action_type-column-resource_field_type } | `:attribute \| :calculation \| :aggregate \| :has_one \| :belongs_to \| :has_many \| :many_to_many` |  |  |
 
 
 
@@ -172,6 +194,9 @@ Target: `PyroManiac.DataTable.Column`
 
 
 
+### Introspection
+
+Target: `PyroManiac.DataTable.ActionType`
 
 
 
@@ -184,10 +209,18 @@ Configure the appearance of forms in the `PyroManiac.Dsl` extension.
    * field
    * field_group
      * field
+   * step
+     * field
+     * field_group
+       * field
  * [action_type](#form-action_type)
    * field
    * field_group
      * field
+   * step
+     * field
+     * field_group
+       * field
 
 
 
@@ -197,6 +230,8 @@ Configure the appearance of forms in the `PyroManiac.Dsl` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
+| [`class`](#form-class){: #form-class } | `nil \| String.t \| (map -> String.t)` |  | The default class for the form. |
+| [`description`](#form-description){: #form-description } | `String.t \| :inherit` |  | The default description for forms. |
 | [`exclude`](#form-exclude){: #form-exclude } | `list(atom)` | `[]` | The actions to exclude from forms. |
 
 
@@ -213,6 +248,10 @@ Configure the appearance forms forms for specific action(s).
  * [field](#form-action-field)
  * [field_group](#form-action-field_group)
    * field
+ * [step](#form-action-step)
+   * field
+   * field_group
+     * field
 
 
 
@@ -226,9 +265,9 @@ Configure the appearance forms forms for specific action(s).
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#form-action-label){: #form-action-label } | `String.t` |  | The label for this form (defaults to capitalized name). |
-| [`description`](#form-action-description){: #form-action-description } | `String.t` |  | The description for this form (defaults to action's description). |
 | [`class`](#form-action-class){: #form-action-class } | `nil \| String.t \| (map -> String.t)` |  | Customize form classes. |
+| [`description`](#form-action-description){: #form-action-description } | `String.t` |  | The description for this form (defaults to action's description). |
+| [`label`](#form-action-label){: #form-action-label } | `String.t` |  | The label for this form (defaults to capitalized name). |
 
 
 ### form.action.field
@@ -252,19 +291,19 @@ Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` e
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`type`](#form-action-field-type){: #form-action-field-type } | `:default \| :long_text \| :short_text \| :autocomplete \| :select \| :nested_form` | `:default` | The type of the value in the form. |
-| [`options`](#form-action-field-options){: #form-action-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`label`](#form-action-field-label){: #form-action-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`description`](#form-action-field-description){: #form-action-field-description } | `String.t` |  | Override the default extracted description. |
-| [`class`](#form-action-field-class){: #form-action-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`input_class`](#form-action-field-input_class){: #form-action-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`autofocus`](#form-action-field-autofocus){: #form-action-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`prompt`](#form-action-field-prompt){: #form-action-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`path`](#form-action-field-path){: #form-action-field-path } | `list(atom)` |  | Append to the root path (nested paths are appended). |
-| [`autocomplete_search_action`](#form-action-field-autocomplete_search_action){: #form-action-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
-| [`autocomplete_search_arg`](#form-action-field-autocomplete_search_arg){: #form-action-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
 | [`autocomplete_option_label_key`](#form-action-field-autocomplete_option_label_key){: #form-action-field-autocomplete_option_label_key } | `atom` | `:label` | Override the default autocomplete key used as a label. |
 | [`autocomplete_option_value_key`](#form-action-field-autocomplete_option_value_key){: #form-action-field-autocomplete_option_value_key } | `atom` | `:id` | Override the default autocomplete key used as a value. |
+| [`autocomplete_search_action`](#form-action-field-autocomplete_search_action){: #form-action-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
+| [`autocomplete_search_arg`](#form-action-field-autocomplete_search_arg){: #form-action-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
+| [`autofocus`](#form-action-field-autofocus){: #form-action-field-autofocus } | `boolean` | `false` | Autofocus the field. |
+| [`class`](#form-action-field-class){: #form-action-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`description`](#form-action-field-description){: #form-action-field-description } | `String.t` |  | Override the default extracted description. |
+| [`input_class`](#form-action-field-input_class){: #form-action-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
+| [`label`](#form-action-field-label){: #form-action-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
+| [`options`](#form-action-field-options){: #form-action-field-options } | `list(any)` | `[]` | The options for a select type input. |
+| [`path`](#form-action-field-path){: #form-action-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
+| [`prompt`](#form-action-field-prompt){: #form-action-field-prompt } | `String.t` |  | Override the default prompt. |
+| [`type`](#form-action-field-type){: #form-action-field-type } | `:autocomplete \| :default \| :long_text \| :nested_form \| :select \| :short_text` | `:default` | The type of the value in the form. |
 
 
 
@@ -276,7 +315,7 @@ Target: `PyroManiac.Form.Field`
 
 ### form.action.field_group
 ```elixir
-field_group name
+field_group label
 ```
 
 
@@ -292,14 +331,13 @@ Configure the appearance of form field groups in the `PyroManiac.Dsl` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`name`](#form-action-field_group-name){: #form-action-field_group-name .spark-required} | `atom` |  | The name of the field group. |
+| [`label`](#form-action-field_group-label){: #form-action-field_group-label } | `String.t` |  | The label of this group (defaults to capitalized name). |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#form-action-field_group-label){: #form-action-field_group-label } | `String.t` |  | The label of this group (defaults to capitalized name). |
 | [`class`](#form-action-field_group-class){: #form-action-field_group-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`path`](#form-action-field_group-path){: #form-action-field_group-path } | `list(atom)` |  | Append to the root path (nested paths are appended). |
+| [`path`](#form-action-field_group-path){: #form-action-field_group-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
 
 
 ### form.action.field_group.field
@@ -323,19 +361,168 @@ Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` e
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`type`](#form-action-field_group-field-type){: #form-action-field_group-field-type } | `:default \| :long_text \| :short_text \| :autocomplete \| :select \| :nested_form` | `:default` | The type of the value in the form. |
-| [`options`](#form-action-field_group-field-options){: #form-action-field_group-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`label`](#form-action-field_group-field-label){: #form-action-field_group-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`description`](#form-action-field_group-field-description){: #form-action-field_group-field-description } | `String.t` |  | Override the default extracted description. |
-| [`class`](#form-action-field_group-field-class){: #form-action-field_group-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`input_class`](#form-action-field_group-field-input_class){: #form-action-field_group-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`autofocus`](#form-action-field_group-field-autofocus){: #form-action-field_group-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`prompt`](#form-action-field_group-field-prompt){: #form-action-field_group-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`path`](#form-action-field_group-field-path){: #form-action-field_group-field-path } | `list(atom)` |  | Append to the root path (nested paths are appended). |
-| [`autocomplete_search_action`](#form-action-field_group-field-autocomplete_search_action){: #form-action-field_group-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
-| [`autocomplete_search_arg`](#form-action-field_group-field-autocomplete_search_arg){: #form-action-field_group-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
 | [`autocomplete_option_label_key`](#form-action-field_group-field-autocomplete_option_label_key){: #form-action-field_group-field-autocomplete_option_label_key } | `atom` | `:label` | Override the default autocomplete key used as a label. |
 | [`autocomplete_option_value_key`](#form-action-field_group-field-autocomplete_option_value_key){: #form-action-field_group-field-autocomplete_option_value_key } | `atom` | `:id` | Override the default autocomplete key used as a value. |
+| [`autocomplete_search_action`](#form-action-field_group-field-autocomplete_search_action){: #form-action-field_group-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
+| [`autocomplete_search_arg`](#form-action-field_group-field-autocomplete_search_arg){: #form-action-field_group-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
+| [`autofocus`](#form-action-field_group-field-autofocus){: #form-action-field_group-field-autofocus } | `boolean` | `false` | Autofocus the field. |
+| [`class`](#form-action-field_group-field-class){: #form-action-field_group-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`description`](#form-action-field_group-field-description){: #form-action-field_group-field-description } | `String.t` |  | Override the default extracted description. |
+| [`input_class`](#form-action-field_group-field-input_class){: #form-action-field_group-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
+| [`label`](#form-action-field_group-field-label){: #form-action-field_group-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
+| [`options`](#form-action-field_group-field-options){: #form-action-field_group-field-options } | `list(any)` | `[]` | The options for a select type input. |
+| [`path`](#form-action-field_group-field-path){: #form-action-field_group-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
+| [`prompt`](#form-action-field_group-field-prompt){: #form-action-field_group-field-prompt } | `String.t` |  | Override the default prompt. |
+| [`type`](#form-action-field_group-field-type){: #form-action-field_group-field-type } | `:autocomplete \| :default \| :long_text \| :nested_form \| :select \| :short_text` | `:default` | The type of the value in the form. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.FieldGroup`
+
+### form.action.step
+```elixir
+step name
+```
+
+
+Configure a form step in the `PyroManiac.Dsl` extension.
+
+### Nested DSLs
+ * [field](#form-action-step-field)
+ * [field_group](#form-action-step-field_group)
+   * field
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#form-action-step-name){: #form-action-step-name .spark-required} | `atom` |  | The name of the step, |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`class`](#form-action-step-class){: #form-action-step-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`label`](#form-action-step-label){: #form-action-step-label } | `String.t` |  | The label of this step (defaults to capitalized name). |
+
+
+### form.action.step.field
+```elixir
+field name
+```
+
+
+Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#form-action-step-field-name){: #form-action-step-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`autocomplete_option_label_key`](#form-action-step-field-autocomplete_option_label_key){: #form-action-step-field-autocomplete_option_label_key } | `atom` | `:label` | Override the default autocomplete key used as a label. |
+| [`autocomplete_option_value_key`](#form-action-step-field-autocomplete_option_value_key){: #form-action-step-field-autocomplete_option_value_key } | `atom` | `:id` | Override the default autocomplete key used as a value. |
+| [`autocomplete_search_action`](#form-action-step-field-autocomplete_search_action){: #form-action-step-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
+| [`autocomplete_search_arg`](#form-action-step-field-autocomplete_search_arg){: #form-action-step-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
+| [`autofocus`](#form-action-step-field-autofocus){: #form-action-step-field-autofocus } | `boolean` | `false` | Autofocus the field. |
+| [`class`](#form-action-step-field-class){: #form-action-step-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`description`](#form-action-step-field-description){: #form-action-step-field-description } | `String.t` |  | Override the default extracted description. |
+| [`input_class`](#form-action-step-field-input_class){: #form-action-step-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
+| [`label`](#form-action-step-field-label){: #form-action-step-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
+| [`options`](#form-action-step-field-options){: #form-action-step-field-options } | `list(any)` | `[]` | The options for a select type input. |
+| [`path`](#form-action-step-field-path){: #form-action-step-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
+| [`prompt`](#form-action-step-field-prompt){: #form-action-step-field-prompt } | `String.t` |  | Override the default prompt. |
+| [`type`](#form-action-step-field-type){: #form-action-step-field-type } | `:autocomplete \| :default \| :long_text \| :nested_form \| :select \| :short_text` | `:default` | The type of the value in the form. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### form.action.step.field_group
+```elixir
+field_group label
+```
+
+
+Configure the appearance of form field groups in the `PyroManiac.Dsl` extension.
+
+### Nested DSLs
+ * [field](#form-action-step-field_group-field)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#form-action-step-field_group-label){: #form-action-step-field_group-label } | `String.t` |  | The label of this group (defaults to capitalized name). |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`class`](#form-action-step-field_group-class){: #form-action-step-field_group-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`path`](#form-action-step-field_group-path){: #form-action-step-field_group-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
+
+
+### form.action.step.field_group.field
+```elixir
+field name
+```
+
+
+Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#form-action-step-field_group-field-name){: #form-action-step-field_group-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`autocomplete_option_label_key`](#form-action-step-field_group-field-autocomplete_option_label_key){: #form-action-step-field_group-field-autocomplete_option_label_key } | `atom` | `:label` | Override the default autocomplete key used as a label. |
+| [`autocomplete_option_value_key`](#form-action-step-field_group-field-autocomplete_option_value_key){: #form-action-step-field_group-field-autocomplete_option_value_key } | `atom` | `:id` | Override the default autocomplete key used as a value. |
+| [`autocomplete_search_action`](#form-action-step-field_group-field-autocomplete_search_action){: #form-action-step-field_group-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
+| [`autocomplete_search_arg`](#form-action-step-field_group-field-autocomplete_search_arg){: #form-action-step-field_group-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
+| [`autofocus`](#form-action-step-field_group-field-autofocus){: #form-action-step-field_group-field-autofocus } | `boolean` | `false` | Autofocus the field. |
+| [`class`](#form-action-step-field_group-field-class){: #form-action-step-field_group-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`description`](#form-action-step-field_group-field-description){: #form-action-step-field_group-field-description } | `String.t` |  | Override the default extracted description. |
+| [`input_class`](#form-action-step-field_group-field-input_class){: #form-action-step-field_group-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
+| [`label`](#form-action-step-field_group-field-label){: #form-action-step-field_group-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
+| [`options`](#form-action-step-field_group-field-options){: #form-action-step-field_group-field-options } | `list(any)` | `[]` | The options for a select type input. |
+| [`path`](#form-action-step-field_group-field-path){: #form-action-step-field_group-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
+| [`prompt`](#form-action-step-field_group-field-prompt){: #form-action-step-field_group-field-prompt } | `String.t` |  | Override the default prompt. |
+| [`type`](#form-action-step-field_group-field-type){: #form-action-step-field_group-field-type } | `:autocomplete \| :default \| :long_text \| :nested_form \| :select \| :short_text` | `:default` | The type of the value in the form. |
 
 
 
@@ -355,6 +542,16 @@ Target: `PyroManiac.Form.FieldGroup`
 
 
 
+### Introspection
+
+Target: `PyroManiac.Form.Step`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Action`
 
 ### form.action_type
 ```elixir
@@ -368,6 +565,10 @@ Configure default form appearance for actions of type(s). Will be ignored by act
  * [field](#form-action_type-field)
  * [field_group](#form-action_type-field_group)
    * field
+ * [step](#form-action_type-step)
+   * field
+   * field_group
+     * field
 
 
 
@@ -405,19 +606,19 @@ Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` e
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`type`](#form-action_type-field-type){: #form-action_type-field-type } | `:default \| :long_text \| :short_text \| :autocomplete \| :select \| :nested_form` | `:default` | The type of the value in the form. |
-| [`options`](#form-action_type-field-options){: #form-action_type-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`label`](#form-action_type-field-label){: #form-action_type-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`description`](#form-action_type-field-description){: #form-action_type-field-description } | `String.t` |  | Override the default extracted description. |
-| [`class`](#form-action_type-field-class){: #form-action_type-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`input_class`](#form-action_type-field-input_class){: #form-action_type-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`autofocus`](#form-action_type-field-autofocus){: #form-action_type-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`prompt`](#form-action_type-field-prompt){: #form-action_type-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`path`](#form-action_type-field-path){: #form-action_type-field-path } | `list(atom)` |  | Append to the root path (nested paths are appended). |
-| [`autocomplete_search_action`](#form-action_type-field-autocomplete_search_action){: #form-action_type-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
-| [`autocomplete_search_arg`](#form-action_type-field-autocomplete_search_arg){: #form-action_type-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
 | [`autocomplete_option_label_key`](#form-action_type-field-autocomplete_option_label_key){: #form-action_type-field-autocomplete_option_label_key } | `atom` | `:label` | Override the default autocomplete key used as a label. |
 | [`autocomplete_option_value_key`](#form-action_type-field-autocomplete_option_value_key){: #form-action_type-field-autocomplete_option_value_key } | `atom` | `:id` | Override the default autocomplete key used as a value. |
+| [`autocomplete_search_action`](#form-action_type-field-autocomplete_search_action){: #form-action_type-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
+| [`autocomplete_search_arg`](#form-action_type-field-autocomplete_search_arg){: #form-action_type-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
+| [`autofocus`](#form-action_type-field-autofocus){: #form-action_type-field-autofocus } | `boolean` | `false` | Autofocus the field. |
+| [`class`](#form-action_type-field-class){: #form-action_type-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`description`](#form-action_type-field-description){: #form-action_type-field-description } | `String.t` |  | Override the default extracted description. |
+| [`input_class`](#form-action_type-field-input_class){: #form-action_type-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
+| [`label`](#form-action_type-field-label){: #form-action_type-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
+| [`options`](#form-action_type-field-options){: #form-action_type-field-options } | `list(any)` | `[]` | The options for a select type input. |
+| [`path`](#form-action_type-field-path){: #form-action_type-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
+| [`prompt`](#form-action_type-field-prompt){: #form-action_type-field-prompt } | `String.t` |  | Override the default prompt. |
+| [`type`](#form-action_type-field-type){: #form-action_type-field-type } | `:autocomplete \| :default \| :long_text \| :nested_form \| :select \| :short_text` | `:default` | The type of the value in the form. |
 
 
 
@@ -429,7 +630,7 @@ Target: `PyroManiac.Form.Field`
 
 ### form.action_type.field_group
 ```elixir
-field_group name
+field_group label
 ```
 
 
@@ -445,14 +646,13 @@ Configure the appearance of form field groups in the `PyroManiac.Dsl` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`name`](#form-action_type-field_group-name){: #form-action_type-field_group-name .spark-required} | `atom` |  | The name of the field group. |
+| [`label`](#form-action_type-field_group-label){: #form-action_type-field_group-label } | `String.t` |  | The label of this group (defaults to capitalized name). |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#form-action_type-field_group-label){: #form-action_type-field_group-label } | `String.t` |  | The label of this group (defaults to capitalized name). |
 | [`class`](#form-action_type-field_group-class){: #form-action_type-field_group-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`path`](#form-action_type-field_group-path){: #form-action_type-field_group-path } | `list(atom)` |  | Append to the root path (nested paths are appended). |
+| [`path`](#form-action_type-field_group-path){: #form-action_type-field_group-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
 
 
 ### form.action_type.field_group.field
@@ -476,19 +676,168 @@ Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` e
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`type`](#form-action_type-field_group-field-type){: #form-action_type-field_group-field-type } | `:default \| :long_text \| :short_text \| :autocomplete \| :select \| :nested_form` | `:default` | The type of the value in the form. |
-| [`options`](#form-action_type-field_group-field-options){: #form-action_type-field_group-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`label`](#form-action_type-field_group-field-label){: #form-action_type-field_group-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`description`](#form-action_type-field_group-field-description){: #form-action_type-field_group-field-description } | `String.t` |  | Override the default extracted description. |
-| [`class`](#form-action_type-field_group-field-class){: #form-action_type-field_group-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`input_class`](#form-action_type-field_group-field-input_class){: #form-action_type-field_group-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`autofocus`](#form-action_type-field_group-field-autofocus){: #form-action_type-field_group-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`prompt`](#form-action_type-field_group-field-prompt){: #form-action_type-field_group-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`path`](#form-action_type-field_group-field-path){: #form-action_type-field_group-field-path } | `list(atom)` |  | Append to the root path (nested paths are appended). |
-| [`autocomplete_search_action`](#form-action_type-field_group-field-autocomplete_search_action){: #form-action_type-field_group-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
-| [`autocomplete_search_arg`](#form-action_type-field_group-field-autocomplete_search_arg){: #form-action_type-field_group-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
 | [`autocomplete_option_label_key`](#form-action_type-field_group-field-autocomplete_option_label_key){: #form-action_type-field_group-field-autocomplete_option_label_key } | `atom` | `:label` | Override the default autocomplete key used as a label. |
 | [`autocomplete_option_value_key`](#form-action_type-field_group-field-autocomplete_option_value_key){: #form-action_type-field_group-field-autocomplete_option_value_key } | `atom` | `:id` | Override the default autocomplete key used as a value. |
+| [`autocomplete_search_action`](#form-action_type-field_group-field-autocomplete_search_action){: #form-action_type-field_group-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
+| [`autocomplete_search_arg`](#form-action_type-field_group-field-autocomplete_search_arg){: #form-action_type-field_group-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
+| [`autofocus`](#form-action_type-field_group-field-autofocus){: #form-action_type-field_group-field-autofocus } | `boolean` | `false` | Autofocus the field. |
+| [`class`](#form-action_type-field_group-field-class){: #form-action_type-field_group-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`description`](#form-action_type-field_group-field-description){: #form-action_type-field_group-field-description } | `String.t` |  | Override the default extracted description. |
+| [`input_class`](#form-action_type-field_group-field-input_class){: #form-action_type-field_group-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
+| [`label`](#form-action_type-field_group-field-label){: #form-action_type-field_group-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
+| [`options`](#form-action_type-field_group-field-options){: #form-action_type-field_group-field-options } | `list(any)` | `[]` | The options for a select type input. |
+| [`path`](#form-action_type-field_group-field-path){: #form-action_type-field_group-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
+| [`prompt`](#form-action_type-field_group-field-prompt){: #form-action_type-field_group-field-prompt } | `String.t` |  | Override the default prompt. |
+| [`type`](#form-action_type-field_group-field-type){: #form-action_type-field_group-field-type } | `:autocomplete \| :default \| :long_text \| :nested_form \| :select \| :short_text` | `:default` | The type of the value in the form. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.FieldGroup`
+
+### form.action_type.step
+```elixir
+step name
+```
+
+
+Configure a form step in the `PyroManiac.Dsl` extension.
+
+### Nested DSLs
+ * [field](#form-action_type-step-field)
+ * [field_group](#form-action_type-step-field_group)
+   * field
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#form-action_type-step-name){: #form-action_type-step-name .spark-required} | `atom` |  | The name of the step, |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`class`](#form-action_type-step-class){: #form-action_type-step-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`label`](#form-action_type-step-label){: #form-action_type-step-label } | `String.t` |  | The label of this step (defaults to capitalized name). |
+
+
+### form.action_type.step.field
+```elixir
+field name
+```
+
+
+Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#form-action_type-step-field-name){: #form-action_type-step-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`autocomplete_option_label_key`](#form-action_type-step-field-autocomplete_option_label_key){: #form-action_type-step-field-autocomplete_option_label_key } | `atom` | `:label` | Override the default autocomplete key used as a label. |
+| [`autocomplete_option_value_key`](#form-action_type-step-field-autocomplete_option_value_key){: #form-action_type-step-field-autocomplete_option_value_key } | `atom` | `:id` | Override the default autocomplete key used as a value. |
+| [`autocomplete_search_action`](#form-action_type-step-field-autocomplete_search_action){: #form-action_type-step-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
+| [`autocomplete_search_arg`](#form-action_type-step-field-autocomplete_search_arg){: #form-action_type-step-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
+| [`autofocus`](#form-action_type-step-field-autofocus){: #form-action_type-step-field-autofocus } | `boolean` | `false` | Autofocus the field. |
+| [`class`](#form-action_type-step-field-class){: #form-action_type-step-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`description`](#form-action_type-step-field-description){: #form-action_type-step-field-description } | `String.t` |  | Override the default extracted description. |
+| [`input_class`](#form-action_type-step-field-input_class){: #form-action_type-step-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
+| [`label`](#form-action_type-step-field-label){: #form-action_type-step-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
+| [`options`](#form-action_type-step-field-options){: #form-action_type-step-field-options } | `list(any)` | `[]` | The options for a select type input. |
+| [`path`](#form-action_type-step-field-path){: #form-action_type-step-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
+| [`prompt`](#form-action_type-step-field-prompt){: #form-action_type-step-field-prompt } | `String.t` |  | Override the default prompt. |
+| [`type`](#form-action_type-step-field-type){: #form-action_type-step-field-type } | `:autocomplete \| :default \| :long_text \| :nested_form \| :select \| :short_text` | `:default` | The type of the value in the form. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### form.action_type.step.field_group
+```elixir
+field_group label
+```
+
+
+Configure the appearance of form field groups in the `PyroManiac.Dsl` extension.
+
+### Nested DSLs
+ * [field](#form-action_type-step-field_group-field)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#form-action_type-step-field_group-label){: #form-action_type-step-field_group-label } | `String.t` |  | The label of this group (defaults to capitalized name). |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`class`](#form-action_type-step-field_group-class){: #form-action_type-step-field_group-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`path`](#form-action_type-step-field_group-path){: #form-action_type-step-field_group-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
+
+
+### form.action_type.step.field_group.field
+```elixir
+field name
+```
+
+
+Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#form-action_type-step-field_group-field-name){: #form-action_type-step-field_group-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`autocomplete_option_label_key`](#form-action_type-step-field_group-field-autocomplete_option_label_key){: #form-action_type-step-field_group-field-autocomplete_option_label_key } | `atom` | `:label` | Override the default autocomplete key used as a label. |
+| [`autocomplete_option_value_key`](#form-action_type-step-field_group-field-autocomplete_option_value_key){: #form-action_type-step-field_group-field-autocomplete_option_value_key } | `atom` | `:id` | Override the default autocomplete key used as a value. |
+| [`autocomplete_search_action`](#form-action_type-step-field_group-field-autocomplete_search_action){: #form-action_type-step-field_group-field-autocomplete_search_action } | `atom` | `:read` | Set the autocomplete search action name. |
+| [`autocomplete_search_arg`](#form-action_type-step-field_group-field-autocomplete_search_arg){: #form-action_type-step-field_group-field-autocomplete_search_arg } | `atom` |  | Set the autocomplete search argument key. |
+| [`autofocus`](#form-action_type-step-field_group-field-autofocus){: #form-action_type-step-field_group-field-autofocus } | `boolean` | `false` | Autofocus the field. |
+| [`class`](#form-action_type-step-field_group-field-class){: #form-action_type-step-field_group-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`description`](#form-action_type-step-field_group-field-description){: #form-action_type-step-field_group-field-description } | `String.t` |  | Override the default extracted description. |
+| [`input_class`](#form-action_type-step-field_group-field-input_class){: #form-action_type-step-field_group-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
+| [`label`](#form-action_type-step-field_group-field-label){: #form-action_type-step-field_group-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
+| [`options`](#form-action_type-step-field_group-field-options){: #form-action_type-step-field_group-field-options } | `list(any)` | `[]` | The options for a select type input. |
+| [`path`](#form-action_type-step-field_group-field-path){: #form-action_type-step-field_group-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
+| [`prompt`](#form-action_type-step-field_group-field-prompt){: #form-action_type-step-field_group-field-prompt } | `String.t` |  | Override the default prompt. |
+| [`type`](#form-action_type-step-field_group-field-type){: #form-action_type-step-field_group-field-type } | `:autocomplete \| :default \| :long_text \| :nested_form \| :select \| :short_text` | `:default` | The type of the value in the form. |
 
 
 
@@ -508,233 +857,16 @@ Target: `PyroManiac.Form.FieldGroup`
 
 
 
+### Introspection
 
+Target: `PyroManiac.Form.Step`
 
 
 
-## live_view
-Configure LiveViews in the `PyroManiac.Dsl` extension.
 
-### Nested DSLs
- * [page](#live_view-page)
-   * create
-   * list
-   * show
-   * update
+### Introspection
 
-
-
-
-
-### live_view.page
-```elixir
-page path, name
-```
-
-
-Configure a page for this resource.
-
-The view style of the page:
-- `:list_and_modal` - Always list view, show/create/edit in a modal
-- `:show_and_modal` - List view for list actions, show as a dedicated view, create/edit in a modal on show
-- `:individual` - All actions are a dedicated view
-
-
-### Nested DSLs
- * [create](#live_view-page-create)
- * [list](#live_view-page-list)
- * [show](#live_view-page-show)
- * [update](#live_view-page-update)
-
-
-
-
-### Arguments
-
-| Name | Type | Default | Docs |
-|------|------|---------|------|
-| [`path`](#live_view-page-path){: #live_view-page-path .spark-required} | `String.t \| list(String.t)` |  | The route path for this page. |
-| [`name`](#live_view-page-name){: #live_view-page-name .spark-required} | `atom` |  | The live action for this page. |
-### Options
-
-| Name | Type | Default | Docs |
-|------|------|---------|------|
-| [`class`](#live_view-page-class){: #live_view-page-class } | `nil \| String.t \| (map -> String.t)` |  | Customize page classes. |
-| [`keep_live?`](#live_view-page-keep_live?){: #live_view-page-keep_live? } | `boolean` | `false` | Subscribe to resource updates and keep the view up to date. |
-| [`route_helper`](#live_view-page-route_helper){: #live_view-page-route_helper } | `atom` |  | The route helper name to be generated. Defaults to [name]_path. |
-| [`view_as`](#live_view-page-view_as){: #live_view-page-view_as } | `:list_and_modal \| :show_and_modal \| :individual` | `:list_and_modal` | The view style of the page. |
-| [`__identifier__`](#live_view-page-__identifier__){: #live_view-page-__identifier__ } | `any` |  |  |
-
-
-### live_view.page.create
-```elixir
-create path, live_action, action
-```
-
-
-Configure a create action for this resource.
-
-
-
-
-
-### Arguments
-
-| Name | Type | Default | Docs |
-|------|------|---------|------|
-| [`path`](#live_view-page-create-path){: #live_view-page-create-path .spark-required} | `String.t \| list(String.t)` |  | The route path for this action. |
-| [`live_action`](#live_view-page-create-live_action){: #live_view-page-create-live_action .spark-required} | `atom` |  | The live action for this action. |
-| [`action`](#live_view-page-create-action){: #live_view-page-create-action .spark-required} | `atom` |  | The action to use to create the record. |
-### Options
-
-| Name | Type | Default | Docs |
-|------|------|---------|------|
-| [`display_as`](#live_view-page-create-display_as){: #live_view-page-create-display_as } | `:form` | `:form` | How to display the action. |
-| [`label`](#live_view-page-create-label){: #live_view-page-create-label } | `String.t \| :inherit` |  | The label for this action (defaults to humanized live_action). |
-| [`description`](#live_view-page-create-description){: #live_view-page-create-description } | `String.t \| :inherit` |  | The description for this action. |
-| [`class`](#live_view-page-create-class){: #live_view-page-create-class } | `nil \| String.t \| (map -> String.t)` |  | Customize action classes. |
-| [`icon_name`](#live_view-page-create-icon_name){: #live_view-page-create-icon_name } | `String.t` | `"hero-plus-circle-solid"` | The icon to use for links/buttons. |
-| [`parent_action`](#live_view-page-create-parent_action){: #live_view-page-create-parent_action } | `any` |  |  |
-| [`create_actions`](#live_view-page-create-create_actions){: #live_view-page-create-create_actions } | `any` | `[]` |  |
-| [`list_actions`](#live_view-page-create-list_actions){: #live_view-page-create-list_actions } | `any` | `[]` |  |
-| [`show_actions`](#live_view-page-create-show_actions){: #live_view-page-create-show_actions } | `any` | `[]` |  |
-| [`update_actions`](#live_view-page-create-update_actions){: #live_view-page-create-update_actions } | `any` | `[]` |  |
-| [`destroy_actions`](#live_view-page-create-destroy_actions){: #live_view-page-create-destroy_actions } | `any` | `[]` |  |
-
-
-
-
-
-
-### live_view.page.list
-```elixir
-list path, live_action, action
-```
-
-
-Configure a list action for this resource.
-
-
-
-
-
-### Arguments
-
-| Name | Type | Default | Docs |
-|------|------|---------|------|
-| [`path`](#live_view-page-list-path){: #live_view-page-list-path .spark-required} | `String.t \| list(String.t)` |  | The route path for this action. |
-| [`live_action`](#live_view-page-list-live_action){: #live_view-page-list-live_action .spark-required} | `atom` |  | The live action for this action. |
-| [`action`](#live_view-page-list-action){: #live_view-page-list-action .spark-required} | `atom` |  | The action to use to load the records. |
-### Options
-
-| Name | Type | Default | Docs |
-|------|------|---------|------|
-| [`display_as`](#live_view-page-list-display_as){: #live_view-page-list-display_as } | `:data_table \| :card_grid` | `:data_table` | How to display the action. |
-| [`label`](#live_view-page-list-label){: #live_view-page-list-label } | `String.t \| :inherit` |  | The label for this action (defaults to humanized live_action). |
-| [`description`](#live_view-page-list-description){: #live_view-page-list-description } | `String.t \| :inherit` |  | The description for this action. |
-| [`class`](#live_view-page-list-class){: #live_view-page-list-class } | `nil \| String.t \| (map -> String.t)` |  | Customize action classes. |
-| [`pagination`](#live_view-page-list-pagination){: #live_view-page-list-pagination } | `:keyset \| :offset \| :none` |  | The pagination type (defaults to `:offset` if available). |
-| [`default_limit`](#live_view-page-list-default_limit){: #live_view-page-list-default_limit } | `pos_integer` |  | The default pagination limit (defaults to the resource's `default_limit`, falling back to `max_page_size`). |
-| [`count?`](#live_view-page-list-count?){: #live_view-page-list-count? } | `boolean` |  | Whether to count the query (defaults to true for `:offset` pagination if available). |
-| [`icon_name`](#live_view-page-list-icon_name){: #live_view-page-list-icon_name } | `String.t` | `"hero-list-bullet-solid"` | The icon to use for links/buttons. |
-| [`parent_action`](#live_view-page-list-parent_action){: #live_view-page-list-parent_action } | `any` |  |  |
-| [`create_actions`](#live_view-page-list-create_actions){: #live_view-page-list-create_actions } | `any` | `[]` |  |
-| [`list_actions`](#live_view-page-list-list_actions){: #live_view-page-list-list_actions } | `any` | `[]` |  |
-| [`show_actions`](#live_view-page-list-show_actions){: #live_view-page-list-show_actions } | `any` | `[]` |  |
-| [`update_actions`](#live_view-page-list-update_actions){: #live_view-page-list-update_actions } | `any` | `[]` |  |
-| [`destroy_actions`](#live_view-page-list-destroy_actions){: #live_view-page-list-destroy_actions } | `any` | `[]` |  |
-
-
-
-
-
-
-### live_view.page.show
-```elixir
-show path, live_action, action
-```
-
-
-Configure a show action for this resource.
-
-
-
-
-
-### Arguments
-
-| Name | Type | Default | Docs |
-|------|------|---------|------|
-| [`path`](#live_view-page-show-path){: #live_view-page-show-path .spark-required} | `String.t \| list(String.t)` |  | The route path for this action. |
-| [`live_action`](#live_view-page-show-live_action){: #live_view-page-show-live_action .spark-required} | `atom` |  | The live action for this action. |
-| [`action`](#live_view-page-show-action){: #live_view-page-show-action .spark-required} | `atom` |  | The action to use to load the record. |
-### Options
-
-| Name | Type | Default | Docs |
-|------|------|---------|------|
-| [`display_as`](#live_view-page-show-display_as){: #live_view-page-show-display_as } | `:card` | `:card` | How to display the action. |
-| [`label`](#live_view-page-show-label){: #live_view-page-show-label } | `String.t \| :inherit` |  | The label for this action (defaults to humanized live_action). |
-| [`description`](#live_view-page-show-description){: #live_view-page-show-description } | `String.t \| :inherit` |  | The description for this action. |
-| [`class`](#live_view-page-show-class){: #live_view-page-show-class } | `nil \| String.t \| (map -> String.t)` |  | Customize action classes. |
-| [`identity`](#live_view-page-show-identity){: #live_view-page-show-identity } | `atom \| list(atom)` | `:id` | The identity used to load the record. |
-| [`icon_name`](#live_view-page-show-icon_name){: #live_view-page-show-icon_name } | `String.t` | `"hero-eye-solid"` | The icon to use for links/buttons. |
-| [`parent_action`](#live_view-page-show-parent_action){: #live_view-page-show-parent_action } | `any` |  |  |
-| [`create_actions`](#live_view-page-show-create_actions){: #live_view-page-show-create_actions } | `any` | `[]` |  |
-| [`list_actions`](#live_view-page-show-list_actions){: #live_view-page-show-list_actions } | `any` | `[]` |  |
-| [`show_actions`](#live_view-page-show-show_actions){: #live_view-page-show-show_actions } | `any` | `[]` |  |
-| [`update_actions`](#live_view-page-show-update_actions){: #live_view-page-show-update_actions } | `any` | `[]` |  |
-| [`destroy_actions`](#live_view-page-show-destroy_actions){: #live_view-page-show-destroy_actions } | `any` | `[]` |  |
-
-
-
-
-
-
-### live_view.page.update
-```elixir
-update path, live_action, action
-```
-
-
-Configure a update action for this resource.
-
-
-
-
-
-### Arguments
-
-| Name | Type | Default | Docs |
-|------|------|---------|------|
-| [`path`](#live_view-page-update-path){: #live_view-page-update-path .spark-required} | `String.t \| list(String.t)` |  | The route path for this action. |
-| [`live_action`](#live_view-page-update-live_action){: #live_view-page-update-live_action .spark-required} | `atom` |  | The live action for this action. |
-| [`action`](#live_view-page-update-action){: #live_view-page-update-action .spark-required} | `atom` |  | The action to use to update the record. |
-### Options
-
-| Name | Type | Default | Docs |
-|------|------|---------|------|
-| [`load_action`](#live_view-page-update-load_action){: #live_view-page-update-load_action } | `atom` |  | The action to use to load the record. |
-| [`display_as`](#live_view-page-update-display_as){: #live_view-page-update-display_as } | `:form` | `:form` | How to display the action. |
-| [`label`](#live_view-page-update-label){: #live_view-page-update-label } | `String.t \| :inherit` |  | The label for this action (defaults to humanized live_action). |
-| [`description`](#live_view-page-update-description){: #live_view-page-update-description } | `String.t \| :inherit` |  | The description for this action. |
-| [`class`](#live_view-page-update-class){: #live_view-page-update-class } | `nil \| String.t \| (map -> String.t)` |  | Customize action classes. |
-| [`identity`](#live_view-page-update-identity){: #live_view-page-update-identity } | `atom \| list(atom)` | `:id` | The identity used to load the record. |
-| [`icon_name`](#live_view-page-update-icon_name){: #live_view-page-update-icon_name } | `String.t` | `"hero-pencil-square-solid"` | The icon to use for links/buttons. |
-| [`parent_action`](#live_view-page-update-parent_action){: #live_view-page-update-parent_action } | `any` |  |  |
-| [`create_actions`](#live_view-page-update-create_actions){: #live_view-page-update-create_actions } | `any` | `[]` |  |
-| [`list_actions`](#live_view-page-update-list_actions){: #live_view-page-update-list_actions } | `any` | `[]` |  |
-| [`show_actions`](#live_view-page-update-show_actions){: #live_view-page-update-show_actions } | `any` | `[]` |  |
-| [`update_actions`](#live_view-page-update-update_actions){: #live_view-page-update-update_actions } | `any` | `[]` |  |
-| [`destroy_actions`](#live_view-page-update-destroy_actions){: #live_view-page-update-destroy_actions } | `any` | `[]` |  |
-
-
-
-
-
-
-
-
-
+Target: `PyroManiac.Form.ActionType`
 
 
 

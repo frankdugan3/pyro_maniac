@@ -11,7 +11,7 @@ defmodule PyroManiac.Dsl.Verifiers.DataTable.NoDuplicateColumnLabels do
     module = Verifier.get_persisted(dsl, :module, nil)
 
     for %Action{} = action <- Verifier.get_entities(dsl, [:data_table]) do
-      for {key, count} <- count_columns(action.columns) do
+      for {key, count} <- action.columns |> Map.values() |> count_columns() do
         case count do
           1 ->
             :ok
