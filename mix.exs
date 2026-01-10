@@ -39,7 +39,7 @@ defmodule PyroManiac.MixProject do
     ]
   end
 
-  defp elixirc_paths(:test), do: ["lib", "test"]
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   defp extras do
@@ -147,13 +147,14 @@ defmodule PyroManiac.MixProject do
       # Core dependencies
       {:ash, "~> 3.0"},
       {:igniter, "~> 0.6", optional: true},
-      {:spark, "~> 2.2.63"},
-      # {:phoenix, "~> 1.8", optional: true},
-      {:phoenix_live_view, "~> 1.1", optional: true},
-      {:hologram, "~> 0.5", optional: true}
+      {:spark, "~> 2.0"},
+      {:ash_phoenix, "~> 2.0", optional: true},
+      {:phoenix_live_view, "~> 1.1", optional: true}
+      # {:hologram, "~> 0.5", optional: true}
     ]
   end
 
+  @extensions "PyroManiac.Dsl,PyroManiac.Theme.Dsl"
   defp aliases do
     [
       docs: [
@@ -164,9 +165,9 @@ defmodule PyroManiac.MixProject do
       ],
       update: ["deps.update --all"],
       format: ["format --migrate"],
-      "spark.cheat_sheets": "spark.cheat_sheets --extensions PyroManiac.Dsl",
+      "spark.cheat_sheets": "spark.cheat_sheets --extensions #{@extensions}",
       "spark.formatter": [
-        "spark.formatter --extensions PyroManiac.Dsl,PyroManiac.Theme.Dsl",
+        "spark.formatter --extensions #{@extensions}",
         "format"
       ],
       # until we hit 1.0, we will ensure no major release!
