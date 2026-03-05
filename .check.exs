@@ -30,6 +30,6 @@
     # {:my_tool, ["my_tool", "arg with spaces"]}
 
     {:spark_formatter,
-     "mix spark.formatter --check --extensions PyroManiac.Dsl,PyroManiac.Theme.Dsl"}
+     "mix spark.formatter --check --extensions PyroManiac.Dsl,PyroManiac.Resource,PyroManiac.Navigation.Dsl,PyroManiac.KanBan"}
   ]
 ]

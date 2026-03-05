@@ -6,22 +6,20 @@
 
 # PyroManiac
 
-Extensible, declarative UI for Ash Framework.
+Extensible, declarative, framework-agnostic UI DSL for Ash Framework resources.
 
-- Compile-time validation of UI correctness
-- Data Tables
-  - Sorting
-  - Filtering
-  - Pagination
-- Forms
-  - Manage Relationships
-  - Field Groups
-  - Wizards
-- Built-in components for Phoenix LiveView
-- Built-in components for Hologram
-- Customizable themes
-  - DaisyUI preset
-  - BEM preset (bring your own CSS)
+PyroManiac is the DSL layer only — it compiles your UI configuration and
+exposes it via `PyroManiac.Info`. Rendering is provided by a separate
+renderer library such as
+[`pyro_maniac_live_view`](https://github.com/frankdugan3/pyro_maniac_live_view).
+
+- Compile-time validation of UI configuration (Spark transformers and verifiers)
+- DSL sections: `page`, `views`, `forms`, `searches`
+- View types: `data_table`, `grid`, `calendar`, `gantt`, `kanban`, `list`, `render`, `delegated`
+- Forms with field groups, wizard steps, conditional visibility, and bulk actions
+- Declarative navigation (`PyroManiac.Navigation`) with a precomputed route manifest
+- Kanban support (`PyroManiac.KanBan` extension on resources)
+- Renderer-agnostic — pair with the renderer for your stack
 
 ## About
 
@@ -29,7 +27,9 @@ For more details on PyroManiac, check out the [About](https://hexdocs.pm/pyro_ma
 
 ## Installation
 
-To install PyroManiac and add declarative UI DSL to your Ash project, follow the [Get Started](https://hexdocs.pm/pyro_maniac/get-started.html) guide. For the other features, please see the "Get Started" guide for the appropriate library instead.
+Follow the [Get Started](https://hexdocs.pm/pyro_maniac/get-started.html) guide
+to add the DSL to your Ash project, then install the renderer library for your
+chosen stack.
 
 ## Development
 

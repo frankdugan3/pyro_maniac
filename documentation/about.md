@@ -1,35 +1,36 @@
 # About
 
-Pyro is a suite of libraries for building UI in Phoenix.
+PyroManiac is a declarative, framework-agnostic UI DSL for Ash Framework
+resources. It uses [Spark](https://hexdocs.pm/spark) to compile your UI
+configuration at build time and exposes the result through
+`PyroManiac.Info` for renderers to consume.
 
-- [Pyro](https://hexdocs.pm/pyro)
+## What it is
 
-  Component tooling for Phoenix.
+- A Spark DSL with four sections — `page`, `views`, `forms`, `searches`
+- Resource and navigation extensions — `PyroManiac.Resource`, `PyroManiac.Navigation`, `PyroManiac.KanBan`
+- A runtime introspection API — `PyroManiac.Info` (and the `*.Info` modules per extension)
 
-  - Customizable "overrides" system for granularly customizable themes
-  - Extended component attributes, e.g. CSS merging
+## What it is not
 
-- [PyroComponents](https://hexdocs.pm/pyro_components)
+PyroManiac does not render anything by itself. Rendering, routing, and
+real-time wiring are the responsibility of a separate renderer library.
+Pair PyroManiac with the renderer for your stack — for example
+[`pyro_maniac_live_view`](https://github.com/frankdugan3/pyro_maniac_live_view)
+for Phoenix LiveView applications.
 
-  Ready-made Phoenix components, built with pyro.
+## Why
 
-  - Heex component library
-  - Overrides presets to get started quickly while allowing deep customization
+The default model in most web frameworks is to scaffold UI code, then
+customize it. That trades repetition for control and ages poorly: the
+copy-pasted boilerplate drifts from any upstream improvement, and small
+schema changes ripple through every page.
 
-- [PyroManiac](https://hexdocs.pm/pyro_maniac)
+PyroManiac inverts that: declare the UI as data on the resource, validate
+it at compile time, and let the renderer turn it into pixels. Resource
+changes and DSL changes both surface as compile errors instead of subtle
+runtime drift.
 
-  Declarative UI for Ash Framework.
+## Getting started
 
-  - Ash extensions providing a declarative UI DSL
-
-- [PyroManiacComponents](https://hexdocs.pm/pyro_maniac_components)
-
-  Components that automatically render PyroComponents declaratively via PyroManiac.
-
-To install PyroManiac and add declarative UI DSL to your Ash project, follow the [Get Started](get-started.html) guide. For the other features, please see the "Get Started" guide for the appropriate library instead.
-
-## What "problem" is it solving?
-
-The default model of Phoenix is to generate, then customize. While this does provide great isolation, I have found it pretty tedious to repeatedly make very similar copy & paste boilerplate changes to the generated code every time I create a new Phoenix app. Additionally, some things (like timezone localization) are quite complicated and it would be nice for them to be handled by a library that is updated with future improvements. Copy & pasting boilerplate will lead to maintenance burdens down the road.
-
-The tricky part is handling all the bespoke features in each app while sharing as much as possible. The goal is to provide a wide array of tooling, helpers and components with sane defaults, while allowing very granular overrides and optional libraries. By separating each level of features, you can choose which parts of Pyro to leverage, and which to implement yourself.
+Follow the [Get Started](get-started.html) guide.

@@ -29,4 +29,6 @@ pyro-*.tar
 
 # Secret files
 *.env
-priv/static/hologram
+
+/priv/resource_snapshots/repo
+/priv/repo/migrations

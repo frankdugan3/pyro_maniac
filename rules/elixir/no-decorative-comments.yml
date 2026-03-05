@@ -1,0 +1,8 @@
+id: elixir-no-decorative-comments
+language: elixir
+severity: warning
+message: "Remove decorative/organizational comment. Comments should only explain surprising behavior, TODO, or HACK."
+rule:
+  kind: comment
+  regex: "[═─━=\\-~_*]{3,}"
+fix: ""

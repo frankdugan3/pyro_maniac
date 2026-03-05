@@ -1,44 +1,69 @@
 defmodule PyroManiac.Dsl do
-  @moduledoc """
-  Declarative configuration of user interfaces for Ash resources.
-  """
+  @moduledoc false
 
   use Spark.Dsl.Extension,
     sections: [
       %Spark.Dsl.Section{
-        describe: "Configure the appearance of data tables in the `PyroManiac.Dsl` extension.",
-        # quokka:sort
+        describe: "Page-level configuration for the PyroManiac UI.",
         entities: [
-          PyroManiac.DataTable.Action.__entity__(),
-          PyroManiac.DataTable.ActionType.__entity__()
+          PyroManiac.Page.TenantFrom.__entity__(),
+          PyroManiac.Page.ExtraAction.__entity__()
         ],
-        name: :data_table,
-        # quokka:sort
+        name: :page,
         schema: [
-          class: [
-            doc: "The default class for the data table.",
-            type: __MODULE__.Type.css_class()
+          title: [
+            type: :string,
+            required: true,
+            doc: "Page title used for the document title and rendered as a page header."
           ],
           description: [
-            doc: "The default description for data tables.",
-            type: __MODULE__.Type.inheritable(:string)
+            type: {:or, [:string, __MODULE__.Type.render_fn()]},
+            doc:
+              "Optional page description rendered below the title. " <>
+                "Accepts a string or a render function that receives assigns."
           ],
+          route: [
+            type: :string,
+            doc:
+              ~s{URL path for this page (e.g. `"/recipes"`, `"/recipes/:id"`). } <>
+                "Renderers may use this to generate route declarations; navigation " <>
+                "items can auto-resolve paths from the page module."
+          ],
+          default_viewer: [
+            type: {:one_of, [:data_table, :grid, :calendar, :gantt, :kanban, :list]},
+            default: :data_table,
+            doc: "The default viewer type for the page."
+          ],
+          track_presence?: [
+            type: :boolean,
+            default: true,
+            doc:
+              "When true, tracks which users are viewing or editing records on this page via the configured presence backend."
+          ]
+        ]
+      },
+      %Spark.Dsl.Section{
+        describe:
+          "Configure views for displaying resource data. Views can be nested recursively.",
+        entities: [
+          PyroManiac.View.View.__entity__()
+        ],
+        name: :views,
+        schema: [
           exclude: [
             default: [],
-            doc: "The actions to exclude from data tables.",
+            doc: "Action names to exclude from all views.",
             type: {:list, :atom}
           ]
         ]
       },
       %Spark.Dsl.Section{
         describe: "Configure the appearance of forms in the `PyroManiac.Dsl` extension.",
-        # quokka:sort
         entities: [
           PyroManiac.Form.Action.__entity__(),
-          PyroManiac.Form.ActionType.__entity__()
+          PyroManiac.Form.BulkAction.__entity__()
         ],
-        name: :form,
-        # quokka:sort
+        name: :forms,
         schema: [
           class: [
             doc: "The default class for the form.",
@@ -52,33 +77,33 @@ defmodule PyroManiac.Dsl do
             default: [],
             doc: "The actions to exclude from forms.",
             type: {:list, :atom}
+          ],
+          extra_form_types: [
+            default: [],
+            doc: "Additional field type atoms accepted by the form DSL.",
+            type: {:list, :atom}
           ]
         ]
+      },
+      %Spark.Dsl.Section{
+        describe: "Configure simple search forms for the tabbed filter UI.",
+        entities: [
+          PyroManiac.Search.Search.__entity__()
+        ],
+        name: :searches,
+        top_level?: true
       }
     ],
-    # quokka:sort
     transformers: [
-      __MODULE__.Transformers.MergeDataTableActions,
-      __MODULE__.Transformers.MergeFormActions
+      __MODULE__.Transformers.ResolveViewResources,
+      __MODULE__.Transformers.ValidateViews,
+      __MODULE__.Transformers.ExpandFormActions,
+      __MODULE__.Transformers.ValidatePage
     ],
-    # quokka:sort
     verifiers: [
-      __MODULE__.Verifiers.DataTable.AllColumnsValid,
-      __MODULE__.Verifiers.DataTable.AllPublicIncluded,
-      __MODULE__.Verifiers.DataTable.DefaultDisplaysValid,
-      __MODULE__.Verifiers.DataTable.DefaultSortsValid,
-      __MODULE__.Verifiers.DataTable.NoDuplicateActions,
-      __MODULE__.Verifiers.DataTable.NoDuplicateColumnLabels,
-      __MODULE__.Verifiers.Form.AllAcceptedIncluded,
-      __MODULE__.Verifiers.Form.AllArgumentsIncluded,
-      __MODULE__.Verifiers.Form.AllFieldsInAction,
-      __MODULE__.Verifiers.Form.ExactlyOneAutofocus,
-      __MODULE__.Verifiers.Form.NoDuplicateActions,
-      __MODULE__.Verifiers.Form.NoDuplicateFieldLabels,
-      __MODULE__.Verifiers.Form.NoDuplicateFields
+      __MODULE__.Verifiers.ResourceHasExtension
     ],
-    # quokka:sort
     persisters: [
-      __MODULE__.Persisters.DataTable
+      __MODULE__.Persisters.Views
     ]
 end

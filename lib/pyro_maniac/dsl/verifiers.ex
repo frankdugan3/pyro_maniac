@@ -8,6 +8,7 @@ defmodule PyroManiac.Dsl.Verifiers do
       import PyroManiac.Dsl.Transformers
       import unquote(__MODULE__)
 
+      alias Spark.Dsl.Entity
       alias Spark.Dsl.Verifier
       alias Spark.Error.DslError
     end

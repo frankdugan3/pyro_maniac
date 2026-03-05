@@ -1,0 +1,3068 @@
+
+21:37:36.314 [info] Application logger started at :nonode@nohost
+
+21:37:36.314 [info] Application xp_mime started at :nonode@nohost
+
+21:37:36.314 [info] Application xp_hpax started at :nonode@nohost
+
+21:37:36.314 [info] Application crypto started at :nonode@nohost
+
+21:37:36.314 [info] Application asn1 started at :nonode@nohost
+
+21:37:36.314 [info] Application public_key started at :nonode@nohost
+
+21:37:36.315 [debug] Child :ssl_handler of Supervisor :logger_sup started
+Pid: #PID<0.105.0>
+Start Call: :logger_olp.start_link(:logger_std_h_ssl_handler, :logger_h_common, %{id: :ssl_handler, module: :logger_std_h, config: %{type: :standard_io, filesync_repeat_interval: :no_repeat}, level: :debug, filters: [], formatter: {:ssl_logger, %{}}, filter_default: :stop}, %{})
+Restart: :temporary
+Shutdown: 2000
+Type: :worker
+
+21:37:36.317 [info] Child :ssl_pem_cache of Supervisor :ssl_admin_sup started
+Pid: #PID<0.109.0>
+Start Call: :ssl_pem_cache.start_link([])
+Restart: :permanent
+Shutdown: 4000
+Type: :worker
+
+21:37:36.318 [info] Child :ssl_manager of Supervisor :ssl_admin_sup started
+Pid: #PID<0.110.0>
+Start Call: :ssl_manager.start_link([])
+Restart: :permanent
+Shutdown: 4000
+Type: :worker
+
+21:37:36.318 [info] Child :tls_client_ticket_store of Supervisor :ssl_admin_sup started
+Pid: #PID<0.111.0>
+Start Call: :tls_client_ticket_store.start_link(1000, 7200)
+Restart: :permanent
+Shutdown: 4000
+Type: :worker
+
+21:37:36.318 [info] Child :ssl_admin_sup of Supervisor :ssl_sup started
+Pid: #PID<0.108.0>
+Start Call: :ssl_admin_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.319 [info] Child :tls_connection_sup of Supervisor :tls_sup started
+Pid: #PID<0.114.0>
+Start Call: :tls_connection_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.319 [info] Child :ssl_listen_tracker_sup of Supervisor :tls_server_sup started
+Pid: #PID<0.116.0>
+Start Call: :ssl_listen_tracker_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.319 [info] Child :tls_server_session_ticket of Supervisor :tls_server_sup started
+Pid: #PID<0.117.0>
+Start Call: :tls_server_session_ticket_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.320 [info] Child :ssl_server_session_cache_sup of Supervisor :tls_server_sup started
+Pid: #PID<0.118.0>
+Start Call: :ssl_server_session_cache_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.320 [info] Child :ssl_upgrade_server_session_cache_sup of Supervisor :tls_server_sup started
+Pid: #PID<0.119.0>
+Start Call: :ssl_upgrade_server_session_cache_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.320 [info] Child :tls_server_sup of Supervisor :tls_sup started
+Pid: #PID<0.115.0>
+Start Call: :tls_server_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.320 [info] Child :tls_sup of Supervisor :ssl_connection_sup started
+Pid: #PID<0.113.0>
+Start Call: :tls_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.320 [info] Child :dtls_connection_sup of Supervisor :dtls_sup started
+Pid: #PID<0.121.0>
+Start Call: :dtls_connection_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.321 [info] Child :dtls_listener_sup of Supervisor :dtls_server_sup started
+Pid: #PID<0.123.0>
+Start Call: :dtls_listener_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.321 [info] Child :dtls_server_session_cache_sup of Supervisor :dtls_server_sup started
+Pid: #PID<0.124.0>
+Start Call: :dtls_server_session_cache_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.321 [info] Child :dtls_server_sup of Supervisor :dtls_sup started
+Pid: #PID<0.122.0>
+Start Call: :dtls_server_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.321 [info] Child :dtls_sup of Supervisor :ssl_connection_sup started
+Pid: #PID<0.120.0>
+Start Call: :dtls_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.321 [info] Child :ssl_connection_sup of Supervisor :ssl_sup started
+Pid: #PID<0.112.0>
+Start Call: :ssl_connection_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:36.321 [info] Application ssl started at :nonode@nohost
+
+21:37:36.322 [info] Application xp_mint started at :nonode@nohost
+
+21:37:36.322 [info] Application xp_nimble_options started at :nonode@nohost
+
+21:37:36.323 [info] Child XPNimblePool.TaskSupervisor of Supervisor #PID<0.130.0> (Supervisor.Default) started
+Pid: #PID<0.131.0>
+Start Call: Task.Supervisor.start_link([name: XPNimblePool.TaskSupervisor])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:36.323 [info] Application xp_nimble_pool started at :nonode@nohost
+
+21:37:36.324 [info] Child :telemetry_handler_table of Supervisor :telemetry_sup started
+Pid: #PID<0.135.0>
+Start Call: :telemetry_handler_table.start_link()
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.324 [info] Application xp_telemetry started at :nonode@nohost
+
+21:37:36.324 [info] Application xp_finch started at :nonode@nohost
+
+21:37:36.331 [info] Child XPReq.Finch.PIDPartition0 of Supervisor XPReq.Finch started
+Pid: #PID<0.141.0>
+Start Call: Registry.Partition.start_link(XPReq.Finch.PIDPartition0, {:duplicate, XPReq.Finch, 0, 1, XPReq.Finch.KeyPartition0, XPReq.Finch.PIDPartition0, [], false})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.331 [info] Child XPReq.Finch of Supervisor XPReq.Finch.Supervisor started
+Pid: #PID<0.140.0>
+Start Call: Registry.start_link([keys: :duplicate, name: XPReq.Finch, meta: [config: %{pools: %{}, registry_name: XPReq.Finch, supervisor_name: XPReq.Finch.PoolSupervisor, manager_name: XPReq.Finch.PoolManager, default_pool_config: %{count: 1, size: 50, mod: XPFinch.HTTP1.Pool, conn_opts: [protocols: [:http1], transport_opts: [keepalive: true, nodelay: true, timeout: 5000], ssl_key_log_file_device: nil], pool_max_idle_time: :infinity, conn_max_idle_time: :infinity, start_pool_metrics?: false}}]])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:36.331 [info] Child XPReq.Finch.PoolSupervisor of Supervisor XPReq.Finch.Supervisor started
+Pid: #PID<0.142.0>
+Start Call: DynamicSupervisor.start_link([name: XPReq.Finch.PoolSupervisor, strategy: :one_for_one])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:36.331 [info] Child XPFinch.PoolManager of Supervisor XPReq.Finch.Supervisor started
+Pid: #PID<0.143.0>
+Start Call: XPFinch.PoolManager.start_link(%{pools: %{}, registry_name: XPReq.Finch, supervisor_name: XPReq.Finch.PoolSupervisor, manager_name: XPReq.Finch.PoolManager, default_pool_config: %{count: 1, size: 50, mod: XPFinch.HTTP1.Pool, conn_opts: [protocols: [:http1], transport_opts: [keepalive: true, nodelay: true, timeout: 5000], ssl_key_log_file_device: nil], pool_max_idle_time: :infinity, conn_max_idle_time: :infinity, start_pool_metrics?: false}})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.331 [info] Child XPReq.Finch of Supervisor #PID<0.138.0> (Supervisor.Default) started
+Pid: #PID<0.139.0>
+Start Call: XPFinch.start_link([name: XPReq.Finch, pools: %{default: [protocols: [:http1]]}])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.331 [info] Child XPReq.FinchSupervisor of Supervisor #PID<0.138.0> (Supervisor.Default) started
+Pid: #PID<0.144.0>
+Start Call: DynamicSupervisor.start_link([strategy: :one_for_one, name: XPReq.FinchSupervisor])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:36.331 [info] Child XPReq.Test.Ownership of Supervisor #PID<0.138.0> (Supervisor.Default) started
+Pid: #PID<0.145.0>
+Start Call: XPReq.Test.Ownership.start_link([name: XPReq.Test.Ownership])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.331 [info] Application xp_req started at :nonode@nohost
+
+21:37:36.331 [info] Application burrito started at :nonode@nohost
+
+21:37:36.333 [info] Child XPBriefly.Entry of Supervisor XPBriefly.Supervisor started
+Pid: #PID<0.149.0>
+Start Call: XPBriefly.Entry.start_link([])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.333 [info] Application xp_briefly started at :nonode@nohost
+
+21:37:36.333 [info] Application xp_schematic started at :nonode@nohost
+
+21:37:36.333 [info] Application xp_typed_struct started at :nonode@nohost
+
+21:37:36.333 [info] Application xp_gen_lsp started at :nonode@nohost
+
+21:37:36.333 [info] Application xp_sourceror started at :nonode@nohost
+
+21:37:36.333 [info] Application xp_spitfire started at :nonode@nohost
+
+21:37:36.333 [info] Application xp_forge started at :nonode@nohost
+
+21:37:36.337 [info] Child :ttb_autostart of Supervisor :runtime_tools_sup started
+Pid: #PID<0.153.0>
+Start Call: :ttb_autostart.start_link()
+Restart: :temporary
+Shutdown: 3000
+Type: :worker
+
+21:37:36.337 [info] Application runtime_tools started at :nonode@nohost
+
+21:37:36.337 [info] Application et started at :nonode@nohost
+
+21:37:36.337 [info] Application observer started at :nonode@nohost
+
+21:37:36.337 [info] Application xp_path_glob started at :nonode@nohost
+
+21:37:36.340 instance_id=19CEA34D2D2 [info] Expert v0.1.0-rc.6-7a4e333 starting on stdio
+
+21:37:36.342 instance_id=19CEA34D2D2 [info] Starting NodePortMapper on nonode@nohost
+
+21:37:36.343 instance_id=19CEA34D2D2 [info] Child XPForge.NodePortMapper of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.158.0>
+Start Call: XPForge.NodePortMapper.start_link([])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.344 instance_id=19CEA34D2D2 [info] Child XPForge.Document.Store of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.159.0>
+Start Call: XPForge.Document.Store.start_link([derive: [analysis: &XPForge.Ast.analyze/1]])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.344 instance_id=19CEA34D2D2 [info] Child XPExpert.ProjectSupervisor of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.160.0>
+Start Call: DynamicSupervisor.start_link([name: XPExpert.ProjectSupervisor, strategy: :one_for_one])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:36.344 instance_id=19CEA34D2D2 [info] Child XPExpert.DynamicSupervisor of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.161.0>
+Start Call: DynamicSupervisor.start_link([name: XPExpert.DynamicSupervisor])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:36.344 instance_id=19CEA34D2D2 [info] Child XPGenLSP.Assigns of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.162.0>
+Start Call: XPGenLSP.Assigns.start_link([name: XPExpert.Assigns])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.344 instance_id=19CEA34D2D2 [info] Child :expert_task_queue of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.163.0>
+Start Call: Task.Supervisor.start_link([name: :expert_task_queue])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:36.345 instance_id=19CEA34D2D2 [info] Child XPGenLSP.Buffer of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.164.0>
+Start Call: XPGenLSP.Buffer.start_link([name: XPExpert.Buffer])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.345 instance_id=19CEA34D2D2 [info] Child XPExpert.ActiveProjects of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.165.0>
+Start Call: XPExpert.ActiveProjects.start_link()
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.345 instance_id=19CEA34D2D2 [debug] [name: XPExpert, buffer: XPExpert.Buffer, task_supervisor: :expert_task_queue, dynamic_supervisor: XPExpert.DynamicSupervisor, assigns: XPExpert.Assigns]
+
+21:37:36.353 instance_id=19CEA34D2D2 [info] Child XPExpert of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.166.0>
+Start Call: XPExpert.start_link([name: XPExpert, buffer: XPExpert.Buffer, task_supervisor: :expert_task_queue, dynamic_supervisor: XPExpert.DynamicSupervisor, assigns: XPExpert.Assigns])
+Restart: :permanent
+Shutdown: 500
+Type: :worker
+
+21:37:36.354 instance_id=19CEA34D2D2 [info] Application xp_expert started at :nonode@nohost
+
+21:37:36.404 instance_id=19CEA34D2D2 [debug] handled request client -> server initialize in 46ms
+
+21:37:36.406 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:36.406 instance_id=19CEA34D2D2 [info] Server initialized, registering capabilities
+
+21:37:36.407 instance_id=19CEA34D2D2 [debug] sent request server -> client client/registerCapability
+
+21:37:36.410 instance_id=19CEA34D2D2 [debug] handled notification client -> server initialized in 4ms
+
+21:37:36.410 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:36.410 instance_id=19CEA34D2D2 [info] Starting project
+
+21:37:36.413 instance_id=19CEA34D2D2 [info] Child {XPExpert.EngineSupervisor, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.172.0>
+Start Call: XPExpert.EngineSupervisor.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 55937})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:36.413 instance_id=19CEA34D2D2 [debug] sent request server -> client window/workDoneProgress/create
+
+21:37:36.414 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:36.414 instance_id=19CEA34D2D2 [info] Opened file:///home/frank/git/pyro_maniac/test/support/layouts.ex
+
+21:37:36.415 instance_id=19CEA34D2D2 [debug] handled notification client -> server textDocument/didOpen in 4ms
+
+21:37:36.415 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:36.418 instance_id=19CEA34D2D2 [info] Child XPForge.EPMD of Supervisor :net_sup started
+Pid: #PID<0.175.0>
+Start Call: XPForge.EPMD.start_link()
+Restart: :permanent
+Shutdown: 2000
+Type: :worker
+
+21:37:36.418 instance_id=19CEA34D2D2 [info] Child :auth of Supervisor :net_sup started
+Pid: #PID<0.176.0>
+Start Call: :auth.start_link()
+Restart: :permanent
+Shutdown: 2000
+Type: :worker
+
+21:37:36.422 instance_id=19CEA34D2D2 [info] Child :net_kernel of Supervisor :net_sup started
+Pid: #PID<0.177.0>
+Start Call: :net_kernel.start_link(%{name: :"expert-manager-pyro_maniac-55937@127.0.0.1", supervisor: :net_sup_dynamic, net_tickintensity: 4, net_ticktime: 60, name_domain: :longnames, clean_halt: false})
+Restart: :permanent
+Shutdown: 2000
+Type: :worker
+
+21:37:36.423 instance_id=19CEA34D2D2 [debug] Child :net_sup_dynamic of Supervisor :kernel_sup started
+Pid: #PID<0.174.0>
+Start Call: :erl_distribution.start_link(%{name: :"expert-manager-pyro_maniac-55937@127.0.0.1", supervisor: :net_sup_dynamic, net_tickintensity: 4, net_ticktime: 60, name_domain: :longnames, clean_halt: false})
+Restart: :permanent
+Shutdown: 1000
+Type: :supervisor
+
+21:37:36.423 instance_id=19CEA34D2D2 [debug] sent request server -> client window/workDoneProgress/create
+
+21:37:36.426 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:36.681 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:36.681 instance_id=19CEA34D2D2 [info] Using path: /home/frank/.local/share/.burrito/expert_erts-15.2.7_0.1.0-rc.6-7a4e333/erts-15.2.7/bin:/home/frank/.local/share/.burrito/expert_erts-15.2.7_0.1.0-rc.6-7a4e333/bin:/home/frank/.local/share/nvim/mason/bin:/home/frank/.local/share/bob/nvim-bin:/home/frank/.local/share/mise/installs/zig/0.15.2/bin:/home/frank/.local/share/mise/installs/erlang/28.3.1/bin:/home/frank/.local/share/mise/installs/elixir/1.19.5-otp-28/bin:/home/frank/.local/share/mise/installs/elixir/1.19.5-otp-28/.mix/escripts:/home/frank/.local/share/mise/installs/go/1.26.0/bin:/home/frank/.local/share/mise/installs/usage/2.16.2:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/opt/rocm/bin:/home/frank/.local/bin:/home/frank/.local/share/go/bin:/home/frank/.local/share/cargo/bin:/home/frank/.fly/bin:/home/frank/.local/bin:/home/frank/.local/share/go/bin:/home/frank/.local/share/cargo/bin:/home/frank/.fly/bin
+
+21:37:36.681 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:36.681 instance_id=19CEA34D2D2 [info] Found elixir executable at /home/frank/.local/share/mise/installs/elixir/1.19.5-otp-28/bin/elixir
+
+21:37:36.682 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:36.681 instance_id=19CEA34D2D2 [info] Found erl executable at /home/frank/.local/share/mise/installs/erlang/28.3.1/bin/erl
+
+21:37:36.683 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:36.682 instance_id=19CEA34D2D2 [info] Preparing engine
+
+21:37:37.805 instance_id=19CEA34D2D2 [debug] Engine build output: Namespacing 12 files:
+
+21:37:37.805 instance_id=19CEA34D2D2 [debug] Engine build output: New: 4
+
+21:37:37.805 instance_id=19CEA34D2D2 [debug] Engine build output: Changed: 8
+
+21:37:37.805 instance_id=19CEA34D2D2 [debug] Engine build output: Deleted: 4
+
+21:37:37.805 instance_id=19CEA34D2D2 [debug] Engine build output: 
+
+21:37:37.808 instance_id=19CEA34D2D2 [debug] Engine build output: Rewriting 0 app files
+
+21:37:37.809 instance_id=19CEA34D2D2 [debug] Engine build output: Rewriting .beam files
+
+21:37:37.809 instance_id=19CEA34D2D2 [debug] Engine build output: Found 0 protocols
+
+21:37:37.809 instance_id=19CEA34D2D2 [debug] Engine build output: Found 0 app beam files
+
+21:37:37.809 instance_id=19CEA34D2D2 [debug] Engine build output: Finished namespacing .beam files
+
+21:37:37.810 instance_id=19CEA34D2D2 [debug] Engine build output: Rewriting 0 scripts
+
+21:37:37.810 instance_id=19CEA34D2D2 [debug] Engine build output: Rebuilding 0 boot files
+
+21:37:37.811 instance_id=19CEA34D2D2 [debug] Engine build output: Rewriting 0 config scripts.
+
+21:37:37.815 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:37.815 instance_id=19CEA34D2D2 [info] Engine available at: /home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns
+
+21:37:37.841 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:37.841 instance_id=19CEA34D2D2 [info] ebin paths:
+["/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/patch/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_briefly/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_bunt/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_credo/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_deps_nix/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_elixir_sense/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_engine/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_file_system/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_forge/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_gen_lsp/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_hpax/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_jason/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_mint/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_nimble_options/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_nimble_parsec/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_path_glob/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_refactorex/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_schematic/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_sourceror/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_spitfire/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_telemetry/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_typed_struct/ebin"]
+
+21:37:37.864 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:37.864 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.206 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.208 instance_id=19CEA34D2D2 [debug] Node port message: ok
+
+
+21:37:38.415 instance_id=19CEA34D2D2 [debug] Node port message:     warning: Spark.Docs.search_data_for/1 is undefined (module Spark.Docs is not available or is yet to be defined)
+    │
+ 77 │            search_data: Spark.Docs.search_data_for(PyroManiac.Dsl)
+    │                                    ~
+    │
+    └─ mix.exs:77:36: PyroManiac.MixProject.extras/0
+
+
+
+21:37:38.420 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:38.417 [notice] Application mix exited: :stopped
+
+
+21:37:38.429 instance_id=19CEA34D2D2 [debug] Node port message:     warning: redefining module PyroManiac.MixProject (current version defined in memory)
+    │
+  1 │ defmodule PyroManiac.MixProject do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ /home/frank/git/pyro_maniac/mix.exs:1: PyroManiac.MixProject (module)
+
+
+
+21:37:38.446 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.446 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.450 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.764 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.764 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.764 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.764 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.764 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.764 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.764 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.765 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.765 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.765 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.765 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.765 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.765 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.765 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.765 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.765 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.766 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.766 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.766 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.767 instance_id=19CEA34D2D2 [debug] sent notification server -> client $/progress
+
+21:37:38.767 instance_id=19CEA34D2D2 [info] Child {XPExpert.Project.Node, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.173.0>
+Start Call: XPExpert.Project.Node.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 55937})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:38.768 instance_id=19CEA34D2D2 [info] Child {XPExpert.Project.Diagnostics, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.208.0>
+Start Call: XPExpert.Project.Diagnostics.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 55937})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:38.768 instance_id=19CEA34D2D2 [info] Child {XPExpert.Project.Intelligence, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.209.0>
+Start Call: XPExpert.Project.Intelligence.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 55937})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:38.769 instance_id=19CEA34D2D2 [info] Child XPExpert.Project.SearchListener of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.210.0>
+Start Call: XPExpert.Project.SearchListener.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 55937})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:38.769 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:38.769 instance_id=19CEA34D2D2 [info] Started project node for pyro_maniac
+
+21:37:38.769 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:38.769 instance_id=19CEA34D2D2 [info] Engine initialized for project pyro_maniac
+
+21:37:38.822 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:38.822 [info] Building PyroManiac
+
+
+21:37:38.822 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:38.822 [debug] sent request server -> client window/workDoneProgress/create
+
+
+21:37:38.823 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:38.823 [debug] sent notification server -> client $/progress
+
+
+21:37:38.847 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:38.847 [debug] sent notification server -> client $/progress
+
+
+21:37:38.850 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:38.850 [debug] sent notification server -> client $/progress
+
+
+21:37:38.852 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:38.852 [debug] sent notification server -> client $/progress
+
+
+21:37:39.372 instance_id=19CEA34D2D2 [debug] Node port message: Resolving Hex dependencies...
+
+
+21:37:39.847 instance_id=19CEA34D2D2 [debug] Node port message: Resolution completed in 0.471s
+
+
+21:37:39.929 instance_id=19CEA34D2D2 [debug] Node port message: Unchanged:
+
+
+21:37:39.929 instance_id=19CEA34D2D2 [debug] Node port message:   ash 3.19.3
+  ash_authentication 4.13.7
+  ash_authentication_phoenix 2.15.0
+  ash_phoenix 2.3.20
+  ash_postgres 2.8.0
+  ash_sql 0.5.0
+
+
+21:37:39.929 instance_id=19CEA34D2D2 [debug] Node port message:   assent 0.2.13
+  bandit 1.10.3
+  bcrypt_elixir 3.3.2
+
+
+21:37:39.929 instance_id=19CEA34D2D2 [debug] Node port message:   beam_file 0.6.4
+  bunt 1.0.0
+
+
+21:37:39.929 instance_id=19CEA34D2D2 [debug] Node port message:   castore 1.0.17
+  cc_precompiler 0.1.11
+  circular_buffer 1.0.0
+
+
+21:37:39.929 instance_id=19CEA34D2D2 [debug] Node port message:   comeonin 5.5.1
+  credo 1.7.17
+
+
+21:37:39.929 instance_id=19CEA34D2D2 [debug] Node port message:   crux 0.1.2
+  db_connection 2.9.0
+
+
+21:37:39.929 instance_id=19CEA34D2D2 [debug] Node port message:   decimal 2.3.0
+  dialyxir 1.4.7
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   doctor 0.22.0
+  earmark_parser 1.4.44
+  ecto 3.13.5
+  ecto_sql 3.13.5
+  elixir_make 0.9.0
+  erlex 0.2.8
+  esbuild 0.10.0
+  ets 0.9.0
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   ex_check 0.16.0
+  ex_doc 0.40.1
+  file_system 1.1.1
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   finch 0.21.0
+  fine 0.1.4
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   git_cli 0.3.0
+  git_ops 2.9.2
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   glob_ex 0.1.11
+  gproc 1.1.0
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   hologram 0.8.0
+  hpax 1.0.3
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   html_entities 0.5.2
+  igniter 0.7.4
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   interceptor 0.5.4
+  iterex 0.1.2
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   jason 1.4.4
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   joken 2.6.2
+  jose 1.11.12
+  lazy_html 0.1.10
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   libgraph 0.16.0
+  makeup 1.2.1
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   makeup_elixir 1.0.1
+  makeup_erlang 1.0.3
+  mime 2.0.7
+  mint 1.7.1
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   mix_audit 2.1.5
+  mix_test_watch 1.4.0
+  nimble_options 1.1.1
+  nimble_parsec 1.4.2
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   nimble_pool 1.1.0
+  owl 0.13.0
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   phoenix 1.8.5
+  phoenix_html 4.3.0
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   phoenix_html_helpers 1.0.1
+  phoenix_live_reload 1.6.2
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   phoenix_live_view 1.1.27
+  phoenix_pubsub 2.2.0
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   phoenix_template 1.0.4
+  phoenix_view 2.0.4
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   plug 1.19.1
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   plug_crypto 2.1.1
+  postgrex 0.22.0
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   quokka 2.12.1
+  reactor 1.0.0
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   req 0.5.17
+  rewrite 1.3.0
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   slugify 1.3.1
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   sourceror 1.12.0
+  spark 2.4.1
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   spitfire 0.3.10
+  splode 0.3.0
+
+
+21:37:39.930 instance_id=19CEA34D2D2 [debug] Node port message:   stream_data 1.3.0
+  tailwind 0.4.1
+
+
+21:37:39.931 instance_id=19CEA34D2D2 [debug] Node port message:   telemetry 1.4.1
+  text_diff 0.1.0
+
+
+21:37:39.931 instance_id=19CEA34D2D2 [debug] Node port message:   thousand_island 1.4.3
+  tidewave 0.5.6
+
+
+21:37:39.931 instance_id=19CEA34D2D2 [debug] Node port message:   usage_rules 1.2.5
+
+
+21:37:39.931 instance_id=19CEA34D2D2 [debug] Node port message:   uuid 1.1.8
+  websock 0.5.3
+
+
+21:37:39.931 instance_id=19CEA34D2D2 [debug] Node port message:   websock_adapter 0.5.9
+  yamerl 0.10.0
+
+
+21:37:39.931 instance_id=19CEA34D2D2 [debug] Node port message:   yaml_elixir 2.12.1
+  ymlr 5.1.4
+
+
+21:37:40.061 instance_id=19CEA34D2D2 [debug] Node port message: All dependencies have been fetched
+
+
+21:37:40.061 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.061 [debug] sent notification server -> client $/progress
+
+
+21:37:40.067 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.067 [debug] sent notification server -> client $/progress
+
+
+21:37:40.070 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.070 [info] Loaded []
+
+
+21:37:40.071 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.070 [debug] sent notification server -> client $/progress
+
+
+21:37:40.245 instance_id=19CEA34D2D2 [debug] Node port message: Compiling 19 files (.ex)
+
+
+21:37:40.321 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.321 [debug] sent notification server -> client $/progress
+
+
+21:37:40.375 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.374 [debug] sent notification server -> client $/progress
+
+
+21:37:40.379 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.378 [debug] sent notification server -> client $/progress
+
+
+21:37:40.388 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.388 [debug] sent notification server -> client $/progress
+
+
+21:37:40.415 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.415 [debug] sent notification server -> client $/progress
+
+
+21:37:40.423 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.422 [debug] sent notification server -> client $/progress
+
+
+21:37:40.425 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.425 [debug] sent notification server -> client $/progress
+
+
+21:37:40.440 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.439 [debug] sent notification server -> client $/progress
+
+
+21:37:40.444 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.443 [debug] sent notification server -> client $/progress
+
+
+21:37:40.466 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.465 [debug] sent notification server -> client $/progress
+
+
+21:37:40.487 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.487 [debug] sent notification server -> client $/progress
+
+
+21:37:40.554 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.553 [debug] sent notification server -> client $/progress
+
+
+21:37:40.571 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:40.571 instance_id=19CEA34D2D2 [error] handling server specific request XPGenLSP.Requests.Shutdown
+
+21:37:40.571 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:40.571 instance_id=19CEA34D2D2 [info] Shutting down
+
+21:37:40.571 instance_id=19CEA34D2D2 [debug] handled request client -> server shutdown in 1ms
+
+21:37:40.572 instance_id=19CEA34D2D2 [debug] sent notification server -> client window/logMessage
+
+21:37:40.572 instance_id=19CEA34D2D2 [warning] Received an Exit notification. Halting the server in 150ms
+
+21:37:40.573 instance_id=19CEA34D2D2 [debug] Child :timer_server of Supervisor :kernel_sup started
+Pid: #PID<0.232.0>
+Start Call: :timer.start_link()
+Restart: :permanent
+Shutdown: 1000
+Type: :worker
+
+21:37:40.573 instance_id=19CEA34D2D2 [debug] handled notification client -> server exit in 1ms
+
+21:37:40.575 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.575 [debug] sent notification server -> client $/progress
+
+
+21:37:40.584 instance_id=19CEA34D2D2 [debug] Node port message: 
+21:37:40.584 [debug] sent notification server -> client $/progress
+
+
+21:37:42.803 [info] Application logger started at :nonode@nohost
+
+21:37:42.803 [info] Application xp_mime started at :nonode@nohost
+
+21:37:42.803 [info] Application xp_hpax started at :nonode@nohost
+
+21:37:42.803 [info] Application crypto started at :nonode@nohost
+
+21:37:42.803 [info] Application asn1 started at :nonode@nohost
+
+21:37:42.804 [info] Application public_key started at :nonode@nohost
+
+21:37:42.804 [debug] Child :ssl_handler of Supervisor :logger_sup started
+Pid: #PID<0.105.0>
+Start Call: :logger_olp.start_link(:logger_std_h_ssl_handler, :logger_h_common, %{id: :ssl_handler, module: :logger_std_h, config: %{type: :standard_io, filesync_repeat_interval: :no_repeat}, level: :debug, filters: [], filter_default: :stop, formatter: {:ssl_logger, %{}}}, %{})
+Restart: :temporary
+Shutdown: 2000
+Type: :worker
+
+21:37:42.806 [info] Child :ssl_pem_cache of Supervisor :ssl_admin_sup started
+Pid: #PID<0.109.0>
+Start Call: :ssl_pem_cache.start_link([])
+Restart: :permanent
+Shutdown: 4000
+Type: :worker
+
+21:37:42.807 [info] Child :ssl_manager of Supervisor :ssl_admin_sup started
+Pid: #PID<0.110.0>
+Start Call: :ssl_manager.start_link([])
+Restart: :permanent
+Shutdown: 4000
+Type: :worker
+
+21:37:42.807 [info] Child :tls_client_ticket_store of Supervisor :ssl_admin_sup started
+Pid: #PID<0.111.0>
+Start Call: :tls_client_ticket_store.start_link(1000, 7200)
+Restart: :permanent
+Shutdown: 4000
+Type: :worker
+
+21:37:42.807 [info] Child :ssl_admin_sup of Supervisor :ssl_sup started
+Pid: #PID<0.108.0>
+Start Call: :ssl_admin_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.808 [info] Child :tls_connection_sup of Supervisor :tls_sup started
+Pid: #PID<0.114.0>
+Start Call: :tls_connection_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.809 [info] Child :ssl_listen_tracker_sup of Supervisor :tls_server_sup started
+Pid: #PID<0.116.0>
+Start Call: :ssl_listen_tracker_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.809 [info] Child :tls_server_session_ticket of Supervisor :tls_server_sup started
+Pid: #PID<0.117.0>
+Start Call: :tls_server_session_ticket_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.809 [info] Child :ssl_server_session_cache_sup of Supervisor :tls_server_sup started
+Pid: #PID<0.118.0>
+Start Call: :ssl_server_session_cache_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.809 [info] Child :ssl_upgrade_server_session_cache_sup of Supervisor :tls_server_sup started
+Pid: #PID<0.119.0>
+Start Call: :ssl_upgrade_server_session_cache_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.809 [info] Child :tls_server_sup of Supervisor :tls_sup started
+Pid: #PID<0.115.0>
+Start Call: :tls_server_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.810 [info] Child :tls_sup of Supervisor :ssl_connection_sup started
+Pid: #PID<0.113.0>
+Start Call: :tls_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.810 [info] Child :dtls_connection_sup of Supervisor :dtls_sup started
+Pid: #PID<0.121.0>
+Start Call: :dtls_connection_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.810 [info] Child :dtls_listener_sup of Supervisor :dtls_server_sup started
+Pid: #PID<0.123.0>
+Start Call: :dtls_listener_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.811 [info] Child :dtls_server_session_cache_sup of Supervisor :dtls_server_sup started
+Pid: #PID<0.124.0>
+Start Call: :dtls_server_session_cache_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.811 [info] Child :dtls_server_sup of Supervisor :dtls_sup started
+Pid: #PID<0.122.0>
+Start Call: :dtls_server_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.811 [info] Child :dtls_sup of Supervisor :ssl_connection_sup started
+Pid: #PID<0.120.0>
+Start Call: :dtls_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.811 [info] Child :ssl_connection_sup of Supervisor :ssl_sup started
+Pid: #PID<0.112.0>
+Start Call: :ssl_connection_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:37:42.811 [info] Application ssl started at :nonode@nohost
+
+21:37:42.811 [info] Application xp_mint started at :nonode@nohost
+
+21:37:42.811 [info] Application xp_nimble_options started at :nonode@nohost
+
+21:37:42.813 [info] Child XPNimblePool.TaskSupervisor of Supervisor #PID<0.130.0> (Supervisor.Default) started
+Pid: #PID<0.131.0>
+Start Call: Task.Supervisor.start_link([name: XPNimblePool.TaskSupervisor])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:42.813 [info] Application xp_nimble_pool started at :nonode@nohost
+
+21:37:42.814 [info] Child :telemetry_handler_table of Supervisor :telemetry_sup started
+Pid: #PID<0.135.0>
+Start Call: :telemetry_handler_table.start_link()
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.814 [info] Application xp_telemetry started at :nonode@nohost
+
+21:37:42.814 [info] Application xp_finch started at :nonode@nohost
+
+21:37:42.821 [info] Child XPReq.Finch.PIDPartition0 of Supervisor XPReq.Finch started
+Pid: #PID<0.141.0>
+Start Call: Registry.Partition.start_link(XPReq.Finch.PIDPartition0, {:duplicate, XPReq.Finch, 0, 1, XPReq.Finch.KeyPartition0, XPReq.Finch.PIDPartition0, [], false})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.821 [info] Child XPReq.Finch of Supervisor XPReq.Finch.Supervisor started
+Pid: #PID<0.140.0>
+Start Call: Registry.start_link([keys: :duplicate, name: XPReq.Finch, meta: [config: %{pools: %{}, registry_name: XPReq.Finch, supervisor_name: XPReq.Finch.PoolSupervisor, manager_name: XPReq.Finch.PoolManager, default_pool_config: %{count: 1, size: 50, mod: XPFinch.HTTP1.Pool, conn_opts: [protocols: [:http1], transport_opts: [keepalive: true, nodelay: true, timeout: 5000], ssl_key_log_file_device: nil], pool_max_idle_time: :infinity, conn_max_idle_time: :infinity, start_pool_metrics?: false}}]])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:42.821 [info] Child XPReq.Finch.PoolSupervisor of Supervisor XPReq.Finch.Supervisor started
+Pid: #PID<0.142.0>
+Start Call: DynamicSupervisor.start_link([name: XPReq.Finch.PoolSupervisor, strategy: :one_for_one])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:42.821 [info] Child XPFinch.PoolManager of Supervisor XPReq.Finch.Supervisor started
+Pid: #PID<0.143.0>
+Start Call: XPFinch.PoolManager.start_link(%{pools: %{}, registry_name: XPReq.Finch, supervisor_name: XPReq.Finch.PoolSupervisor, manager_name: XPReq.Finch.PoolManager, default_pool_config: %{count: 1, size: 50, mod: XPFinch.HTTP1.Pool, conn_opts: [protocols: [:http1], transport_opts: [keepalive: true, nodelay: true, timeout: 5000], ssl_key_log_file_device: nil], pool_max_idle_time: :infinity, conn_max_idle_time: :infinity, start_pool_metrics?: false}})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.821 [info] Child XPReq.Finch of Supervisor #PID<0.138.0> (Supervisor.Default) started
+Pid: #PID<0.139.0>
+Start Call: XPFinch.start_link([name: XPReq.Finch, pools: %{default: [protocols: [:http1]]}])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.821 [info] Child XPReq.FinchSupervisor of Supervisor #PID<0.138.0> (Supervisor.Default) started
+Pid: #PID<0.144.0>
+Start Call: DynamicSupervisor.start_link([strategy: :one_for_one, name: XPReq.FinchSupervisor])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:42.821 [info] Child XPReq.Test.Ownership of Supervisor #PID<0.138.0> (Supervisor.Default) started
+Pid: #PID<0.145.0>
+Start Call: XPReq.Test.Ownership.start_link([name: XPReq.Test.Ownership])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.821 [info] Application xp_req started at :nonode@nohost
+
+21:37:42.821 [info] Application burrito started at :nonode@nohost
+
+21:37:42.823 [info] Child XPBriefly.Entry of Supervisor XPBriefly.Supervisor started
+Pid: #PID<0.149.0>
+Start Call: XPBriefly.Entry.start_link([])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.823 [info] Application xp_briefly started at :nonode@nohost
+
+21:37:42.823 [info] Application xp_schematic started at :nonode@nohost
+
+21:37:42.823 [info] Application xp_typed_struct started at :nonode@nohost
+
+21:37:42.823 [info] Application xp_gen_lsp started at :nonode@nohost
+
+21:37:42.823 [info] Application xp_sourceror started at :nonode@nohost
+
+21:37:42.823 [info] Application xp_spitfire started at :nonode@nohost
+
+21:37:42.823 [info] Application xp_forge started at :nonode@nohost
+
+21:37:42.826 [info] Child :ttb_autostart of Supervisor :runtime_tools_sup started
+Pid: #PID<0.153.0>
+Start Call: :ttb_autostart.start_link()
+Restart: :temporary
+Shutdown: 3000
+Type: :worker
+
+21:37:42.826 [info] Application runtime_tools started at :nonode@nohost
+
+21:37:42.826 [info] Application et started at :nonode@nohost
+
+21:37:42.826 [info] Application observer started at :nonode@nohost
+
+21:37:42.826 [info] Application xp_path_glob started at :nonode@nohost
+
+21:37:42.829 instance_id=19CEA34EC2B [info] Expert v0.1.0-rc.6-7a4e333 starting on stdio
+
+21:37:42.832 instance_id=19CEA34EC2B [info] Starting NodePortMapper on nonode@nohost
+
+21:37:42.833 instance_id=19CEA34EC2B [info] Child XPForge.NodePortMapper of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.158.0>
+Start Call: XPForge.NodePortMapper.start_link([])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.833 instance_id=19CEA34EC2B [info] Child XPForge.Document.Store of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.159.0>
+Start Call: XPForge.Document.Store.start_link([derive: [analysis: &XPForge.Ast.analyze/1]])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.833 instance_id=19CEA34EC2B [info] Child XPExpert.ProjectSupervisor of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.160.0>
+Start Call: DynamicSupervisor.start_link([name: XPExpert.ProjectSupervisor, strategy: :one_for_one])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:42.833 instance_id=19CEA34EC2B [info] Child XPExpert.DynamicSupervisor of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.161.0>
+Start Call: DynamicSupervisor.start_link([name: XPExpert.DynamicSupervisor])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:42.834 instance_id=19CEA34EC2B [info] Child XPGenLSP.Assigns of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.162.0>
+Start Call: XPGenLSP.Assigns.start_link([name: XPExpert.Assigns])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.834 instance_id=19CEA34EC2B [info] Child :expert_task_queue of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.163.0>
+Start Call: Task.Supervisor.start_link([name: :expert_task_queue])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:37:42.834 instance_id=19CEA34EC2B [info] Child XPGenLSP.Buffer of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.164.0>
+Start Call: XPGenLSP.Buffer.start_link([name: XPExpert.Buffer])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.834 instance_id=19CEA34EC2B [info] Child XPExpert.ActiveProjects of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.165.0>
+Start Call: XPExpert.ActiveProjects.start_link()
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.834 instance_id=19CEA34EC2B [debug] [name: XPExpert, buffer: XPExpert.Buffer, task_supervisor: :expert_task_queue, dynamic_supervisor: XPExpert.DynamicSupervisor, assigns: XPExpert.Assigns]
+
+21:37:42.839 instance_id=19CEA34EC2B [info] Child XPExpert of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.166.0>
+Start Call: XPExpert.start_link([name: XPExpert, buffer: XPExpert.Buffer, task_supervisor: :expert_task_queue, dynamic_supervisor: XPExpert.DynamicSupervisor, assigns: XPExpert.Assigns])
+Restart: :permanent
+Shutdown: 500
+Type: :worker
+
+21:37:42.839 instance_id=19CEA34EC2B [info] Application xp_expert started at :nonode@nohost
+
+21:37:42.888 instance_id=19CEA34EC2B [debug] handled request client -> server initialize in 44ms
+
+21:37:42.890 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:42.890 instance_id=19CEA34EC2B [info] Server initialized, registering capabilities
+
+21:37:42.890 instance_id=19CEA34EC2B [debug] sent request server -> client client/registerCapability
+
+21:37:42.893 instance_id=19CEA34EC2B [debug] handled notification client -> server initialized in 4ms
+
+21:37:42.893 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:42.893 instance_id=19CEA34EC2B [info] Starting project
+
+21:37:42.896 instance_id=19CEA34EC2B [info] Child {XPExpert.EngineSupervisor, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.172.0>
+Start Call: XPExpert.EngineSupervisor.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 3424})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:42.897 instance_id=19CEA34EC2B [debug] sent request server -> client window/workDoneProgress/create
+
+21:37:42.897 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:42.897 instance_id=19CEA34EC2B [info] Opened file:///home/frank/git/pyro_maniac/test/support/navigation.ex
+
+21:37:42.897 instance_id=19CEA34EC2B [debug] handled notification client -> server textDocument/didOpen in 3ms
+
+21:37:42.898 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:42.901 instance_id=19CEA34EC2B [info] Child XPForge.EPMD of Supervisor :net_sup started
+Pid: #PID<0.175.0>
+Start Call: XPForge.EPMD.start_link()
+Restart: :permanent
+Shutdown: 2000
+Type: :worker
+
+21:37:42.901 instance_id=19CEA34EC2B [info] Child :auth of Supervisor :net_sup started
+Pid: #PID<0.176.0>
+Start Call: :auth.start_link()
+Restart: :permanent
+Shutdown: 2000
+Type: :worker
+
+21:37:42.906 instance_id=19CEA34EC2B [info] Child :net_kernel of Supervisor :net_sup started
+Pid: #PID<0.177.0>
+Start Call: :net_kernel.start_link(%{name: :"expert-manager-pyro_maniac-3424@127.0.0.1", supervisor: :net_sup_dynamic, net_tickintensity: 4, net_ticktime: 60, name_domain: :longnames, clean_halt: false})
+Restart: :permanent
+Shutdown: 2000
+Type: :worker
+
+21:37:42.906 instance_id=19CEA34EC2B [debug] Child :net_sup_dynamic of Supervisor :kernel_sup started
+Pid: #PID<0.174.0>
+Start Call: :erl_distribution.start_link(%{name: :"expert-manager-pyro_maniac-3424@127.0.0.1", supervisor: :net_sup_dynamic, net_tickintensity: 4, net_ticktime: 60, name_domain: :longnames, clean_halt: false})
+Restart: :permanent
+Shutdown: 1000
+Type: :supervisor
+
+21:37:42.907 instance_id=19CEA34EC2B [debug] sent request server -> client window/workDoneProgress/create
+
+21:37:42.908 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:43.155 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:43.155 instance_id=19CEA34EC2B [info] Using path: /home/frank/.local/share/.burrito/expert_erts-15.2.7_0.1.0-rc.6-7a4e333/erts-15.2.7/bin:/home/frank/.local/share/.burrito/expert_erts-15.2.7_0.1.0-rc.6-7a4e333/bin:/home/frank/.local/share/nvim/mason/bin:/home/frank/.local/share/bob/nvim-bin:/home/frank/.local/share/mise/installs/zig/0.15.2/bin:/home/frank/.local/share/mise/installs/erlang/28.3.1/bin:/home/frank/.local/share/mise/installs/elixir/1.19.5-otp-28/bin:/home/frank/.local/share/mise/installs/elixir/1.19.5-otp-28/.mix/escripts:/home/frank/.local/share/mise/installs/go/1.26.0/bin:/home/frank/.local/share/mise/installs/usage/2.16.2:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/opt/rocm/bin:/home/frank/.local/bin:/home/frank/.local/share/go/bin:/home/frank/.local/share/cargo/bin:/home/frank/.fly/bin:/home/frank/.local/bin:/home/frank/.local/share/go/bin:/home/frank/.local/share/cargo/bin:/home/frank/.fly/bin
+
+21:37:43.155 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:43.155 instance_id=19CEA34EC2B [info] Found elixir executable at /home/frank/.local/share/mise/installs/elixir/1.19.5-otp-28/bin/elixir
+
+21:37:43.155 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:43.155 instance_id=19CEA34EC2B [info] Found erl executable at /home/frank/.local/share/mise/installs/erlang/28.3.1/bin/erl
+
+21:37:43.156 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:43.156 instance_id=19CEA34EC2B [info] Preparing engine
+
+21:37:44.289 instance_id=19CEA34EC2B [debug] Engine build output: Namespacing 12 files:
+
+21:37:44.289 instance_id=19CEA34EC2B [debug] Engine build output: New: 4
+
+21:37:44.289 instance_id=19CEA34EC2B [debug] Engine build output: Changed: 8
+
+21:37:44.289 instance_id=19CEA34EC2B [debug] Engine build output: Deleted: 4
+
+21:37:44.289 instance_id=19CEA34EC2B [debug] Engine build output: 
+
+21:37:44.293 instance_id=19CEA34EC2B [debug] Engine build output: Rewriting 0 app files
+
+21:37:44.294 instance_id=19CEA34EC2B [debug] Engine build output: Rewriting .beam files
+
+21:37:44.294 instance_id=19CEA34EC2B [debug] Engine build output: Found 0 protocols
+
+21:37:44.294 instance_id=19CEA34EC2B [debug] Engine build output: Found 0 app beam files
+
+21:37:44.294 instance_id=19CEA34EC2B [debug] Engine build output: Finished namespacing .beam files
+
+21:37:44.295 instance_id=19CEA34EC2B [debug] Engine build output: Rewriting 0 scripts
+
+21:37:44.296 instance_id=19CEA34EC2B [debug] Engine build output: Rebuilding 0 boot files
+
+21:37:44.296 instance_id=19CEA34EC2B [debug] Engine build output: Rewriting 0 config scripts.
+
+21:37:44.301 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:44.301 instance_id=19CEA34EC2B [info] Engine available at: /home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns
+
+21:37:44.331 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:44.331 instance_id=19CEA34EC2B [info] ebin paths:
+["/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/patch/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_briefly/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_bunt/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_credo/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_deps_nix/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_elixir_sense/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_engine/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_file_system/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_forge/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_gen_lsp/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_hpax/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_jason/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_mint/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_nimble_options/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_nimble_parsec/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_path_glob/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_refactorex/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_schematic/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_sourceror/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_spitfire/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_telemetry/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_typed_struct/ebin"]
+
+21:37:44.356 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:44.357 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:44.711 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:44.713 instance_id=19CEA34EC2B [debug] Node port message: ok
+
+
+21:37:44.932 instance_id=19CEA34EC2B [debug] Node port message:     warning: Spark.Docs.search_data_for/1 is undefined (module Spark.Docs is not available or is yet to be defined)
+    │
+ 77 │            search_data: Spark.Docs.search_data_for(PyroManiac.Dsl)
+    │                                    ~
+    │
+    └─ mix.exs:77:36: PyroManiac.MixProject.extras/0
+
+
+
+21:37:44.936 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:44.933 [notice] Application mix exited: :stopped
+
+
+21:37:44.944 instance_id=19CEA34EC2B [debug] Node port message:     warning: redefining module PyroManiac.MixProject (current version defined in memory)
+    │
+  1 │ defmodule PyroManiac.MixProject do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ /home/frank/git/pyro_maniac/mix.exs:1: PyroManiac.MixProject (module)
+
+
+
+21:37:44.961 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:44.961 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:44.965 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.279 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.279 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.279 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.279 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.279 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.279 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.280 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.280 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.280 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.280 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.280 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.280 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.280 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.280 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.281 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.281 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.281 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.281 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.281 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.282 instance_id=19CEA34EC2B [debug] sent notification server -> client $/progress
+
+21:37:45.282 instance_id=19CEA34EC2B [info] Child {XPExpert.Project.Node, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.173.0>
+Start Call: XPExpert.Project.Node.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 3424})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:45.283 instance_id=19CEA34EC2B [info] Child {XPExpert.Project.Diagnostics, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.208.0>
+Start Call: XPExpert.Project.Diagnostics.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 3424})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:45.284 instance_id=19CEA34EC2B [info] Child {XPExpert.Project.Intelligence, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.209.0>
+Start Call: XPExpert.Project.Intelligence.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 3424})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:45.284 instance_id=19CEA34EC2B [info] Child XPExpert.Project.SearchListener of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.210.0>
+Start Call: XPExpert.Project.SearchListener.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 3424})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:37:45.285 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:45.284 instance_id=19CEA34EC2B [info] Started project node for pyro_maniac
+
+21:37:45.285 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:45.285 instance_id=19CEA34EC2B [info] Engine initialized for project pyro_maniac
+
+21:37:45.339 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:45.339 [info] Building PyroManiac
+
+
+21:37:45.340 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:45.339 [debug] sent request server -> client window/workDoneProgress/create
+
+
+21:37:45.340 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:45.340 [debug] sent notification server -> client $/progress
+
+
+21:37:45.347 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:45.347 [debug] sent notification server -> client $/progress
+
+
+21:37:45.350 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:45.350 [debug] sent notification server -> client $/progress
+
+
+21:37:45.352 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:45.352 [debug] sent notification server -> client $/progress
+
+
+21:37:45.979 instance_id=19CEA34EC2B [debug] Node port message: Resolving Hex dependencies...
+
+
+21:37:46.459 instance_id=19CEA34EC2B [debug] Node port message: Resolution completed in 0.476s
+
+
+21:37:46.542 instance_id=19CEA34EC2B [debug] Node port message: Unchanged:
+  ash 3.19.3
+
+
+21:37:46.542 instance_id=19CEA34EC2B [debug] Node port message:   ash_authentication 4.13.7
+  ash_authentication_phoenix 2.15.0
+  ash_phoenix 2.3.20
+  ash_postgres 2.8.0
+  ash_sql 0.5.0
+  assent 0.2.13
+  bandit 1.10.3
+
+
+21:37:46.542 instance_id=19CEA34EC2B [debug] Node port message:   bcrypt_elixir 3.3.2
+  beam_file 0.6.4
+  bunt 1.0.0
+
+
+21:37:46.542 instance_id=19CEA34EC2B [debug] Node port message:   castore 1.0.17
+  cc_precompiler 0.1.11
+
+
+21:37:46.542 instance_id=19CEA34EC2B [debug] Node port message:   circular_buffer 1.0.0
+  comeonin 5.5.1
+  credo 1.7.17
+
+
+21:37:46.542 instance_id=19CEA34EC2B [debug] Node port message:   crux 0.1.2
+  db_connection 2.9.0
+
+
+21:37:46.542 instance_id=19CEA34EC2B [debug] Node port message:   decimal 2.3.0
+  dialyxir 1.4.7
+
+
+21:37:46.542 instance_id=19CEA34EC2B [debug] Node port message:   doctor 0.22.0
+  earmark_parser 1.4.44
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   ecto 3.13.5
+  ecto_sql 3.13.5
+  elixir_make 0.9.0
+  erlex 0.2.8
+  esbuild 0.10.0
+  ets 0.9.0
+  ex_check 0.16.0
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   ex_doc 0.40.1
+  file_system 1.1.1
+  finch 0.21.0
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   fine 0.1.4
+  git_cli 0.3.0
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   git_ops 2.9.2
+  glob_ex 0.1.11
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   gproc 1.1.0
+  hologram 0.8.0
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   hpax 1.0.3
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   html_entities 0.5.2
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   igniter 0.7.4
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   interceptor 0.5.4
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   iterex 0.1.2
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   jason 1.4.4
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   joken 2.6.2
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   jose 1.11.12
+  lazy_html 0.1.10
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   libgraph 0.16.0
+  makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.3
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   mime 2.0.7
+  mint 1.7.1
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   mix_audit 2.1.5
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   mix_test_watch 1.4.0
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   nimble_options 1.1.1
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   nimble_parsec 1.4.2
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   nimble_pool 1.1.0
+  owl 0.13.0
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   phoenix 1.8.5
+  phoenix_html 4.3.0
+  phoenix_html_helpers 1.0.1
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   phoenix_live_reload 1.6.2
+  phoenix_live_view 1.1.27
+  phoenix_pubsub 2.2.0
+  phoenix_template 1.0.4
+  phoenix_view 2.0.4
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   plug 1.19.1
+  plug_crypto 2.1.1
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   postgrex 0.22.0
+  quokka 2.12.1
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   reactor 1.0.0
+  req 0.5.17
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   rewrite 1.3.0
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   slugify 1.3.1
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   sourceror 1.12.0
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   spark 2.4.1
+  spitfire 0.3.10
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   splode 0.3.0
+  stream_data 1.3.0
+  tailwind 0.4.1
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   telemetry 1.4.1
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   text_diff 0.1.0
+  thousand_island 1.4.3
+  tidewave 0.5.6
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   usage_rules 1.2.5
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   uuid 1.1.8
+  websock 0.5.3
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   websock_adapter 0.5.9
+  yamerl 0.10.0
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   yaml_elixir 2.12.1
+
+
+21:37:46.543 instance_id=19CEA34EC2B [debug] Node port message:   ymlr 5.1.4
+
+
+21:37:46.664 instance_id=19CEA34EC2B [debug] Node port message: All dependencies have been fetched
+
+
+21:37:46.664 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:46.664 [debug] sent notification server -> client $/progress
+
+
+21:37:46.671 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:46.671 [debug] sent notification server -> client $/progress
+
+
+21:37:46.674 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:46.674 [info] Loaded []
+
+
+21:37:46.674 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:46.674 [debug] sent notification server -> client $/progress
+
+
+21:37:46.853 instance_id=19CEA34EC2B [debug] Node port message: Compiling 19 files (.ex)
+
+
+21:37:46.936 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:46.935 [debug] sent notification server -> client $/progress
+
+
+21:37:46.986 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:46.985 [debug] sent notification server -> client $/progress
+
+
+21:37:46.987 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:46.987 [debug] sent notification server -> client $/progress
+
+
+21:37:46.997 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:46.996 [debug] sent notification server -> client $/progress
+
+
+21:37:47.017 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.016 [debug] sent notification server -> client $/progress
+
+
+21:37:47.022 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.021 [debug] sent notification server -> client $/progress
+
+
+21:37:47.044 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.043 [debug] sent notification server -> client $/progress
+
+
+21:37:47.053 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.053 [debug] sent notification server -> client $/progress
+
+
+21:37:47.057 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.057 [debug] sent notification server -> client $/progress
+
+
+21:37:47.079 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.079 [debug] sent notification server -> client $/progress
+
+
+21:37:47.103 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.102 [debug] sent notification server -> client $/progress
+
+
+21:37:47.177 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.175 [debug] sent notification server -> client $/progress
+
+
+21:37:47.181 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.181 [debug] sent notification server -> client $/progress
+
+
+21:37:47.184 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.183 [debug] sent notification server -> client $/progress
+
+
+21:37:47.209 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.208 [debug] sent notification server -> client $/progress
+
+
+21:37:47.416 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.416 [debug] sent notification server -> client $/progress
+
+
+21:37:47.497 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.496 [debug] sent notification server -> client $/progress
+
+
+21:37:47.595 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.595 [debug] sent notification server -> client $/progress
+
+
+21:37:47.632 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.632 [debug] sent notification server -> client $/progress
+
+
+21:37:47.711 instance_id=19CEA34EC2B [debug] Node port message:     warning: PyroManiac.LiveView.PresenceIdentity.display_name/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.LiveView.PresenceIdentity.display_name/1
+
+    │
+ 32 │         style={"--presence-hue: #{:erlang.phash2(PresenceIdentity.display_name(@current_user), 360)}"}
+    │         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/pyro_maniac/live_view/user_settings.ex:32: PyroManiac.LiveView.UserSettings."user_settings_menu (overridable 1)"/1
+
+
+
+21:37:47.712 instance_id=19CEA34EC2B [debug] Node port message:     warning: PyroManiac.LiveView.PresenceIdentity.display_name/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.LiveView.PresenceIdentity.display_name/1
+
+    │
+ 87 │           style={"--presence-hue: #{:erlang.phash2(PresenceIdentity.display_name(@current_user), 360)}"}
+    │           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/pyro_maniac/live_view/user_settings.ex:87: PyroManiac.LiveView.UserSettings."user_info (overridable 1)"/1
+
+
+
+21:37:47.712 instance_id=19CEA34EC2B [debug] Node port message:     warning: PyroManiac.LiveView.PresenceIdentity.initials/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.LiveView.PresenceIdentity.initials/1
+
+    │
+ 34 │         {PresenceIdentity.initials(@current_user)}
+    │         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/pyro_maniac/live_view/user_settings.ex:34: PyroManiac.LiveView.UserSettings."user_settings_menu (overridable 1)"/1
+
+
+
+21:37:47.713 instance_id=19CEA34EC2B [debug] Node port message:     warning: PyroManiac.LiveView.PresenceIdentity.initials/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.LiveView.PresenceIdentity.initials/1
+
+    │
+ 89 │           {PresenceIdentity.initials(@current_user)}
+    │           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/pyro_maniac/live_view/user_settings.ex:89: PyroManiac.LiveView.UserSettings."user_info (overridable 1)"/1
+
+
+
+21:37:47.713 instance_id=19CEA34EC2B [debug] Node port message:      warning: PyroManiac.Presenter.present/2 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.Presenter.present/2
+
+     │
+ 131 │       |> Presenter.present(scope)
+     │                    ~
+     │
+     └─ lib/pyro_maniac/view/column.ex:131:20: PyroManiac.View.Column.render_cell_data/1
+
+
+
+21:37:47.714 instance_id=19CEA34EC2B [debug] Node port message:      warning: PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.Presenter.present/1
+
+     │
+ 142 │       |> Presenter.present()
+     │                    ~
+     │
+     └─ lib/pyro_maniac/view/column.ex:142:20: PyroManiac.View.Column.render_cell_data/1
+
+
+
+21:37:47.714 instance_id=19CEA34EC2B [debug] Node port message:      warning: PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.Presenter.present/1
+
+     │
+ 117 │         value -> Presenter.present(value)
+     │                            ~
+     │
+     └─ lib/pyro_maniac/view/column.ex:117:28: PyroManiac.View.Column.render_cell_data/1
+
+
+
+21:37:47.715 instance_id=19CEA34EC2B [debug] Node port message:      warning: PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.Presenter.present/1
+
+     │
+ 546 │     Presenter.present(value)
+     │               ~
+     │
+     └─ lib/pyro_maniac/live_view/version_viewer.ex:546:15: PyroManiac.LiveView.VersionViewer.present/1
+
+
+
+21:37:47.716 instance_id=19CEA34EC2B [debug] Node port message:      warning: PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.Presenter.present/1
+
+     │
+ 481 │     display_value = if is_nil(value), do: "\u2014", else: Presenter.present(value)
+     │                                                                     ~
+     │
+     └─ lib/pyro_maniac/form/wizard_form.ex:481:69: PyroManiac.LiveView.Form.WizardForm.render_readonly_field/1
+
+
+
+21:37:47.716 instance_id=19CEA34EC2B [debug] Node port message:     warning: PyroManiac.Presenter.present/2 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.Presenter.present/2
+
+    │
+ 71 │     Enum.map_join(list, ", ", &PyroManiac.Presenter.present(&1, scope))
+    │                                                     ~
+    │
+    └─ lib/pyro_maniac/presenter.ex:71:53: PyroManiac.Presenter.List.present/2
+
+
+
+21:37:47.716 instance_id=19CEA34EC2B [debug] Node port message:     warning: PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.Presenter.present/1
+
+    │
+ 67 │     Enum.map_join(list, ", ", &PyroManiac.Presenter.present/1)
+    │                                                     ~
+    │
+    └─ lib/pyro_maniac/presenter.ex:67:53: PyroManiac.Presenter.List.present/1
+
+
+
+21:37:47.718 instance_id=19CEA34EC2B [debug] Node port message:      warning: PyroManiac.LiveView.Viewer.DataTable.render_data_table/1 is undefined (module PyroManiac.LiveView.Viewer.DataTable is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.LiveView.Viewer.DataTable.render_data_table/1
+
+     │
+ 636 │       :data_table -> DataTable.render_data_table(assigns)
+     │                                ~
+     │
+     └─ lib/pyro_maniac/live_view/viewer.ex:636:32: PyroManiac.LiveView.Viewer.render_viewer_content/1
+
+
+
+21:37:47.719 instance_id=19CEA34EC2B [debug] Node port message:      warning: PyroManiac.LiveView.Viewer.CardGrid.render_grid/1 is undefined (module PyroManiac.LiveView.Viewer.CardGrid is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.LiveView.Viewer.CardGrid.render_grid/1
+
+     │
+ 637 │       :grid -> CardGrid.render_grid(assigns)
+     │                         ~
+     │
+     └─ lib/pyro_maniac/live_view/viewer.ex:637:25: PyroManiac.LiveView.Viewer.render_viewer_content/1
+
+
+
+21:37:47.747 instance_id=19CEA34EC2B [debug] Node port message: Generated pyro_maniac app
+
+
+21:37:47.759 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.758 [info] Compile completed with status ok Produced 13 diagnostics [%Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", severity: :warning, message: "PyroManiac.LiveView.PresenceIdentity.display_name/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.LiveView.PresenceIdentity.display_name/1\n", position: 32, compiler_name: "Elixir", span: nil, details: nil, stacktrace: [{PyroManiac.LiveView.UserSettings, :"user_settings_menu (overridable 1)", 1, [file: ~c"lib/pyro_maniac/live_view/user_settings.ex", line: 32]}]}, %Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", severity: :warning, message: "PyroManiac.LiveView.PresenceIdentity.display_name/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.LiveView.PresenceIdentity.display_name/1\n", position: 87, compiler_name: "Elixir", span: nil, details: nil, stacktrace: [{PyroManiac.LiveView.UserSettings, :"user_info (overridable 1)", 1, [file: ~c"lib/pyro_maniac/live_view/user_settings.ex", line: 87]}]}, %Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", severity: :warning, message: "PyroManiac.LiveView.PresenceIdentity.initials/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.LiveView.PresenceIdentity.initials/1\n", position: 34, compiler_name: "Elixir", span: nil, details: nil, stacktrace: [{PyroManiac.LiveView.UserSettings, :"user_settings_menu (overridable 1)", 1, [file: ~c"lib/pyro_maniac/live_view/user_settings.ex", line: 34]}]}, %Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", severity: :warning, message: "PyroManiac.LiveView.PresenceIdentity.initials/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.LiveView.PresenceIdentity.initials/1\n", position: 89, compiler_name: "Elixir", span: nil, details: nil, stacktrace: [{PyroManiac.LiveView.UserSettings, :"user_info (overridable 1)", 1, [file: ~c"lib/pyro_maniac/live_view/user_settings.ex", line: 89]}]}, %Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/view/column.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/view/column.ex", severity: :warning, message: "PyroManiac.Presenter.present/2 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.Presenter.present/2\n", position: {131, 20}, compiler_name: "Elixir", span: nil, details: nil, stacktrace: [{PyroManiac.View.Column, :render_cell_data, 1, [file: ~c"lib/pyro_maniac/view/column.ex", closing: [line: 131, column: 33], line: 131, column: 20]}]}, %Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/view/column.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/view/column.ex", severity: :warning, message: "PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.Presenter.present/1\n", position: {142, 20}, compiler_name: "Elixir", ...}, ...]
+
+
+21:37:47.763 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.763 [debug] sent notification server -> client $/progress
+
+
+21:37:47.765 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:37:47.765 instance_id=19CEA34EC2B [info] Compiled pyro_maniac in 2.4 seconds
+
+21:37:47.766 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.766 [info] Plugins found 0 results in 0.006 ms
+
+
+21:37:47.770 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:47.772 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.772 [debug] sent request server -> client window/workDoneProgress/create
+
+
+21:37:47.773 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:47.772 [debug] sent notification server -> client $/progress
+
+
+21:37:47.774 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:47.775 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:47.777 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:47.777 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:47.778 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:48.461 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:48.461 [notice] disk_log: repairing ~c"/home/frank/git/pyro_maniac/.expert/indexes/ets/28.3.1/1.19.5/3/updates.wal" ...
+
+
+21:37:48.461 [debug] sent notification server -> client $/progress
+
+
+21:37:54.177 instance_id=19CEA34EC2B [debug] handled notification client -> server textDocument/didChange in 7ms
+
+21:37:54.381 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:54.381 [info] Plugins found 0 results in 0.005 ms
+
+
+21:37:54.383 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:54.383 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:54.384 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:54.386 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:54.387 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:54.387 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:54.387 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:55.535 instance_id=19CEA34EC2B [debug] handled notification client -> server textDocument/didChange in 738µs
+
+21:37:55.684 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:55.685 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:55.684 [info] Plugins found 0 results in 0.008 ms
+
+
+21:37:55.685 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:55.685 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:55.685 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:55.686 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:55.686 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:55.686 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:55.889 instance_id=19CEA34EC2B [debug] handled notification client -> server textDocument/didChange in 654µs
+
+21:37:56.040 instance_id=19CEA34EC2B [debug] Node port message: 
+21:37:56.040 [info] Plugins found 0 results in 0.008 ms
+
+
+21:37:56.040 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:56.040 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:56.041 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:56.041 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:56.041 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:56.042 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:37:56.042 instance_id=19CEA34EC2B [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:38:03.544 instance_id=19CEA34EC2B [debug] Node port message: 
+21:38:03.544 [warning] Timeout updating index for path: /home/frank/git/pyro_maniac/test/support/navigation.ex
+
+
+21:38:09.792 instance_id=19CEA34EC2B [debug] handled notification client -> server textDocument/didSave in 2ms
+
+21:38:09.793 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:38:09.793 instance_id=19CEA34EC2B [error] handling server specific request XPGenLSP.Requests.Shutdown
+
+21:38:09.793 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:38:09.793 instance_id=19CEA34EC2B [info] Shutting down
+
+21:38:09.793 instance_id=19CEA34EC2B [debug] handled request client -> server shutdown in 936µs
+
+21:38:09.803 instance_id=19CEA34EC2B [debug] sent notification server -> client window/logMessage
+
+21:38:09.803 instance_id=19CEA34EC2B [warning] Received an Exit notification. Halting the server in 150ms
+
+21:38:09.803 instance_id=19CEA34EC2B [debug] Child :timer_server of Supervisor :kernel_sup started
+Pid: #PID<0.242.0>
+Start Call: :timer.start_link()
+Restart: :permanent
+Shutdown: 1000
+Type: :worker
+
+21:38:09.803 instance_id=19CEA34EC2B [debug] handled notification client -> server exit in 1ms
+
+21:38:11.992 [info] Application logger started at :nonode@nohost
+
+21:38:11.992 [info] Application xp_mime started at :nonode@nohost
+
+21:38:11.992 [info] Application xp_hpax started at :nonode@nohost
+
+21:38:11.992 [info] Application crypto started at :nonode@nohost
+
+21:38:11.992 [info] Application asn1 started at :nonode@nohost
+
+21:38:11.992 [info] Application public_key started at :nonode@nohost
+
+21:38:11.993 [debug] Child :ssl_handler of Supervisor :logger_sup started
+Pid: #PID<0.105.0>
+Start Call: :logger_olp.start_link(:logger_std_h_ssl_handler, :logger_h_common, %{id: :ssl_handler, module: :logger_std_h, config: %{type: :standard_io, filesync_repeat_interval: :no_repeat}, level: :debug, filter_default: :stop, filters: [], formatter: {:ssl_logger, %{}}}, %{})
+Restart: :temporary
+Shutdown: 2000
+Type: :worker
+
+21:38:11.994 [info] Child :ssl_pem_cache of Supervisor :ssl_admin_sup started
+Pid: #PID<0.109.0>
+Start Call: :ssl_pem_cache.start_link([])
+Restart: :permanent
+Shutdown: 4000
+Type: :worker
+
+21:38:11.996 [info] Child :ssl_manager of Supervisor :ssl_admin_sup started
+Pid: #PID<0.110.0>
+Start Call: :ssl_manager.start_link([])
+Restart: :permanent
+Shutdown: 4000
+Type: :worker
+
+21:38:11.996 [info] Child :tls_client_ticket_store of Supervisor :ssl_admin_sup started
+Pid: #PID<0.111.0>
+Start Call: :tls_client_ticket_store.start_link(1000, 7200)
+Restart: :permanent
+Shutdown: 4000
+Type: :worker
+
+21:38:11.996 [info] Child :ssl_admin_sup of Supervisor :ssl_sup started
+Pid: #PID<0.108.0>
+Start Call: :ssl_admin_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.997 [info] Child :tls_connection_sup of Supervisor :tls_sup started
+Pid: #PID<0.114.0>
+Start Call: :tls_connection_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.997 [info] Child :ssl_listen_tracker_sup of Supervisor :tls_server_sup started
+Pid: #PID<0.116.0>
+Start Call: :ssl_listen_tracker_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.997 [info] Child :tls_server_session_ticket of Supervisor :tls_server_sup started
+Pid: #PID<0.117.0>
+Start Call: :tls_server_session_ticket_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.997 [info] Child :ssl_server_session_cache_sup of Supervisor :tls_server_sup started
+Pid: #PID<0.118.0>
+Start Call: :ssl_server_session_cache_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.998 [info] Child :ssl_upgrade_server_session_cache_sup of Supervisor :tls_server_sup started
+Pid: #PID<0.119.0>
+Start Call: :ssl_upgrade_server_session_cache_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.998 [info] Child :tls_server_sup of Supervisor :tls_sup started
+Pid: #PID<0.115.0>
+Start Call: :tls_server_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.998 [info] Child :tls_sup of Supervisor :ssl_connection_sup started
+Pid: #PID<0.113.0>
+Start Call: :tls_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.998 [info] Child :dtls_connection_sup of Supervisor :dtls_sup started
+Pid: #PID<0.121.0>
+Start Call: :dtls_connection_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.999 [info] Child :dtls_listener_sup of Supervisor :dtls_server_sup started
+Pid: #PID<0.123.0>
+Start Call: :dtls_listener_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.999 [info] Child :dtls_server_session_cache_sup of Supervisor :dtls_server_sup started
+Pid: #PID<0.124.0>
+Start Call: :dtls_server_session_cache_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.999 [info] Child :dtls_server_sup of Supervisor :dtls_sup started
+Pid: #PID<0.122.0>
+Start Call: :dtls_server_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.999 [info] Child :dtls_sup of Supervisor :ssl_connection_sup started
+Pid: #PID<0.120.0>
+Start Call: :dtls_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.999 [info] Child :ssl_connection_sup of Supervisor :ssl_sup started
+Pid: #PID<0.112.0>
+Start Call: :ssl_connection_sup.start_link()
+Restart: :permanent
+Shutdown: 4000
+Type: :supervisor
+
+21:38:11.999 [info] Application ssl started at :nonode@nohost
+
+21:38:11.999 [info] Application xp_mint started at :nonode@nohost
+
+21:38:11.999 [info] Application xp_nimble_options started at :nonode@nohost
+
+21:38:12.001 [info] Child XPNimblePool.TaskSupervisor of Supervisor #PID<0.130.0> (Supervisor.Default) started
+Pid: #PID<0.131.0>
+Start Call: Task.Supervisor.start_link([name: XPNimblePool.TaskSupervisor])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:38:12.001 [info] Application xp_nimble_pool started at :nonode@nohost
+
+21:38:12.002 [info] Child :telemetry_handler_table of Supervisor :telemetry_sup started
+Pid: #PID<0.135.0>
+Start Call: :telemetry_handler_table.start_link()
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.002 [info] Application xp_telemetry started at :nonode@nohost
+
+21:38:12.002 [info] Application xp_finch started at :nonode@nohost
+
+21:38:12.009 [info] Child XPReq.Finch.PIDPartition0 of Supervisor XPReq.Finch started
+Pid: #PID<0.141.0>
+Start Call: Registry.Partition.start_link(XPReq.Finch.PIDPartition0, {:duplicate, XPReq.Finch, 0, 1, XPReq.Finch.KeyPartition0, XPReq.Finch.PIDPartition0, [], false})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.009 [info] Child XPReq.Finch of Supervisor XPReq.Finch.Supervisor started
+Pid: #PID<0.140.0>
+Start Call: Registry.start_link([keys: :duplicate, name: XPReq.Finch, meta: [config: %{pools: %{}, registry_name: XPReq.Finch, supervisor_name: XPReq.Finch.PoolSupervisor, manager_name: XPReq.Finch.PoolManager, default_pool_config: %{count: 1, size: 50, mod: XPFinch.HTTP1.Pool, conn_opts: [protocols: [:http1], transport_opts: [keepalive: true, nodelay: true, timeout: 5000], ssl_key_log_file_device: nil], pool_max_idle_time: :infinity, conn_max_idle_time: :infinity, start_pool_metrics?: false}}]])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:38:12.009 [info] Child XPReq.Finch.PoolSupervisor of Supervisor XPReq.Finch.Supervisor started
+Pid: #PID<0.142.0>
+Start Call: DynamicSupervisor.start_link([name: XPReq.Finch.PoolSupervisor, strategy: :one_for_one])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:38:12.009 [info] Child XPFinch.PoolManager of Supervisor XPReq.Finch.Supervisor started
+Pid: #PID<0.143.0>
+Start Call: XPFinch.PoolManager.start_link(%{pools: %{}, registry_name: XPReq.Finch, supervisor_name: XPReq.Finch.PoolSupervisor, manager_name: XPReq.Finch.PoolManager, default_pool_config: %{count: 1, size: 50, mod: XPFinch.HTTP1.Pool, conn_opts: [protocols: [:http1], transport_opts: [keepalive: true, nodelay: true, timeout: 5000], ssl_key_log_file_device: nil], pool_max_idle_time: :infinity, conn_max_idle_time: :infinity, start_pool_metrics?: false}})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.009 [info] Child XPReq.Finch of Supervisor #PID<0.138.0> (Supervisor.Default) started
+Pid: #PID<0.139.0>
+Start Call: XPFinch.start_link([name: XPReq.Finch, pools: %{default: [protocols: [:http1]]}])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.009 [info] Child XPReq.FinchSupervisor of Supervisor #PID<0.138.0> (Supervisor.Default) started
+Pid: #PID<0.144.0>
+Start Call: DynamicSupervisor.start_link([strategy: :one_for_one, name: XPReq.FinchSupervisor])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:38:12.010 [info] Child XPReq.Test.Ownership of Supervisor #PID<0.138.0> (Supervisor.Default) started
+Pid: #PID<0.145.0>
+Start Call: XPReq.Test.Ownership.start_link([name: XPReq.Test.Ownership])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.010 [info] Application xp_req started at :nonode@nohost
+
+21:38:12.010 [info] Application burrito started at :nonode@nohost
+
+21:38:12.011 [info] Child XPBriefly.Entry of Supervisor XPBriefly.Supervisor started
+Pid: #PID<0.149.0>
+Start Call: XPBriefly.Entry.start_link([])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.011 [info] Application xp_briefly started at :nonode@nohost
+
+21:38:12.011 [info] Application xp_schematic started at :nonode@nohost
+
+21:38:12.011 [info] Application xp_typed_struct started at :nonode@nohost
+
+21:38:12.012 [info] Application xp_gen_lsp started at :nonode@nohost
+
+21:38:12.012 [info] Application xp_sourceror started at :nonode@nohost
+
+21:38:12.012 [info] Application xp_spitfire started at :nonode@nohost
+
+21:38:12.012 [info] Application xp_forge started at :nonode@nohost
+
+21:38:12.016 [info] Child :ttb_autostart of Supervisor :runtime_tools_sup started
+Pid: #PID<0.153.0>
+Start Call: :ttb_autostart.start_link()
+Restart: :temporary
+Shutdown: 3000
+Type: :worker
+
+21:38:12.017 [info] Application runtime_tools started at :nonode@nohost
+
+21:38:12.017 [info] Application et started at :nonode@nohost
+
+21:38:12.017 [info] Application observer started at :nonode@nohost
+
+21:38:12.017 [info] Application xp_path_glob started at :nonode@nohost
+
+21:38:12.019 instance_id=19CEA355E32 [info] Expert v0.1.0-rc.6-7a4e333 starting on stdio
+
+21:38:12.022 instance_id=19CEA355E32 [info] Starting NodePortMapper on nonode@nohost
+
+21:38:12.023 instance_id=19CEA355E32 [info] Child XPForge.NodePortMapper of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.158.0>
+Start Call: XPForge.NodePortMapper.start_link([])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.023 instance_id=19CEA355E32 [info] Child XPForge.Document.Store of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.159.0>
+Start Call: XPForge.Document.Store.start_link([derive: [analysis: &XPForge.Ast.analyze/1]])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.024 instance_id=19CEA355E32 [info] Child XPExpert.ProjectSupervisor of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.160.0>
+Start Call: DynamicSupervisor.start_link([name: XPExpert.ProjectSupervisor, strategy: :one_for_one])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:38:12.024 instance_id=19CEA355E32 [info] Child XPExpert.DynamicSupervisor of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.161.0>
+Start Call: DynamicSupervisor.start_link([name: XPExpert.DynamicSupervisor])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:38:12.025 instance_id=19CEA355E32 [info] Child XPGenLSP.Assigns of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.162.0>
+Start Call: XPGenLSP.Assigns.start_link([name: XPExpert.Assigns])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.025 instance_id=19CEA355E32 [info] Child :expert_task_queue of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.163.0>
+Start Call: Task.Supervisor.start_link([name: :expert_task_queue])
+Restart: :permanent
+Shutdown: :infinity
+Type: :supervisor
+
+21:38:12.025 instance_id=19CEA355E32 [info] Child XPGenLSP.Buffer of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.164.0>
+Start Call: XPGenLSP.Buffer.start_link([name: XPExpert.Buffer])
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.025 instance_id=19CEA355E32 [info] Child XPExpert.ActiveProjects of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.165.0>
+Start Call: XPExpert.ActiveProjects.start_link()
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.025 instance_id=19CEA355E32 [debug] [name: XPExpert, buffer: XPExpert.Buffer, task_supervisor: :expert_task_queue, dynamic_supervisor: XPExpert.DynamicSupervisor, assigns: XPExpert.Assigns]
+
+21:38:12.030 instance_id=19CEA355E32 [info] Child XPExpert of Supervisor XPExpert.Supervisor started
+Pid: #PID<0.166.0>
+Start Call: XPExpert.start_link([name: XPExpert, buffer: XPExpert.Buffer, task_supervisor: :expert_task_queue, dynamic_supervisor: XPExpert.DynamicSupervisor, assigns: XPExpert.Assigns])
+Restart: :permanent
+Shutdown: 500
+Type: :worker
+
+21:38:12.030 instance_id=19CEA355E32 [info] Application xp_expert started at :nonode@nohost
+
+21:38:12.077 instance_id=19CEA355E32 [debug] handled request client -> server initialize in 42ms
+
+21:38:12.079 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:12.079 instance_id=19CEA355E32 [info] Server initialized, registering capabilities
+
+21:38:12.080 instance_id=19CEA355E32 [debug] sent request server -> client client/registerCapability
+
+21:38:12.083 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:12.083 instance_id=19CEA355E32 [info] Starting project
+
+21:38:12.083 instance_id=19CEA355E32 [debug] handled notification client -> server initialized in 4ms
+
+21:38:12.086 instance_id=19CEA355E32 [info] Child {XPExpert.EngineSupervisor, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.171.0>
+Start Call: XPExpert.EngineSupervisor.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 25092})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:12.087 instance_id=19CEA355E32 [debug] sent request server -> client window/workDoneProgress/create
+
+21:38:12.089 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:12.089 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:12.089 instance_id=19CEA355E32 [info] Opened file:///home/frank/git/pyro_maniac/test/support/router.ex
+
+21:38:12.089 instance_id=19CEA355E32 [debug] handled notification client -> server textDocument/didOpen in 6ms
+
+21:38:12.093 instance_id=19CEA355E32 [info] Child XPForge.EPMD of Supervisor :net_sup started
+Pid: #PID<0.175.0>
+Start Call: XPForge.EPMD.start_link()
+Restart: :permanent
+Shutdown: 2000
+Type: :worker
+
+21:38:12.093 instance_id=19CEA355E32 [info] Child :auth of Supervisor :net_sup started
+Pid: #PID<0.176.0>
+Start Call: :auth.start_link()
+Restart: :permanent
+Shutdown: 2000
+Type: :worker
+
+21:38:12.098 instance_id=19CEA355E32 [info] Child :net_kernel of Supervisor :net_sup started
+Pid: #PID<0.177.0>
+Start Call: :net_kernel.start_link(%{name: :"expert-manager-pyro_maniac-25092@127.0.0.1", supervisor: :net_sup_dynamic, net_tickintensity: 4, net_ticktime: 60, name_domain: :longnames, clean_halt: false})
+Restart: :permanent
+Shutdown: 2000
+Type: :worker
+
+21:38:12.098 instance_id=19CEA355E32 [debug] Child :net_sup_dynamic of Supervisor :kernel_sup started
+Pid: #PID<0.174.0>
+Start Call: :erl_distribution.start_link(%{name: :"expert-manager-pyro_maniac-25092@127.0.0.1", supervisor: :net_sup_dynamic, net_tickintensity: 4, net_ticktime: 60, name_domain: :longnames, clean_halt: false})
+Restart: :permanent
+Shutdown: 1000
+Type: :supervisor
+
+21:38:12.099 instance_id=19CEA355E32 [debug] sent request server -> client window/workDoneProgress/create
+
+21:38:12.099 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:12.356 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:12.356 instance_id=19CEA355E32 [info] Using path: /home/frank/.local/share/.burrito/expert_erts-15.2.7_0.1.0-rc.6-7a4e333/erts-15.2.7/bin:/home/frank/.local/share/.burrito/expert_erts-15.2.7_0.1.0-rc.6-7a4e333/bin:/home/frank/.local/share/nvim/mason/bin:/home/frank/.local/share/bob/nvim-bin:/home/frank/.local/share/mise/installs/zig/0.15.2/bin:/home/frank/.local/share/mise/installs/erlang/28.3.1/bin:/home/frank/.local/share/mise/installs/elixir/1.19.5-otp-28/bin:/home/frank/.local/share/mise/installs/elixir/1.19.5-otp-28/.mix/escripts:/home/frank/.local/share/mise/installs/go/1.26.0/bin:/home/frank/.local/share/mise/installs/usage/2.16.2:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/opt/rocm/bin:/home/frank/.local/bin:/home/frank/.local/share/go/bin:/home/frank/.local/share/cargo/bin:/home/frank/.fly/bin:/home/frank/.local/bin:/home/frank/.local/share/go/bin:/home/frank/.local/share/cargo/bin:/home/frank/.fly/bin
+
+21:38:12.356 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:12.356 instance_id=19CEA355E32 [info] Found elixir executable at /home/frank/.local/share/mise/installs/elixir/1.19.5-otp-28/bin/elixir
+
+21:38:12.356 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:12.356 instance_id=19CEA355E32 [info] Found erl executable at /home/frank/.local/share/mise/installs/erlang/28.3.1/bin/erl
+
+21:38:12.357 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:12.357 instance_id=19CEA355E32 [info] Preparing engine
+
+21:38:13.467 instance_id=19CEA355E32 [debug] Engine build output: Namespacing 12 files:
+
+21:38:13.467 instance_id=19CEA355E32 [debug] Engine build output: New: 4
+
+21:38:13.467 instance_id=19CEA355E32 [debug] Engine build output: Changed: 8
+
+21:38:13.467 instance_id=19CEA355E32 [debug] Engine build output: Deleted: 4
+
+21:38:13.467 instance_id=19CEA355E32 [debug] Engine build output: 
+
+21:38:13.470 instance_id=19CEA355E32 [debug] Engine build output: Rewriting 0 app files
+
+21:38:13.471 instance_id=19CEA355E32 [debug] Engine build output: Rewriting .beam files
+
+21:38:13.471 instance_id=19CEA355E32 [debug] Engine build output: Found 0 protocols
+
+21:38:13.471 instance_id=19CEA355E32 [debug] Engine build output: Found 0 app beam files
+
+21:38:13.471 instance_id=19CEA355E32 [debug] Engine build output: Finished namespacing .beam files
+
+21:38:13.471 instance_id=19CEA355E32 [debug] Engine build output: Rewriting 0 scripts
+
+21:38:13.472 instance_id=19CEA355E32 [debug] Engine build output: Rebuilding 0 boot files
+
+21:38:13.473 instance_id=19CEA355E32 [debug] Engine build output: Rewriting 0 config scripts.
+
+21:38:13.477 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:13.477 instance_id=19CEA355E32 [info] Engine available at: /home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns
+
+21:38:13.503 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:13.503 instance_id=19CEA355E32 [info] ebin paths:
+["/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/patch/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_briefly/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_bunt/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_credo/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_deps_nix/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_elixir_sense/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_engine/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_file_system/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_forge/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_gen_lsp/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_hpax/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_jason/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_mint/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_nimble_options/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_nimble_parsec/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_path_glob/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_refactorex/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_schematic/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_sourceror/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_spitfire/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_telemetry/ebin",
+ "/home/frank/.cache/expert/0.1.0-rc.6-7a4e333/ex-1.19.5-erl-16.2/4s4lZyJa7N0qbptclDF2hg/_build/dev_ns/lib/xp_typed_struct/ebin"]
+
+21:38:13.531 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:13.532 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:13.877 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:13.880 instance_id=19CEA355E32 [debug] Node port message: ok
+
+
+21:38:14.110 instance_id=19CEA355E32 [debug] Node port message:     warning: Spark.Docs.search_data_for/1 is undefined (module Spark.Docs is not available or is yet to be defined)
+    │
+ 77 │            search_data: Spark.Docs.search_data_for(PyroManiac.Dsl)
+    │                                    ~
+    │
+    └─ mix.exs:77:36: PyroManiac.MixProject.extras/0
+
+
+
+21:38:14.116 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:14.112 [notice] Application mix exited: :stopped
+
+
+21:38:14.126 instance_id=19CEA355E32 [debug] Node port message:     warning: redefining module PyroManiac.MixProject (current version defined in memory)
+    │
+  1 │ defmodule PyroManiac.MixProject do
+    │ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ /home/frank/git/pyro_maniac/mix.exs:1: PyroManiac.MixProject (module)
+
+
+
+21:38:14.142 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.143 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.147 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.441 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.441 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.441 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.441 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.441 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.441 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.441 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.442 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.442 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.442 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.442 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.442 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.443 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.443 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.443 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.443 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.443 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.443 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.444 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.444 instance_id=19CEA355E32 [debug] sent notification server -> client $/progress
+
+21:38:14.444 instance_id=19CEA355E32 [info] Child {XPExpert.Project.Node, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.172.0>
+Start Call: XPExpert.Project.Node.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 25092})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:14.446 instance_id=19CEA355E32 [info] Child {XPExpert.Project.Diagnostics, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.208.0>
+Start Call: XPExpert.Project.Diagnostics.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 25092})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:14.448 instance_id=19CEA355E32 [info] Child {XPExpert.Project.Intelligence, "pyro_maniac::118628440"} of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.209.0>
+Start Call: XPExpert.Project.Intelligence.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 25092})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:14.449 instance_id=19CEA355E32 [info] Child XPExpert.Project.SearchListener of Supervisor :"pyro_maniac::118628440::supervisor" started
+Pid: #PID<0.210.0>
+Start Call: XPExpert.Project.SearchListener.start_link(%XPForge.Project{root_uri: "file:///home/frank/git/pyro_maniac", mix_exs_uri: "file:///home/frank/git/pyro_maniac/mix.exs", mix_project?: true, mix_env: nil, mix_target: nil, env_variables: %{}, project_module: nil, entropy: 25092})
+Restart: :permanent
+Shutdown: 5000
+Type: :worker
+
+21:38:14.449 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:14.449 instance_id=19CEA355E32 [info] Started project node for pyro_maniac
+
+21:38:14.449 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:14.449 instance_id=19CEA355E32 [info] Engine initialized for project pyro_maniac
+
+21:38:14.501 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:14.501 [info] Building PyroManiac
+
+
+21:38:14.501 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:14.501 [debug] sent request server -> client window/workDoneProgress/create
+
+
+21:38:14.501 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:14.501 [debug] sent notification server -> client $/progress
+
+
+21:38:14.510 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:14.510 [debug] sent notification server -> client $/progress
+
+
+21:38:14.513 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:14.513 [debug] sent notification server -> client $/progress
+
+
+21:38:14.516 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:14.515 [debug] sent notification server -> client $/progress
+
+
+21:38:15.024 instance_id=19CEA355E32 [debug] Node port message: Resolving Hex dependencies...
+
+
+21:38:15.502 instance_id=19CEA355E32 [debug] Node port message: Resolution completed in 0.476s
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message: Unchanged:
+  ash 3.19.3
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   ash_authentication 4.13.7
+  ash_authentication_phoenix 2.15.0
+  ash_phoenix 2.3.20
+  ash_postgres 2.8.0
+  ash_sql 0.5.0
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   assent 0.2.13
+  bandit 1.10.3
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   bcrypt_elixir 3.3.2
+  beam_file 0.6.4
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   bunt 1.0.0
+  castore 1.0.17
+  cc_precompiler 0.1.11
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   circular_buffer 1.0.0
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   comeonin 5.5.1
+  credo 1.7.17
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   crux 0.1.2
+  db_connection 2.9.0
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   decimal 2.3.0
+  dialyxir 1.4.7
+  doctor 0.22.0
+  earmark_parser 1.4.44
+  ecto 3.13.5
+  ecto_sql 3.13.5
+  elixir_make 0.9.0
+  erlex 0.2.8
+  esbuild 0.10.0
+  ets 0.9.0
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   ex_check 0.16.0
+  ex_doc 0.40.1
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   file_system 1.1.1
+  finch 0.21.0
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   fine 0.1.4
+  git_cli 0.3.0
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   git_ops 2.9.2
+  glob_ex 0.1.11
+  gproc 1.1.0
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   hologram 0.8.0
+  hpax 1.0.3
+  html_entities 0.5.2
+  igniter 0.7.4
+  interceptor 0.5.4
+  iterex 0.1.2
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   jason 1.4.4
+  joken 2.6.2
+  jose 1.11.12
+  lazy_html 0.1.10
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   libgraph 0.16.0
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   makeup 1.2.1
+  makeup_elixir 1.0.1
+  makeup_erlang 1.0.3
+  mime 2.0.7
+
+
+21:38:15.588 instance_id=19CEA355E32 [debug] Node port message:   mint 1.7.1
+  mix_audit 2.1.5
+  mix_test_watch 1.4.0
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   nimble_options 1.1.1
+  nimble_parsec 1.4.2
+  nimble_pool 1.1.0
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   owl 0.13.0
+  phoenix 1.8.5
+  phoenix_html 4.3.0
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   phoenix_html_helpers 1.0.1
+  phoenix_live_reload 1.6.2
+  phoenix_live_view 1.1.27
+  phoenix_pubsub 2.2.0
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   phoenix_template 1.0.4
+  phoenix_view 2.0.4
+  plug 1.19.1
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   plug_crypto 2.1.1
+  postgrex 0.22.0
+  quokka 2.12.1
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   reactor 1.0.0
+  req 0.5.17
+  rewrite 1.3.0
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   slugify 1.3.1
+  sourceror 1.12.0
+  spark 2.4.1
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   spitfire 0.3.10
+  splode 0.3.0
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   stream_data 1.3.0
+  tailwind 0.4.1
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   telemetry 1.4.1
+  text_diff 0.1.0
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   thousand_island 1.4.3
+  tidewave 0.5.6
+  usage_rules 1.2.5
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   uuid 1.1.8
+  websock 0.5.3
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   websock_adapter 0.5.9
+  yamerl 0.10.0
+
+
+21:38:15.589 instance_id=19CEA355E32 [debug] Node port message:   yaml_elixir 2.12.1
+  ymlr 5.1.4
+
+
+21:38:15.710 instance_id=19CEA355E32 [debug] Node port message: All dependencies have been fetched
+
+
+21:38:15.710 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:15.710 [debug] sent notification server -> client $/progress
+
+
+21:38:15.718 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:15.717 [debug] sent notification server -> client $/progress
+
+
+21:38:15.720 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:15.720 [info] Loaded []
+
+
+21:38:15.720 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:15.720 [debug] sent notification server -> client $/progress
+
+
+21:38:15.882 instance_id=19CEA355E32 [debug] Node port message: Compiling 3 files (.ex)
+
+
+21:38:16.012 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:16.011 [debug] sent notification server -> client $/progress
+
+
+21:38:16.114 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:16.113 [debug] sent notification server -> client $/progress
+
+
+21:38:16.152 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:16.151 [debug] sent notification server -> client $/progress
+
+
+21:38:16.184 instance_id=19CEA355E32 [debug] Node port message:     warning: PyroManiac.LiveView.PresenceIdentity.display_name/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.LiveView.PresenceIdentity.display_name/1
+
+    │
+ 32 │         style={"--presence-hue: #{:erlang.phash2(PresenceIdentity.display_name(@current_user), 360)}"}
+    │         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/pyro_maniac/live_view/user_settings.ex:32: PyroManiac.LiveView.UserSettings."user_settings_menu (overridable 1)"/1
+
+
+
+21:38:16.185 instance_id=19CEA355E32 [debug] Node port message:     warning: PyroManiac.LiveView.PresenceIdentity.display_name/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.LiveView.PresenceIdentity.display_name/1
+
+    │
+ 87 │           style={"--presence-hue: #{:erlang.phash2(PresenceIdentity.display_name(@current_user), 360)}"}
+    │           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/pyro_maniac/live_view/user_settings.ex:87: PyroManiac.LiveView.UserSettings."user_info (overridable 1)"/1
+
+
+
+21:38:16.185 instance_id=19CEA355E32 [debug] Node port message:     warning: PyroManiac.LiveView.PresenceIdentity.initials/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.LiveView.PresenceIdentity.initials/1
+
+    │
+ 34 │         {PresenceIdentity.initials(@current_user)}
+    │         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/pyro_maniac/live_view/user_settings.ex:34: PyroManiac.LiveView.UserSettings."user_settings_menu (overridable 1)"/1
+
+
+
+21:38:16.186 instance_id=19CEA355E32 [debug] Node port message:     warning: PyroManiac.LiveView.PresenceIdentity.initials/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.LiveView.PresenceIdentity.initials/1
+
+    │
+ 89 │           {PresenceIdentity.initials(@current_user)}
+    │           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/pyro_maniac/live_view/user_settings.ex:89: PyroManiac.LiveView.UserSettings."user_info (overridable 1)"/1
+
+
+
+21:38:16.186 instance_id=19CEA355E32 [debug] Node port message:      warning: PyroManiac.Presenter.present/2 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.Presenter.present/2
+
+     │
+ 131 │       |> Presenter.present(scope)
+     │                    ~
+     │
+     └─ lib/pyro_maniac/view/column.ex:131:20: PyroManiac.View.Column.render_cell_data/1
+
+
+
+21:38:16.186 instance_id=19CEA355E32 [debug] Node port message:      warning: PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.Presenter.present/1
+
+     │
+ 142 │       |> Presenter.present()
+     │                    ~
+     │
+     └─ lib/pyro_maniac/view/column.ex:142:20: PyroManiac.View.Column.render_cell_data/1
+
+
+
+21:38:16.187 instance_id=19CEA355E32 [debug] Node port message:      warning: PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.Presenter.present/1
+
+     │
+ 117 │         value -> Presenter.present(value)
+     │                            ~
+     │
+     └─ lib/pyro_maniac/view/column.ex:117:28: PyroManiac.View.Column.render_cell_data/1
+
+
+
+21:38:16.188 instance_id=19CEA355E32 [debug] Node port message:      warning: PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.Presenter.present/1
+
+     │
+ 546 │     Presenter.present(value)
+     │               ~
+     │
+     └─ lib/pyro_maniac/live_view/version_viewer.ex:546:15: PyroManiac.LiveView.VersionViewer.present/1
+
+
+
+21:38:16.188 instance_id=19CEA355E32 [debug] Node port message:      warning: PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.Presenter.present/1
+
+     │
+ 481 │     display_value = if is_nil(value), do: "\u2014", else: Presenter.present(value)
+     │                                                                     ~
+     │
+     └─ lib/pyro_maniac/form/wizard_form.ex:481:69: PyroManiac.LiveView.Form.WizardForm.render_readonly_field/1
+
+
+
+21:38:16.189 instance_id=19CEA355E32 [debug] Node port message:     warning: PyroManiac.Presenter.present/2 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.Presenter.present/2
+
+    │
+ 71 │     Enum.map_join(list, ", ", &PyroManiac.Presenter.present(&1, scope))
+    │                                                     ~
+    │
+    └─ lib/pyro_maniac/presenter.ex:71:53: PyroManiac.Presenter.List.present/2
+
+
+
+21:38:16.189 instance_id=19CEA355E32 [debug] Node port message:     warning: PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:
+
+          * PyroManiac.Presenter.present/1
+
+    │
+ 67 │     Enum.map_join(list, ", ", &PyroManiac.Presenter.present/1)
+    │                                                     ~
+    │
+    └─ lib/pyro_maniac/presenter.ex:67:53: PyroManiac.Presenter.List.present/1
+
+
+
+21:38:16.190 instance_id=19CEA355E32 [debug] Node port message:      warning: PyroManiac.LiveView.Viewer.DataTable.render_data_table/1 is undefined (module PyroManiac.LiveView.Viewer.DataTable is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.LiveView.Viewer.DataTable.render_data_table/1
+
+     │
+ 636 │       :data_table -> DataTable.render_data_table(assigns)
+     │                                ~
+     │
+     └─ lib/pyro_maniac/live_view/viewer.ex:636:32: PyroManiac.LiveView.Viewer.render_viewer_content/1
+
+
+
+21:38:16.191 instance_id=19CEA355E32 [debug] Node port message:      warning: PyroManiac.LiveView.Viewer.CardGrid.render_grid/1 is undefined (module PyroManiac.LiveView.Viewer.CardGrid is not available or is yet to be defined). Did you mean:
+
+           * PyroManiac.LiveView.Viewer.CardGrid.render_grid/1
+
+     │
+ 637 │       :grid -> CardGrid.render_grid(assigns)
+     │                         ~
+     │
+     └─ lib/pyro_maniac/live_view/viewer.ex:637:25: PyroManiac.LiveView.Viewer.render_viewer_content/1
+
+
+
+21:38:16.221 instance_id=19CEA355E32 [debug] Node port message: Generated pyro_maniac app
+
+
+21:38:16.230 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:16.230 [info] Compile completed with status ok Produced 13 diagnostics [%Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", severity: :warning, message: "PyroManiac.LiveView.PresenceIdentity.display_name/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.LiveView.PresenceIdentity.display_name/1\n", position: 32, compiler_name: "Elixir", span: nil, details: nil, stacktrace: [{PyroManiac.LiveView.UserSettings, :"user_settings_menu (overridable 1)", 1, [file: ~c"lib/pyro_maniac/live_view/user_settings.ex", line: 32]}]}, %Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", severity: :warning, message: "PyroManiac.LiveView.PresenceIdentity.display_name/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.LiveView.PresenceIdentity.display_name/1\n", position: 87, compiler_name: "Elixir", span: nil, details: nil, stacktrace: [{PyroManiac.LiveView.UserSettings, :"user_info (overridable 1)", 1, [file: ~c"lib/pyro_maniac/live_view/user_settings.ex", line: 87]}]}, %Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", severity: :warning, message: "PyroManiac.LiveView.PresenceIdentity.initials/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.LiveView.PresenceIdentity.initials/1\n", position: 34, compiler_name: "Elixir", span: nil, details: nil, stacktrace: [{PyroManiac.LiveView.UserSettings, :"user_settings_menu (overridable 1)", 1, [file: ~c"lib/pyro_maniac/live_view/user_settings.ex", line: 34]}]}, %Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/live_view/user_settings.ex", severity: :warning, message: "PyroManiac.LiveView.PresenceIdentity.initials/1 is undefined (module PyroManiac.LiveView.PresenceIdentity is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.LiveView.PresenceIdentity.initials/1\n", position: 89, compiler_name: "Elixir", span: nil, details: nil, stacktrace: [{PyroManiac.LiveView.UserSettings, :"user_info (overridable 1)", 1, [file: ~c"lib/pyro_maniac/live_view/user_settings.ex", line: 89]}]}, %Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/view/column.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/view/column.ex", severity: :warning, message: "PyroManiac.Presenter.present/2 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.Presenter.present/2\n", position: {131, 20}, compiler_name: "Elixir", span: nil, details: nil, stacktrace: [{PyroManiac.View.Column, :render_cell_data, 1, [file: ~c"lib/pyro_maniac/view/column.ex", closing: [line: 131, column: 33], line: 131, column: 20]}]}, %Mix.Task.Compiler.Diagnostic{file: "/home/frank/git/pyro_maniac/lib/pyro_maniac/view/column.ex", source: "/home/frank/git/pyro_maniac/lib/pyro_maniac/view/column.ex", severity: :warning, message: "PyroManiac.Presenter.present/1 is undefined (module PyroManiac.Presenter is not available or is yet to be defined). Did you mean:\n\n      * PyroManiac.Presenter.present/1\n", position: {142, 20}, compiler_name: "Elixir", ...}, ...]
+
+
+21:38:16.234 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:16.234 [debug] sent notification server -> client $/progress
+
+
+21:38:16.236 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:16.236 instance_id=19CEA355E32 [info] Compiled pyro_maniac in 1.7 seconds
+
+21:38:16.237 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:16.237 [info] Plugins found 0 results in 0.006 ms
+
+
+21:38:16.241 instance_id=19CEA355E32 [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:38:16.243 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:16.243 [debug] sent request server -> client window/workDoneProgress/create
+
+
+21:38:16.243 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:16.243 [debug] sent notification server -> client $/progress
+
+
+21:38:16.244 instance_id=19CEA355E32 [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:38:16.245 instance_id=19CEA355E32 [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:38:16.247 instance_id=19CEA355E32 [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:38:16.248 instance_id=19CEA355E32 [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:38:16.248 instance_id=19CEA355E32 [debug] sent notification server -> client textDocument/publishDiagnostics
+
+21:38:16.935 instance_id=19CEA355E32 [debug] Node port message: 
+21:38:16.934 [notice] disk_log: repairing ~c"/home/frank/git/pyro_maniac/.expert/indexes/ets/28.3.1/1.19.5/3/updates.wal" ...
+
+
+21:38:16.934 [debug] sent notification server -> client $/progress
+
+
+21:38:28.464 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:28.464 instance_id=19CEA355E32 [error] handling server specific request XPGenLSP.Requests.Shutdown
+
+21:38:28.464 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:28.464 instance_id=19CEA355E32 [info] Shutting down
+
+21:38:28.464 instance_id=19CEA355E32 [debug] handled request client -> server shutdown in 1ms
+
+21:38:28.465 instance_id=19CEA355E32 [debug] sent notification server -> client window/logMessage
+
+21:38:28.465 instance_id=19CEA355E32 [warning] Received an Exit notification. Halting the server in 150ms
+
+21:38:28.465 instance_id=19CEA355E32 [debug] Child :timer_server of Supervisor :kernel_sup started
+Pid: #PID<0.226.0>
+Start Call: :timer.start_link()
+Restart: :permanent
+Shutdown: 1000
+Type: :worker
+
+21:38:28.465 instance_id=19CEA355E32 [debug] handled notification client -> server exit in 1ms

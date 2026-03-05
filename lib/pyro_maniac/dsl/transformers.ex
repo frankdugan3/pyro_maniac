@@ -1,17 +1,13 @@
 defmodule PyroManiac.Dsl.Transformers do
   @moduledoc false
-  alias Ash.Resource.Info, as: ResourceInfo
-  alias Ash.Resource.Relationships.{BelongsTo, HasMany, HasOne, ManyToMany}
-  alias Ash.Resource.{Aggregate, Attribute, Calculation}
-  alias Spark.Dsl.Transformer
 
   @doc """
   Get the Ash resource actions for an PyroManiac DSL.
   """
   def get_resource_actions(dsl) do
     dsl
-    |> Transformer.get_persisted(:resource)
-    |> ResourceInfo.actions()
+    |> Spark.Dsl.Transformer.get_persisted(:resource)
+    |> Ash.Resource.Info.actions()
   end
 
   @doc """
@@ -19,15 +15,15 @@ defmodule PyroManiac.Dsl.Transformers do
   """
   def resource_field_type(resource, field_name) do
     resource
-    |> ResourceInfo.field(field_name)
+    |> Ash.Resource.Info.field(field_name)
     |> case do
-      %Attribute{} -> :attribute
-      %Aggregate{} -> :aggregate
-      %Calculation{} -> :calculation
-      %HasOne{} -> :has_one
-      %BelongsTo{} -> :belongs_to
-      %HasMany{} -> :has_many
-      %ManyToMany{} -> :many_to_many
+      %Ash.Resource.Attribute{} -> :attribute
+      %Ash.Resource.Aggregate{} -> :aggregate
+      %Ash.Resource.Calculation{} -> :calculation
+      %Ash.Resource.Relationships.HasOne{} -> :has_one
+      %Ash.Resource.Relationships.BelongsTo{} -> :belongs_to
+      %Ash.Resource.Relationships.HasMany{} -> :has_many
+      %Ash.Resource.Relationships.ManyToMany{} -> :many_to_many
     end
   end
 
@@ -38,22 +34,21 @@ defmodule PyroManiac.Dsl.Transformers do
 
   def inherit_pyro_config(dsl, path, entity_name, key, default) when is_list(path) do
     dsl
-    |> Transformer.get_entities(path)
+    |> Spark.Dsl.Transformer.get_entities(path)
     |> Enum.find(&(&1.name == entity_name))
     |> get_nested(List.wrap(key), default)
   end
 
-  def inherit_pyro_config(dsl, kind, entity_name, key, default) when kind in [:form] do
-    inherit_pyro_config(dsl, [:form], entity_name, key, default)
+  def inherit_pyro_config(dsl, kind, entity_name, key, default) when kind in [:forms] do
+    inherit_pyro_config(dsl, [:forms], entity_name, key, default)
   end
 
-  def inherit_pyro_config(dsl, kind, entity_name, key, default) when kind in [:data_table] do
-    inherit_pyro_config(dsl, [:data_table], entity_name, key, default)
+  def inherit_pyro_config(dsl, kind, entity_name, key, default) when kind in [:data_tables] do
+    inherit_pyro_config(dsl, [:data_tables], entity_name, key, default)
   end
 
-  def inherit_pyro_config(dsl, kind, entity_name, key, default)
-      when kind in [:card, :card_grid] do
-    inherit_pyro_config(dsl, [:card_grid], entity_name, key, default)
+  def inherit_pyro_config(dsl, kind, entity_name, key, default) when kind in [:cards] do
+    inherit_pyro_config(dsl, [:cards], entity_name, key, default)
   end
 
   @doc """
@@ -113,6 +108,11 @@ defmodule PyroManiac.Dsl.Transformers do
       use Spark.Dsl.Transformer
 
       import unquote(__MODULE__)
+
+      alias Ash.Resource
+      alias Spark.Dsl.Entity
+      alias Spark.Dsl.Transformer
+      alias Spark.Error.DslError
     end
   end
 end

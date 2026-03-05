@@ -1,7 +1,6 @@
 defmodule PyroManiac.Dsl.Type do
-  @moduledoc """
-  Custom Spark types for PyroManiac.
-  """
+  @moduledoc false
+
   @css_class {:or, [nil, :string, {:fun, [:map], :string}]}
   @pagination {:one_of, [:keyset, :offset, :none]}
   @render_fn {:fun, [:map], :any}
@@ -38,9 +37,36 @@ defmodule PyroManiac.Dsl.Type do
   def inheritable(type), do: {:or, [type, {:one_of, [:inherit]}]}
 
   @doc """
+  Inline edit configuration for a column.
+
+  - `nil` — not editable
+  - `:text`, `:number`, etc. — input type using primary update action
+  - `{:action_name, :input_type}` — specific action + input type
+  - render function — custom render function
+  """
+  def edit_with do
+    {:or, [nil, :atom, {:tuple, [:atom, :atom]}, @render_fn]}
+  end
+
+  @doc """
   Ash pagination strategies.
   """
   def pagination, do: @pagination
+
+  @doc """
+  Real-time event handling strategy for PubSub notifications.
+
+  - `:none` — ignore this event type
+  - `:prepend` — insert new record at the beginning of the list (create only)
+  - `:append` — insert new record at the end of the list (create only)
+  - `:replace` — find and replace the record in the list (update only)
+  - `:remove` — remove the record from the list (destroy only)
+  - `:reload` — reload the entire data set
+  - `:notify` — show a flash notification without modifying data
+  """
+  def on_create, do: {:or, [nil, {:one_of, [:none, :prepend, :append, :reload, :notify]}]}
+  def on_update, do: {:or, [nil, {:one_of, [:none, :replace, :reload, :notify]}]}
+  def on_destroy, do: {:or, [nil, {:one_of, [:none, :remove, :reload, :notify]}]}
 
   @doc """
   A render function to render the item. It will be passed assigns.

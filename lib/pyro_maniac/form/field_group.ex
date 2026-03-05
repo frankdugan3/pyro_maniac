@@ -9,7 +9,6 @@ defmodule PyroManiac.Form.FieldGroup do
     describe: "Configure the appearance of form field groups in the `PyroManiac.Dsl` extension.",
     recursive_as: :fields,
     entities: [fields: [PyroManiac.Form.Field]],
-    # quokka:sort
     schema: [
       class: [
         doc: "Customize class.",
@@ -23,6 +22,11 @@ defmodule PyroManiac.Form.FieldGroup do
         default: [],
         doc: "Append to the root path (nested paths are appended).",
         type: {:list, :atom}
+      ],
+      when: [
+        doc:
+          "Conditional visibility function. Receives the form and returns a boolean. When nil (default), group is always visible.",
+        type: {:or, [nil, {:fun, 1}]}
       ]
     ]
 end

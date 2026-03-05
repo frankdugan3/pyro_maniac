@@ -1,0 +1,268 @@
+<svg width="800" height="300" viewBox="0 0 800 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Shard gradients — chrome metallic banding per color family -->
+    <linearGradient id="shard-pink" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#FF8ED4"/>
+      <stop offset="8%" stop-color="#FF69B4"/>
+      <stop offset="18%" stop-color="#FF9FD5"/>
+      <stop offset="28%" stop-color="#D84A95"/>
+      <stop offset="38%" stop-color="#B03078"/>
+      <stop offset="46%" stop-color="#D06098"/>
+      <stop offset="54%" stop-color="#A82870"/>
+      <stop offset="65%" stop-color="#801858"/>
+      <stop offset="78%" stop-color="#600040"/>
+      <stop offset="90%" stop-color="#400028"/>
+      <stop offset="100%" stop-color="#2A0018"/>
+    </linearGradient>
+    <linearGradient id="shard-purple" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#C88AEE"/>
+      <stop offset="8%" stop-color="#A855C0"/>
+      <stop offset="18%" stop-color="#C880DD"/>
+      <stop offset="28%" stop-color="#9040B0"/>
+      <stop offset="38%" stop-color="#7530A0"/>
+      <stop offset="46%" stop-color="#9958BB"/>
+      <stop offset="54%" stop-color="#6A20A0"/>
+      <stop offset="65%" stop-color="#501080"/>
+      <stop offset="78%" stop-color="#3A0060"/>
+      <stop offset="90%" stop-color="#280045"/>
+      <stop offset="100%" stop-color="#180028"/>
+    </linearGradient>
+    <linearGradient id="shard-cyan" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#80F0FF"/>
+      <stop offset="8%" stop-color="#00E5FF"/>
+      <stop offset="18%" stop-color="#60DDEE"/>
+      <stop offset="28%" stop-color="#00AACC"/>
+      <stop offset="38%" stop-color="#0088AA"/>
+      <stop offset="46%" stop-color="#30AABB"/>
+      <stop offset="54%" stop-color="#007899"/>
+      <stop offset="65%" stop-color="#005A75"/>
+      <stop offset="78%" stop-color="#004058"/>
+      <stop offset="90%" stop-color="#002838"/>
+      <stop offset="100%" stop-color="#001820"/>
+    </linearGradient>
+
+    <!-- Chrome gradient — silver/blue metallic with pink-purple hints, animated seamless shimmer -->
+    <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="2" gradientUnits="objectBoundingBox" spreadMethod="repeat">
+      <!-- Forward: bright silver to dark -->
+      <stop offset="0%" stop-color="#E8EEF2"/>
+      <stop offset="3%" stop-color="#D0D8E4"/>
+      <stop offset="6%" stop-color="#F0F4F8"/>
+      <stop offset="9%" stop-color="#C0C8D8"/>
+      <stop offset="12%" stop-color="#9AACC8"/>
+      <stop offset="15%" stop-color="#B8A0C8"/>
+      <stop offset="18%" stop-color="#8A7AAE"/>
+      <stop offset="21%" stop-color="#6A60A0"/>
+      <stop offset="24%" stop-color="#8AADD8"/>
+      <stop offset="27%" stop-color="#6A8CB8"/>
+      <stop offset="30%" stop-color="#4A5880"/>
+      <stop offset="33%" stop-color="#3C3868"/>
+      <stop offset="36%" stop-color="#2A2050"/>
+      <stop offset="39%" stop-color="#3A3870"/>
+      <stop offset="42%" stop-color="#201840"/>
+      <stop offset="45%" stop-color="#160E30"/>
+      <stop offset="47.5%" stop-color="#100A24"/>
+      <stop offset="50%" stop-color="#0A0818"/>
+      <!-- Reverse: dark back to bright silver -->
+      <stop offset="52.5%" stop-color="#100A24"/>
+      <stop offset="55%" stop-color="#160E30"/>
+      <stop offset="58%" stop-color="#201840"/>
+      <stop offset="61%" stop-color="#3A3870"/>
+      <stop offset="64%" stop-color="#2A2050"/>
+      <stop offset="67%" stop-color="#3C3868"/>
+      <stop offset="70%" stop-color="#4A5880"/>
+      <stop offset="73%" stop-color="#6A8CB8"/>
+      <stop offset="76%" stop-color="#8AADD8"/>
+      <stop offset="79%" stop-color="#6A60A0"/>
+      <stop offset="82%" stop-color="#8A7AAE"/>
+      <stop offset="85%" stop-color="#B8A0C8"/>
+      <stop offset="88%" stop-color="#9AACC8"/>
+      <stop offset="91%" stop-color="#C0C8D8"/>
+      <stop offset="94%" stop-color="#F0F4F8"/>
+      <stop offset="97%" stop-color="#D0D8E4"/>
+      <stop offset="100%" stop-color="#E8EEF2"/>
+      <animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="0 2" dur="8s" repeatCount="indefinite"/>
+    </linearGradient>
+
+    <!-- 3D extrusion gradient -->
+    <linearGradient id="extrusion" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#141028"/>
+      <stop offset="100%" stop-color="#0A0814"/>
+    </linearGradient>
+
+    <!-- Bevel highlight -->
+    <linearGradient id="bevel" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="15%" stop-color="#D0E4F0" stop-opacity="0.7"/>
+      <stop offset="35%" stop-color="#6090B0" stop-opacity="0.3"/>
+      <stop offset="55%" stop-color="#2A4868" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#0A1828" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Stripe mask — black bands = fully transparent cutouts through shards -->
+    <pattern id="stripe-bands" patternUnits="userSpaceOnUse" width="800" height="4">
+      <rect width="800" height="2.5" fill="white"/>
+      <rect width="800" height="1.5" y="2.5" fill="black"/>
+    </pattern>
+    <mask id="stripe-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="800" height="300">
+      <rect width="800" height="300" fill="white"/>
+      <rect width="800" height="300" fill="url(#stripe-bands)" opacity="0">
+        <animate attributeName="opacity" from="0" to="1" begin="4.6s" dur="0.8s" fill="freeze"/>
+      </rect>
+    </mask>
+
+    <!-- Neon glow for shard edges -->
+    <filter id="neonPink" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0.5 0 0.3  0 0 0 1 0" result="pinkBlur"/>
+      <feMerge>
+        <feMergeNode in="pinkBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="neonCyan" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0  0 0.8 0 0 0  0 0 1 0 0  0 0 0 1 0" result="cyanBlur"/>
+      <feMerge>
+        <feMergeNode in="cyanBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="neonPurple" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0.5 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="purpBlur"/>
+      <feMerge>
+        <feMergeNode in="purpBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle glow behind chrome text -->
+    <filter id="chromeGlow" x="-5%" y="-15%" width="110%" height="130%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Tagline neon glow -->
+    <filter id="textGlow" x="-20%" y="-40%" width="140%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="tight"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="medium"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="wide"/>
+      <feMerge>
+        <feMergeNode in="wide"/>
+        <feMergeNode in="medium"/>
+        <feMergeNode in="tight"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Ash triangle shards — start as Ash colors, scatter and recolor to outrun sun -->
+  <g mask="url(#stripe-mask)">
+  <g transform="translate(15, 121) scale(0.053)">
+
+    <!-- Shard 7 (far-left, yellow) at t=0.8s -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" from="0 0" to="-100 55" begin="0.8s" dur="1.2s" fill="freeze"/>
+      <path d="M306.336 1520H0L614.193 516.121L306.336 1520Z" fill="#FFD319"/>
+      <path d="M306.336 1520H0L614.193 516.121L306.336 1520Z" fill="#FFBD59">
+        <animate attributeName="opacity" from="1" to="0" begin="0.8s" dur="1.2s" fill="freeze"/>
+      </path>
+    </g>
+
+    <!-- Shard 2 (left-center, orange) at t=1.2s -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" from="0 0" to="-80 -40" begin="1.2s" dur="1.2s" fill="freeze"/>
+      <path d="M337.975 1520H447.128L1033.41 813.841L663.824 457.451L337.975 1520Z" fill="#FF8C00"/>
+      <path d="M337.975 1520H447.128L1033.41 813.841L663.824 457.451L337.975 1520Z" fill="#FF914D">
+        <animate attributeName="opacity" from="1" to="0" begin="1.2s" dur="1.2s" fill="freeze"/>
+      </path>
+    </g>
+
+    <!-- Shard 3 (small bottom-left, yellow) at t=1.6s -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" from="0 0" to="150 100" begin="1.6s" dur="1.0s" fill="freeze"/>
+      <path d="M795.834 1520H486.445L801.082 1141.03L795.834 1520Z" fill="#FFD319"/>
+      <path d="M795.834 1520H486.445L801.082 1141.03L795.834 1520Z" fill="#FFBD59">
+        <animate attributeName="opacity" from="1" to="0" begin="1.6s" dur="1.0s" fill="freeze"/>
+      </path>
+    </g>
+
+    <!-- Shard 6 (center diamond, yellow) at t=2.0s -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" from="0 0" to="300 -50" begin="2.0s" dur="1.0s" fill="freeze"/>
+      <path d="M1406.9 1492.69L850.239 1081.82L1040.43 852.744L1406.9 1492.69Z" fill="#FFD319"/>
+      <path d="M1406.9 1492.69L850.239 1081.82L1040.43 852.744L1406.9 1492.69Z" fill="#FFBD59">
+        <animate attributeName="opacity" from="1" to="0" begin="2.0s" dur="1.0s" fill="freeze"/>
+      </path>
+    </g>
+
+    <!-- Shard 1 (large right edge, red) at t=2.4s -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" from="0 0" to="400 -200" begin="2.4s" dur="1.2s" fill="freeze"/>
+      <path d="M929.965 0L1859.93 1520H1809.3L671.355 422.691L929.965 0Z" fill="#E8175D"/>
+      <path d="M929.965 0L1859.93 1520H1809.3L671.355 422.691L929.965 0Z" fill="#FF5757">
+        <animate attributeName="opacity" from="1" to="0" begin="2.4s" dur="1.2s" fill="freeze"/>
+      </path>
+    </g>
+
+    <!-- Shard 4 (bottom-center, red) at t=2.8s -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" from="0 0" to="350 120" begin="2.8s" dur="1.0s" fill="freeze"/>
+      <path d="M826.086 1520H1392.97L831.82 1105.82L826.086 1520Z" fill="#E8175D"/>
+      <path d="M826.086 1520H1392.97L831.82 1105.82L826.086 1520Z" fill="#FF5757">
+        <animate attributeName="opacity" from="1" to="0" begin="2.8s" dur="1.0s" fill="freeze"/>
+      </path>
+    </g>
+
+    <!-- Shard 5 (right-bottom, orange) at t=3.2s -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" from="0 0" to="500 80" begin="3.2s" dur="1.2s" fill="freeze"/>
+      <path d="M1457.4 1520L1077.17 856.035L1765.72 1520H1457.4Z" fill="#FF8C00"/>
+      <path d="M1457.4 1520L1077.17 856.035L1765.72 1520H1457.4Z" fill="#FF914D">
+        <animate attributeName="opacity" from="1" to="0" begin="3.2s" dur="1.2s" fill="freeze"/>
+      </path>
+    </g>
+
+  </g>
+  </g>
+
+  <!-- ===== "PyroManiac" CHROME TEXT — Audiowide converted to paths ===== -->
+  <!-- Path data from Inkscape text-to-path conversion, positioned to right of triangle -->
+  <g filter="url(#chromeGlow)" transform="translate(165, 97)">
+
+    <!-- Layer 1: 3D extrusion depth -->
+    <use href="#pyromania-path" transform="translate(5, 5)" fill="#060410"/>
+    <use href="#pyromania-path" transform="translate(4, 4)" fill="#0A0818"/>
+    <use href="#pyromania-path" transform="translate(3, 3)" fill="#0E0C20"/>
+    <use href="#pyromania-path" transform="translate(2, 2)" fill="url(#extrusion)"/>
+
+    <!-- Layer 2: Main chrome fill -->
+    <use href="#pyromania-path" fill="url(#chrome)"/>
+
+    <!-- Layer 3: Dark outline for definition -->
+    <use href="#pyromania-path" fill="none" stroke="#141028" stroke-width="0.8"/>
+
+    <!-- Layer 4: Bevel highlight overlay -->
+    <use href="#pyromania-path" fill="url(#bevel)" opacity="0.35"/>
+
+    <!-- The reusable path — PYROMANIAC in Audiowide, converted to outlines -->
+    <path id="pyromania-path" d="m 55.546875,40.679687 q 0,3.128907 -0.773438,5.589844 Q 54,48.730469 52.664062,50.628906 q -1.300781,1.863281 -3.023437,3.199219 -1.722656,1.335937 -3.621094,2.179687 -1.863281,0.84375 -3.796875,1.230469 Q 40.324219,57.625 38.636719,57.625 H 17.964844 v -9.140625 h 20.671875 q 1.757812,-0.140625 3.164062,-0.703125 1.441406,-0.597656 2.460938,-1.582031 1.019531,-0.984375 1.582031,-2.355469 0.5625,-1.40625 0.5625,-3.164063 V 36.53125 q -0.175781,-1.722656 -0.738281,-3.164063 -0.5625,-1.441406 -1.546875,-2.460937 -0.949219,-1.019531 -2.320313,-1.582031 -1.371094,-0.597657 -3.164062,-0.597657 H 18.035156 q -1.828125,0 -2.777343,0.949219 -0.949219,0.949219 -0.949219,2.742188 V 70 H 5.1679687 V 32.417969 q 0,-3.515625 1.265625,-5.976563 1.3007813,-2.460937 3.1992188,-3.972656 1.9335935,-1.511719 4.1835935,-2.179688 2.25,-0.703125 4.148438,-0.703125 h 20.671875 q 3.09375,0 5.554687,0.808594 2.460938,0.773438 4.324219,2.109375 1.898437,1.300781 3.199219,3.023438 1.335937,1.722656 2.179687,3.621093 0.878906,1.863282 1.265625,3.796875 0.386719,1.898438 0.386719,3.585938 z M 113.375,36.460937 q 0,3.128907 -0.80859,5.589844 -0.77344,2.460938 -2.07422,4.359375 -1.30078,1.863281 -3.0586,3.199219 -1.72265,1.335937 -3.58593,2.214844 -1.86328,0.84375 -3.79688,1.230468 -1.898436,0.386719 -3.585936,0.386719 H 92.773437 V 70 H 83.5625 V 53.441406 h -3.65625 q -1.6875,0 -3.621094,-0.386719 Q 74.386719,52.667969 72.488281,51.824219 70.625,50.945312 68.902344,49.609375 67.179687,48.273437 65.84375,46.410156 64.542969,44.511719 63.734375,42.050781 62.960937,39.554687 62.960937,36.460937 v -16.875 h 9.140625 v 16.875 q 0,1.792969 0.5625,3.234375 0.5625,1.40625 1.582032,2.425782 1.019531,1.019531 2.460937,1.582031 1.476563,0.527344 3.269531,0.527344 h 16.488282 q 1.300781,-0.210938 2.671875,-0.527344 1.371091,-0.351563 2.496091,-1.160156 1.125,-0.808594 1.86328,-2.25 0.73829,-1.441407 0.73829,-3.832032 v -16.875 h 9.14062 z m 60.60547,0.07031 q 0,3.128906 -0.77344,5.589844 -0.77344,2.460937 -2.10937,4.359375 -1.30079,1.863281 -3.02344,3.199218 -1.72266,1.335938 -3.6211,2.214844 -1.86328,0.84375 -3.79687,1.230469 -1.89844,0.386719 -3.58594,0.386719 L 176.16016,70 H 162.02734 L 142.97266,53.511719 h -6.57422 v -9.140625 h 20.67187 q 1.72266,-0.140625 3.12891,-0.703125 1.4414,-0.597657 2.46094,-1.582032 1.05468,-0.984375 1.61718,-2.355468 0.5625,-1.40625 0.5625,-3.199219 v -5.765625 q 0,-0.773438 -0.21093,-1.160156 -0.17579,-0.421875 -0.49219,-0.597657 -0.28125,-0.210937 -0.63281,-0.246093 -0.31641,-0.03516 -0.59766,-0.03516 H 132.74219 V 70 h -9.14063 V 24.191406 q 0,-0.949219 0.35157,-1.792969 0.35156,-0.84375 0.94921,-1.476562 0.63282,-0.632813 1.47657,-0.984375 0.84375,-0.351563 1.82812,-0.351563 h 34.69922 q 3.05859,0 5.16797,1.125 2.10937,1.089844 3.41015,2.777344 1.33594,1.652344 1.89844,3.585938 0.59766,1.933593 0.59766,3.621093 z m 64.08594,13.078125 q 0,4.605469 -1.58204,8.472656 -1.58203,3.867188 -4.39453,6.679688 -2.8125,2.8125 -6.67968,4.394531 -3.83204,1.546875 -8.36719,1.546875 h -12.375 q -4.53516,0 -8.40235,-1.546875 -3.86718,-1.582031 -6.67968,-4.394531 -2.8125,-2.8125 -4.42969,-6.679688 -1.58203,-3.867187 -1.58203,-8.472656 v -9.632813 q 0,-4.570312 1.58203,-8.4375 1.61719,-3.902343 4.42969,-6.679687 2.8125,-2.8125 6.67968,-4.394531 3.86719,-1.582032 8.40235,-1.582032 h 12.375 q 4.53515,0 8.36719,1.582032 3.86718,1.582031 6.67968,4.394531 2.8125,2.777344 4.39453,6.679687 1.58204,3.867188 1.58204,8.4375 z m -9.14063,-9.632813 q 0,-2.707031 -0.87891,-4.886718 -0.84375,-2.214844 -2.42578,-3.761719 -1.54687,-1.582031 -3.76172,-2.425781 -2.17968,-0.878907 -4.8164,-0.878907 h -12.375 q -2.67188,0 -4.88672,0.878907 -2.17969,0.84375 -3.76172,2.425781 -1.58203,1.546875 -2.46094,3.761719 -0.84375,2.179687 -0.84375,4.886718 v 9.632813 q 0,2.707031 0.84375,4.921875 0.87891,2.179687 2.46094,3.761719 1.58203,1.546875 3.76172,2.425781 2.21484,0.84375 4.88672,0.84375 h 12.30469 q 2.67187,0 4.85156,-0.84375 2.21484,-0.878906 3.79687,-2.425781 1.58203,-1.582032 2.42578,-3.761719 0.87891,-2.214844 0.87891,-4.921875 z M 307.77734,70 h -9.21093 V 39.976562 l -16.20704,28.511719 q -0.59765,1.089844 -1.6875,1.652344 -1.05468,0.5625 -2.28515,0.5625 -1.19531,0 -2.25,-0.5625 -1.01953,-0.5625 -1.61719,-1.652344 L 258.24219,39.976562 V 70 h -9.14063 V 23.488281 q 0,-1.582031 0.91406,-2.8125 0.94922,-1.230469 2.46094,-1.652344 0.73828,-0.175781 1.47656,-0.105468 0.73829,0.03516 1.40625,0.316406 0.70313,0.246094 1.26563,0.738281 0.5625,0.457031 0.94922,1.125 l 20.8125,36.175781 20.8125,-36.175781 q 0.80859,-1.335937 2.21484,-1.898437 1.44141,-0.5625 2.98828,-0.175782 1.47657,0.421875 2.42578,1.652344 0.94922,1.230469 0.94922,2.8125 z m 62.08203,0 h -9.14062 V 57.625 H 328.58594 V 70 h -9.14063 V 44.792969 q 0,-5.519532 1.89844,-10.160157 1.89844,-4.640625 5.27344,-7.980468 3.375,-3.339844 7.98047,-5.203125 4.60546,-1.863282 10.05468,-1.863282 h 20.60157 q 0.94921,0 1.79296,0.351563 0.84375,0.351562 1.47657,0.984375 0.63281,0.632812 0.98437,1.476562 0.35156,0.84375 0.35156,1.792969 z M 328.58594,48.484375 h 32.13281 V 28.726562 h -16.06641 q -0.42187,0 -1.79297,0.140625 -1.33593,0.105469 -3.1289,0.597657 -1.75781,0.492187 -3.72656,1.511718 -1.96875,1.019532 -3.6211,2.8125 -1.65234,1.792969 -2.74219,4.5 -1.05468,2.671875 -1.05468,6.503907 z m 104.26953,17.613281 q 0,0.984375 -0.38672,1.828125 -0.35156,0.84375 -0.98438,1.476563 -0.59765,0.597656 -1.4414,0.949218 -0.84375,0.351563 -1.79297,0.351563 -0.84375,0 -1.72266,-0.316406 -0.84375,-0.316407 -1.51172,-1.019532 l -33.39843,-34.875 V 70 h -9.14063 V 23.488281 q 0,-1.40625 0.77344,-2.53125 0.80859,-1.160156 2.03906,-1.722656 1.30078,-0.527344 2.67188,-0.246094 1.37109,0.246094 2.35547,1.265625 L 423.71484,55.09375 V 19.585937 h 9.14063 z M 454.68359,70 h -9.14062 V 19.585937 h 9.14062 z m 62.15235,0 h -9.14063 V 57.625 H 475.5625 V 70 h -9.14063 V 44.792969 q 0,-5.519532 1.89844,-10.160157 1.89844,-4.640625 5.27344,-7.980468 3.375,-3.339844 7.98047,-5.203125 4.60547,-1.863282 10.05469,-1.863282 h 20.60156 q 0.94922,0 1.79297,0.351563 0.84375,0.351562 1.47656,0.984375 0.63281,0.632812 0.98437,1.476562 0.35157,0.84375 0.35157,1.792969 z M 475.5625,48.484375 h 32.13281 V 28.726562 h -16.0664 q -0.42188,0 -1.79297,0.140625 -1.33594,0.105469 -3.12891,0.597657 -1.75781,0.492187 -3.72656,1.511718 -1.96875,1.019532 -3.6211,2.8125 -1.65234,1.792969 -2.74218,4.5 -1.05469,2.671875 -1.05469,6.503907 z M 574.59375,70 h -32.97656 q -1.26563,0 -2.74219,-0.28125 -1.44141,-0.316406 -2.88281,-0.949219 -1.40625,-0.632812 -2.70703,-1.617187 -1.30079,-1.019532 -2.32032,-2.425782 -0.98437,-1.441406 -1.58203,-3.304687 -0.59765,-1.898438 -0.59765,-4.253906 v -24.75 q 0,-1.265625 0.28125,-2.707032 0.3164,-1.476562 0.94921,-2.882812 0.63282,-1.441406 1.65235,-2.742188 1.01953,-1.300781 2.42578,-2.285156 1.44141,-1.019531 3.30469,-1.617187 1.86328,-0.597657 4.21875,-0.597657 h 32.97656 v 9.140625 h -32.97656 q -1.79297,0 -2.74219,0.949219 -0.94922,0.949219 -0.94922,2.8125 v 24.679688 q 0,1.757812 0.94922,2.742187 0.98437,0.949219 2.74219,0.949219 h 32.97656 z" fill="url(#chrome)"/>
+  </g>
+
+  <!-- Subtitle gradient -->
+  <linearGradient id="subtitle-grad" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#FF61A6"/>
+    <stop offset="50%" stop-color="#C880DD"/>
+    <stop offset="100%" stop-color="#44CCEE"/>
+  </linearGradient>
+
+  <!-- Tagline — Audiowide, subtle pink-to-cyan gradient with neon glow -->
+  <g filter="url(#textGlow)" opacity="0.8">
+    <text x="170" y="202" font-family="'Audiowide', 'Segoe UI', sans-serif" font-weight="400" font-size="14" fill="url(#subtitle-grad)" textLength="570" lengthAdjust="spacingAndGlyphs">
+      DSL-FIRST UI FRAMEWORK FOR ASH
+    </text>
+  </g>
+</svg>

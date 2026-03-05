@@ -8,7 +8,6 @@ defmodule PyroManiac.Form.Field do
     args: [:name],
     describe:
       "Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.",
-    # quokka:sort
     schema: [
       autocomplete_option_label_key: [
         default: :label,
@@ -42,6 +41,12 @@ defmodule PyroManiac.Form.Field do
         doc: "Override the default extracted description.",
         type: :string
       ],
+      form_only?: [
+        default: false,
+        doc:
+          "When true, this field exists only in the form UI and is not submitted to the action.",
+        type: :boolean
+      ],
       input_class: [
         doc: "Customize input class.",
         type: PyroManiac.Dsl.Type.css_class()
@@ -71,9 +76,25 @@ defmodule PyroManiac.Form.Field do
       ],
       type: [
         default: :default,
-        doc: "The type of the value in the form.",
-        # quokka:sort
-        type: {:one_of, [:autocomplete, :default, :long_text, :nested_form, :select, :short_text]}
+        doc:
+          "The type of the value in the form. Extensible via `extra_form_types` on the forms section.",
+        type: :atom
+      ],
+      allow_nil?: [
+        default: true,
+        doc: "Whether nil is allowed. Auto-populated by the transformer from the Ash attribute.",
+        type: :boolean
+      ],
+      enum_options: [
+        default: [],
+        doc:
+          "Options from Ash enum types or one_of constraints. Auto-populated by the transformer.",
+        type: {:list, :any}
+      ],
+      when: [
+        doc:
+          "Conditional visibility function. Receives the form and returns a boolean. When nil (default), field is always visible.",
+        type: {:or, [nil, {:fun, 1}]}
       ]
     ]
 end
