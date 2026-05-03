@@ -6,7 +6,7 @@ defmodule PyroManiac.Form.Step do
   use PyroManiac.Dsl.Entity,
     name: :step,
     args: [:name],
-    describe: "Configure a form step in the `PyroManiac.Dsl` extension.",
+    describe: "Configure a form step in the `PyroManiac` extension.",
     entities: [fields: [PyroManiac.Form.Field, PyroManiac.Form.FieldGroup]],
     schema: [
       class: [

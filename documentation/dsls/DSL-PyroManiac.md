@@ -497,7 +497,7 @@ Target: `PyroManiac.View.View`
 
 
 ## forms
-Configure the appearance of forms in the `PyroManiac.Dsl` extension.
+Configure the appearance of forms in the `PyroManiac` extension.
 
 ### Nested DSLs
  * [action](#forms-action)
@@ -576,7 +576,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+Declare non-default behavior for a specific form field in the `PyroManiac` extension.
 
 
 
@@ -623,7 +623,7 @@ field_group label
 ```
 
 
-Configure the appearance of form field groups in the `PyroManiac.Dsl` extension.
+Configure the appearance of form field groups in the `PyroManiac` extension.
 
 ### Nested DSLs
  * [field](#forms-action-field_group-field)
@@ -651,7 +651,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+Declare non-default behavior for a specific form field in the `PyroManiac` extension.
 
 
 
@@ -705,7 +705,7 @@ step name
 ```
 
 
-Configure a form step in the `PyroManiac.Dsl` extension.
+Configure a form step in the `PyroManiac` extension.
 
 ### Nested DSLs
  * [field](#forms-action-step-field)
@@ -738,7 +738,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+Declare non-default behavior for a specific form field in the `PyroManiac` extension.
 
 
 
@@ -785,7 +785,7 @@ field_group label
 ```
 
 
-Configure the appearance of form field groups in the `PyroManiac.Dsl` extension.
+Configure the appearance of form field groups in the `PyroManiac` extension.
 
 ### Nested DSLs
  * [field](#forms-action-step-field_group-field)
@@ -813,7 +813,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+Declare non-default behavior for a specific form field in the `PyroManiac` extension.
 
 
 
@@ -945,7 +945,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+Declare non-default behavior for a specific form field in the `PyroManiac` extension.
 
 
 
@@ -992,7 +992,7 @@ field_group label
 ```
 
 
-Configure the appearance of form field groups in the `PyroManiac.Dsl` extension.
+Configure the appearance of form field groups in the `PyroManiac` extension.
 
 ### Nested DSLs
  * [field](#forms-bulk_action-field_group-field)
@@ -1020,7 +1020,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+Declare non-default behavior for a specific form field in the `PyroManiac` extension.
 
 
 
@@ -1074,7 +1074,7 @@ step name
 ```
 
 
-Configure a form step in the `PyroManiac.Dsl` extension.
+Configure a form step in the `PyroManiac` extension.
 
 ### Nested DSLs
  * [field](#forms-bulk_action-step-field)
@@ -1107,7 +1107,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+Declare non-default behavior for a specific form field in the `PyroManiac` extension.
 
 
 
@@ -1154,7 +1154,7 @@ field_group label
 ```
 
 
-Configure the appearance of form field groups in the `PyroManiac.Dsl` extension.
+Configure the appearance of form field groups in the `PyroManiac` extension.
 
 ### Nested DSLs
  * [field](#forms-bulk_action-step-field_group-field)
@@ -1182,7 +1182,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.
+Declare non-default behavior for a specific form field in the `PyroManiac` extension.
 
 
 

@@ -7,7 +7,7 @@ defmodule PyroManiac.Form.Field do
     name: :field,
     args: [:name],
     describe:
-      "Declare non-default behavior for a specific form field in the `PyroManiac.Dsl` extension.",
+      "Declare non-default behavior for a specific form field in the `PyroManiac` extension.",
     schema: [
       autocomplete_option_label_key: [
         default: :label,

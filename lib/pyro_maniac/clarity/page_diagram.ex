@@ -53,20 +53,21 @@ with {:module, _} <- Code.ensure_loaded(Clarity.Content),
     end
 
     defp add_page_node([header], module) do
-      title = PI.title(module) || ""
-      route = PI.route(module) || ""
-
       label =
         [
           escape(inspect(module)),
-          title != "" && "title: #{escape(title)}",
-          route != "" && "route: #{escape(route)}"
+          line("title", PI.title(module)),
+          line("route", PI.route(module))
         ]
-        |> Enum.reject(&(&1 in [false, nil]))
+        |> Enum.reject(&is_nil/1)
         |> Enum.join("<br/>")
 
       [~s|  page["#{label}"]|, header]
     end
+
+    defp line(_label, nil), do: nil
+    defp line(_label, ""), do: nil
+    defp line(label, value), do: "#{label}: #{escape(value)}"
 
     defp add_resource(acc, nil), do: acc
 
@@ -171,7 +172,5 @@ with {:module, _} <- Code.ensure_loaded(Clarity.Content),
       |> String.replace("<", "&lt;")
       |> String.replace(">", "&gt;")
     end
-
-    defp escape(value), do: value |> to_string() |> escape()
   end
 end

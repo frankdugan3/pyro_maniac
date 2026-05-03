@@ -36,12 +36,41 @@ defmodule PyroManiac.Helpers do
   end
 
   @doc """
-  Toggles sort directly on the sort param string.
+  Toggles sort directly on the encoded sort param string.
 
-  This avoids issues with Ash calculation expressions that can't be easily
-  stringified. Works with field paths like "type.label".
+  Operating on the encoded string (rather than parsed structures) avoids
+  issues with Ash calculation expressions that don't stringify cleanly.
+  Works with field paths like `"type.label"`.
+
+  ## Modes
+
+  The combination of `:multiple?` and `:toggle_nil?` selects one of three
+  modes — designed to map onto plain / shift / ctrl click in a column header:
+
+    * `multiple?: false, toggle_nil?: false` (default) — **isolate**. Drop
+      all other sorts and sort by `field_path` alone. If `field_path` is
+      already the sole sort, cycle: `:asc` → `:desc` → off. If it's part of
+      a multi-sort, isolate it preserving its current direction.
+
+    * `multiple?: true, toggle_nil?: false` — **append-or-flip**. Append
+      `field_path` at `:asc` if absent. If present, flip `:asc` ↔ `:desc`
+      preserving its position and nil ordering. **Never removes** —
+      position is stable across repeated invocations.
+
+    * `toggle_nil?: true` (regardless of `multiple?`) — **cycle nils**.
+      Append `field_path` at `:asc_nils_first` if absent. If present, cycle
+      its nil ordering preserving direction and position. **Never removes.**
+
+  The nil-ordering cycle has two states per direction, matching what the
+  encoding can distinguish (Postgres convention: `ASC` defaults to nulls
+  last; `DESC` defaults to nulls first):
+
+    * `:asc` ↔ `:asc_nils_first`
+    * `:desc` ↔ `:desc_nils_last`
 
   ## Examples
+
+  Isolate (plain click):
 
       iex> toggle_sort_param("name", "code", %{})
       "code"
@@ -50,10 +79,35 @@ defmodule PyroManiac.Helpers do
       "-code"
 
       iex> toggle_sort_param("-code", "code", %{})
-      "code"
+      ""
+
+      iex> toggle_sort_param("name,code", "name", %{})
+      "name"
+
+  Append-or-flip (shift click) — position stable, never removes:
 
       iex> toggle_sort_param("name", "code", %{multiple?: true})
       "name,code"
+
+      iex> toggle_sort_param("name,code", "name", %{multiple?: true})
+      "-name,code"
+
+      iex> toggle_sort_param("-name,code", "name", %{multiple?: true})
+      "name,code"
+
+  Cycle nils (ctrl click) — position stable, never removes:
+
+      iex> toggle_sort_param("name,code", "name", %{toggle_nil?: true})
+      "++name,code"
+
+      iex> toggle_sort_param("++name,code", "name", %{toggle_nil?: true})
+      "name,code"
+
+      iex> toggle_sort_param("-name", "name", %{toggle_nil?: true})
+      "--name"
+
+      iex> toggle_sort_param("--name", "name", %{toggle_nil?: true})
+      "-name"
   """
   def toggle_sort_param(current_param, field_path, opts \\ %{})
 
@@ -61,41 +115,81 @@ defmodule PyroManiac.Helpers do
     multiple? = Map.get(opts, :multiple?, false)
     toggle_nil? = Map.get(opts, :toggle_nil?, false)
 
-    current_sorts = parse_sort_param(current_param)
+    parsed = parse_sort_param(current_param)
 
-    {existing_dir, other_sorts} = extract_field_sort(current_sorts, field_path)
-
-    new_dir = next_direction(existing_dir, toggle_nil?, multiple?)
-
-    new_sorts = build_sort_list(new_dir, field_path, other_sorts, multiple?)
+    new_sorts =
+      cond do
+        toggle_nil? -> apply_cycle_nils(parsed, field_path)
+        multiple? -> apply_append_or_flip(parsed, field_path)
+        true -> apply_isolate(parsed, field_path)
+      end
 
     encode_sort(new_sorts)
   end
 
   def toggle_sort_param(_, field_path, _opts), do: field_path
 
-  defp extract_field_sort(sorts, field_path) do
-    Enum.reduce(sorts, {nil, []}, fn {f, dir}, {found, acc} ->
-      if f == field_path, do: {dir, acc}, else: {found, [{f, dir} | acc]}
-    end)
-    |> then(fn {dir, others} -> {dir, Enum.reverse(others)} end)
+  defp apply_isolate(parsed, field) do
+    case parsed do
+      [{^field, dir}] ->
+        case cycle_plain_direction(dir) do
+          nil -> []
+          next -> [{field, next}]
+        end
+
+      _ ->
+        case List.keyfind(parsed, field, 0) do
+          nil -> [{field, :asc}]
+          {^field, dir} -> [{field, dir}]
+        end
+    end
   end
 
-  defp next_direction(nil, false, _multiple?), do: :asc
-  defp next_direction(nil, true, _multiple?), do: :asc_nils_first
-  defp next_direction(:asc, false, _multiple?), do: :desc
-  defp next_direction(:asc, true, _multiple?), do: :asc_nils_first
-  defp next_direction(:asc_nils_first, _, _multiple?), do: :asc
-  defp next_direction(:asc_nils_last, _, _multiple?), do: :asc_nils_first
-  defp next_direction(:desc, false, multiple?), do: if(!multiple?, do: :asc)
-  defp next_direction(:desc, true, _multiple?), do: :desc_nils_last
-  defp next_direction(:desc_nils_first, _, _multiple?), do: :desc_nils_last
-  defp next_direction(:desc_nils_last, _, _multiple?), do: :desc
+  defp apply_append_or_flip(parsed, field) do
+    case Enum.find_index(parsed, fn {f, _} -> f == field end) do
+      nil ->
+        parsed ++ [{field, :asc}]
 
-  defp build_sort_list(nil, _field_path, _other_sorts, false), do: []
-  defp build_sort_list(nil, _field_path, other_sorts, true), do: other_sorts
-  defp build_sort_list(dir, field_path, _other_sorts, false), do: [{field_path, dir}]
-  defp build_sort_list(dir, field_path, other_sorts, true), do: other_sorts ++ [{field_path, dir}]
+      idx ->
+        {_, dir} = Enum.at(parsed, idx)
+        List.replace_at(parsed, idx, {field, flip_direction(dir)})
+    end
+  end
+
+  defp apply_cycle_nils(parsed, field) do
+    case Enum.find_index(parsed, fn {f, _} -> f == field end) do
+      nil ->
+        parsed ++ [{field, :asc_nils_first}]
+
+      idx ->
+        {_, dir} = Enum.at(parsed, idx)
+        List.replace_at(parsed, idx, {field, cycle_nils(dir)})
+    end
+  end
+
+  defp cycle_plain_direction(:asc), do: :desc
+  defp cycle_plain_direction(:asc_nils_first), do: :desc_nils_first
+  defp cycle_plain_direction(:asc_nils_last), do: :desc_nils_last
+  defp cycle_plain_direction(:desc), do: nil
+  defp cycle_plain_direction(:desc_nils_first), do: nil
+  defp cycle_plain_direction(:desc_nils_last), do: nil
+
+  defp flip_direction(:asc), do: :desc
+  defp flip_direction(:asc_nils_first), do: :desc_nils_first
+  defp flip_direction(:asc_nils_last), do: :desc_nils_last
+  defp flip_direction(:desc), do: :asc
+  defp flip_direction(:desc_nils_first), do: :asc_nils_first
+  defp flip_direction(:desc_nils_last), do: :asc_nils_last
+
+  # 2-state cycle matching the URL encoding (Postgres convention: ASC default
+  # = nulls last; DESC default = nulls first), so `:asc_nils_last` and
+  # `:desc_nils_first` aren't reachable from a default starting state.
+  defp cycle_nils(:asc), do: :asc_nils_first
+  defp cycle_nils(:asc_nils_first), do: :asc
+  defp cycle_nils(:asc_nils_last), do: :asc_nils_first
+  defp cycle_nils(:desc), do: :desc_nils_last
+  defp cycle_nils(:desc_nils_first), do: :desc_nils_last
+  defp cycle_nils(:desc_nils_last), do: :desc
 
   # Parse sort param string into list of {field_path, direction} tuples
   defp parse_sort_param(""), do: []

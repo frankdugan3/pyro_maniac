@@ -58,7 +58,7 @@ defmodule PyroManiac.Dsl do
         ]
       },
       %Spark.Dsl.Section{
-        describe: "Configure the appearance of forms in the `PyroManiac.Dsl` extension.",
+        describe: "Configure the appearance of forms in the `PyroManiac` extension.",
         entities: [
           PyroManiac.Form.Action.__entity__(),
           PyroManiac.Form.BulkAction.__entity__()

@@ -6,7 +6,7 @@ defmodule PyroManiac.Form.FieldGroup do
   use PyroManiac.Dsl.Entity,
     name: :field_group,
     args: [:label],
-    describe: "Configure the appearance of form field groups in the `PyroManiac.Dsl` extension.",
+    describe: "Configure the appearance of form field groups in the `PyroManiac` extension.",
     recursive_as: :fields,
     entities: [fields: [PyroManiac.Form.Field]],
     schema: [
