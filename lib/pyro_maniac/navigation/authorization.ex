@@ -13,12 +13,11 @@ defmodule PyroManiac.Navigation.Authorization do
   @doc """
   Filters a navigation tree, removing items the given scope is not authorized to see.
 
-  When `scope` is `nil`, returns the tree unchanged. Otherwise, recursively
-  filters group children and removes empty groups.
+  Recursively filters group children and removes empty groups. A `nil` scope
+  is passed through to `Ash.can?/3` as a `nil` actor — items whose policies
+  require an authenticated actor are filtered out.
   """
   @spec filter_authorized(list(), any()) :: list()
-  def filter_authorized(entities, nil), do: entities
-
   def filter_authorized(entities, scope) do
     entities
     |> Enum.map(fn
