@@ -53,6 +53,11 @@ defmodule PyroManiac.Navigation.Item do
       href: [
         doc: "External URL. Opens in a new tab.",
         type: :string
+      ],
+      authorizer: [
+        doc:
+          "Custom authorizer function `(scope -> boolean)`. When set, takes precedence over the default page-based authorization.",
+        type: {:fun, [:map], :boolean}
       ]
     ],
     transform: {__MODULE__, :__set_defaults__, []}

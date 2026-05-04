@@ -5,6 +5,7 @@ spark_locals_without_parens = [
   action: 1,
   action: 2,
   allow_nil?: 1,
+  authorizer: 1,
   autocomplete_option_label_key: 1,
   autocomplete_option_value_key: 1,
   autocomplete_search_action: 1,

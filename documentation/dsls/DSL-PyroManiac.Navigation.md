@@ -46,6 +46,7 @@ Declare a navigation link.
 | [`page`](#nav-item-page){: #nav-item-page } | `atom` |  | A PyroManiac page module. Validated and authorization-aware. |
 | [`module`](#nav-item-module){: #nav-item-module } | `atom` |  | A non-PyroManiac module. Not validated against PyroManiac. |
 | [`href`](#nav-item-href){: #nav-item-href } | `String.t` |  | External URL. Opens in a new tab. |
+| [`authorizer`](#nav-item-authorizer){: #nav-item-authorizer } | `(map -> boolean)` |  | Custom authorizer function `(scope -> boolean)`. When set, takes precedence over the default page-based authorization. |
 
 
 
@@ -114,6 +115,7 @@ Declare a navigation link.
 | [`page`](#nav-group-item-page){: #nav-group-item-page } | `atom` |  | A PyroManiac page module. Validated and authorization-aware. |
 | [`module`](#nav-group-item-module){: #nav-group-item-module } | `atom` |  | A non-PyroManiac module. Not validated against PyroManiac. |
 | [`href`](#nav-group-item-href){: #nav-group-item-href } | `String.t` |  | External URL. Opens in a new tab. |
+| [`authorizer`](#nav-group-item-authorizer){: #nav-group-item-authorizer } | `(map -> boolean)` |  | Custom authorizer function `(scope -> boolean)`. When set, takes precedence over the default page-based authorization. |
 
 
 

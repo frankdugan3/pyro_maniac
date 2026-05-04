@@ -31,6 +31,7 @@ defmodule PyroManiac.Navigation.Authorization do
     |> Enum.filter(fn
       %Group{items: []} -> false
       %Group{} -> true
+      %Item{authorizer: fun} when is_function(fun, 1) -> fun.(scope)
       %Item{page: page} when not is_nil(page) -> authorized?(page, scope)
       %Item{} -> true
     end)
