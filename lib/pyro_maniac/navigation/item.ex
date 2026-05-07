@@ -30,6 +30,10 @@ defmodule PyroManiac.Navigation.Item do
         doc: "Display text. Auto-derived from name if omitted.",
         type: :string
       ],
+      class: [
+        doc: "Customize class.",
+        type: PyroManiac.Dsl.Type.css_class()
+      ],
       icon: [
         doc: "Icon name to be passed to the renderer.",
         type: :atom
