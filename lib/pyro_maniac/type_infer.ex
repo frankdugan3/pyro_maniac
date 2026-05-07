@@ -16,7 +16,7 @@ defmodule PyroManiac.TypeInfer do
   def date_type?(:date), do: true
   def date_type?(_), do: false
 
-  @doc "Returns true if the Ash type is a datetime variant."
+  @doc "Returns true if the Ash type is a UTC/zoned datetime variant."
   def datetime_type?(Ash.Type.DateTime), do: true
   def datetime_type?(:datetime), do: true
   def datetime_type?(Ash.Type.UtcDatetime), do: true
@@ -31,6 +31,18 @@ defmodule PyroManiac.TypeInfer do
   end
 
   def datetime_type?(_), do: false
+
+  @doc "Returns true if the Ash type is a naive (timezone-less) datetime."
+  def naive_datetime_type?(Ash.Type.NaiveDatetime), do: true
+  def naive_datetime_type?(:naive_datetime), do: true
+  def naive_datetime_type?(_), do: false
+
+  @doc "Returns true if the Ash type is a time-of-day."
+  def time_type?(Ash.Type.Time), do: true
+  def time_type?(:time), do: true
+  def time_type?(Ash.Type.TimeUsec), do: true
+  def time_type?(:time_usec), do: true
+  def time_type?(_), do: false
 
   @doc "Returns true if the Ash type is an integer."
   def integer_type?(Ash.Type.Integer), do: true
@@ -88,19 +100,22 @@ defmodule PyroManiac.TypeInfer do
   @doc """
   Infer the input type for a Form field.
 
-  Returns atoms like `:boolean_radio`, `:multi_select`, `:select`, `:number`,
-  `:date`, `:datetime`, or `:text`.
+  Returns atoms like `:boolean`, `:select`, `:number`, `:date`, `:datetime`,
+  `:naive_datetime`, `:time`, or `:text`. Array-of-enum is resolved as
+  `:select` (the `multiple?` flag on the field carries the multi-valued bit).
   """
   def infer_input_type(_field, nil), do: :text
 
   def infer_input_type(field, attr_info) do
     cond do
-      boolean_type?(attr_info.type) -> :boolean_radio
-      array_enum_type?(attr_info) -> :multi_select
+      boolean_type?(attr_info.type) -> :boolean
+      array_enum_type?(attr_info) -> :select
       enum_type?(attr_info) -> :select
       numeric_type?(attr_info.type) -> :number
       date_type?(attr_info.type) -> :date
+      naive_datetime_type?(attr_info.type) -> :naive_datetime
       datetime_type?(attr_info.type) -> :datetime
+      time_type?(attr_info.type) -> :time
       interval_type?(attr_info.type) -> :interval
       true -> infer_from_field_name(field)
     end

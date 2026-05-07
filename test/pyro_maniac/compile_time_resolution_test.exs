@@ -144,9 +144,9 @@ defmodule PyroManiac.CompileTimeResolutionTest do
       assert field.type == :number
     end
 
-    test "boolean fields resolve to :boolean_radio" do
+    test "boolean fields resolve to :boolean" do
       field = get_field(StaffPage, :create, :active)
-      assert field.type == :boolean_radio
+      assert field.type == :boolean
     end
 
     test "date fields resolve to :date" do
@@ -213,8 +213,8 @@ defmodule PyroManiac.CompileTimeResolutionTest do
       assert Info.resolve_field_type(Brewery.Recipe, :target_abv) == :number
     end
 
-    test "infers :boolean_radio for boolean types" do
-      assert Info.resolve_field_type(Brewery.Staff, :active) == :boolean_radio
+    test "infers :boolean for boolean types" do
+      assert Info.resolve_field_type(Brewery.Staff, :active) == :boolean
     end
 
     test "infers :date for date types" do

@@ -441,7 +441,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
       expected = """
       [PyroManiac.DslErrors.FormsTest.UnknownFieldType]
       forms -> field -> target_abv -> type defined in <FILE:LINE>:
-        unknown field type :tex for field :target_abv. Accepted types: [:attachment, :autocomplete, :boolean_radio, :checkbox, :checkbox_group, :date, :datetime, :default, :email, :interval, :long_text, :multi_select, :nested_form, :number, :password, :select, :short_text, :text, :textarea, :toggle]
+        unknown field type :tex for field :target_abv. Accepted types: [:attachment, :boolean, :checkbox, :combobox, :date, :datetime, :default, :email, :interval, :naive_datetime, :nested_form, :number, :password, :select, :text, :textarea, :time, :toggle]
 
         Did you mean:
           * :text

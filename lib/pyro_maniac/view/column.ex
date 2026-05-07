@@ -81,7 +81,7 @@ defmodule PyroManiac.View.Column do
       type: [
         default: :default,
         doc: "The type of the column.",
-        type: {:one_of, [:default, :long_text, :attachment]}
+        type: {:one_of, [:default, :textarea, :attachment]}
       ],
       __attachment_destination__: [
         private?: true,
@@ -132,7 +132,7 @@ defmodule PyroManiac.View.Column do
   end
 
   # TODO: Figure out how to do this framework-agnostically.
-  # def render_cell_data(%{col: %{type: :long_text}} = assigns) do
+  # def render_cell_data(%{col: %{type: :textarea}} = assigns) do
   #   ~H"""
   #   <span class="whitespace-pre-wrap">{get_nested(@row, @col.source)}</span>
   #   """

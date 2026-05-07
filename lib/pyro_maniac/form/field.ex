@@ -9,23 +9,24 @@ defmodule PyroManiac.Form.Field do
     describe:
       "Declare non-default behavior for a specific form field in the `PyroManiac` extension.",
     schema: [
-      autocomplete_option_label_key: [
-        default: :label,
-        doc: "Override the default autocomplete key used as a label.",
+      combobox_option_label_key: [
+        doc:
+          "Combobox label key. Auto-populated for `belongs_to` fields from the destination resource's `default_label`; falls back to `:label` if neither is set.",
         type: :atom
       ],
-      autocomplete_option_value_key: [
-        default: :id,
-        doc: "Override the default autocomplete key used as a value.",
+      combobox_option_value_key: [
+        doc:
+          "Combobox value key. Auto-populated for `belongs_to` fields from the destination resource's primary key; falls back to `:id`.",
         type: :atom
       ],
-      autocomplete_search_action: [
-        default: :read,
-        doc: "Set the autocomplete search action name.",
+      combobox_search_action: [
+        doc:
+          "Combobox search action name. Auto-populated for `belongs_to` fields to the destination resource's primary `:read` action.",
         type: :atom
       ],
-      autocomplete_search_arg: [
-        doc: "Set the autocomplete search argument key.",
+      combobox_search_arg: [
+        doc:
+          "Combobox search argument key (when the search action takes an action argument for the typed query). Optional — leave nil to filter inline at the call site.",
         type: :atom
       ],
       autofocus: [
@@ -90,6 +91,12 @@ defmodule PyroManiac.Form.Field do
         doc:
           "Options from Ash enum types or one_of constraints. Auto-populated by the transformer.",
         type: {:list, :any}
+      ],
+      multiple?: [
+        default: false,
+        doc:
+          "Whether the field accepts multiple values (e.g. an array enum). Auto-populated by the transformer; the renderer reads this to choose between single and multi-valued chrome on the same atom.",
+        type: :boolean
       ],
       when: [
         doc:
