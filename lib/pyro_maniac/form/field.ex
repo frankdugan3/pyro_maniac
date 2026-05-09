@@ -25,8 +25,26 @@ defmodule PyroManiac.Form.Field do
         type: :atom
       ],
       combobox_search_arg: [
-        doc:
-          "Combobox search argument key (when the search action takes an action argument for the typed query). Optional — leave nil to filter inline at the call site.",
+        doc: """
+        Argument name on `combobox_search_action` that receives the typed search string.
+
+        Selects between two search modes:
+
+        - **`nil` (default)** — ad-hoc mode. The framework builds the search query
+          inline against `combobox_search_action`, filtering with
+          `contains(^ref(combobox_option_label_key), ^query)`, sorting by the same
+          label key, and applying a default limit. The configured action's own
+          filter/sort/pagination are otherwise honored. This is the path used by
+          the auto-detected `belongs_to` case.
+
+        - **set to an atom** — custom-action mode. The framework calls
+          `Ash.Query.for_read(destination, combobox_search_action, %{<arg> => query})`
+          and **does not** apply its own filter or sort. The action owns the search
+          semantics — useful when you need composite filters, fuzzy/ranked
+          matching, tenant-scoped lookups, or anything beyond a simple
+          `contains/2` on a single field. A default limit is applied only when the
+          action doesn't already paginate.
+        """,
         type: :atom
       ],
       autofocus: [
