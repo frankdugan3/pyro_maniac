@@ -319,22 +319,38 @@ defmodule PyroManiac.Info do
   defp nest_load([head | tail], children), do: {head, [nest_load(tail, children)]}
 
   @doc """
-  Builds the list of loads required by a view's columns or fields.
+  Builds the list of loads required to render a view.
+
+  Combines:
+
+  * The relationship / calculation / aggregate loads implied by the view's
+    columns (`:data_table`), sections (`:grid`), fields, or explicit
+    `loads:` (`:render`).
+  * The resource's `AshStorage` attachment relationships, when the
+    optional `AshStorage` extension is loaded and present on the resource —
+    so a view that surfaces an attachment badge or count always has the
+    underlying relationship populated.
   """
   @spec build_loads_from_view(View.t(), Ash.Resource.t()) :: [atom() | {atom(), any()}]
-  def build_loads_from_view(%View{columns: columns, type: :data_table}, resource) do
+  def build_loads_from_view(view, resource) do
+    view
+    |> do_build_loads_from_view(resource)
+    |> with_attachment_loads(resource)
+  end
+
+  defp do_build_loads_from_view(%View{columns: columns, type: :data_table}, resource) do
     build_loads_from_columns(columns, resource)
   end
 
-  def build_loads_from_view(%View{sections: sections, type: :grid}, resource) do
+  defp do_build_loads_from_view(%View{sections: sections, type: :grid}, resource) do
     build_loads_from_sections(sections, resource)
   end
 
-  def build_loads_from_view(%View{loads: loads, type: :render}, _resource) do
+  defp do_build_loads_from_view(%View{loads: loads, type: :render}, _resource) do
     List.wrap(loads)
   end
 
-  def build_loads_from_view(%View{fields: fields}, resource) when is_list(fields) do
+  defp do_build_loads_from_view(%View{fields: fields}, resource) when is_list(fields) do
     fields
     |> Enum.flat_map(fn field ->
       build_load_for_path(field.source, resource)
@@ -342,7 +358,28 @@ defmodule PyroManiac.Info do
     |> Enum.uniq()
   end
 
-  def build_loads_from_view(_, _), do: []
+  defp do_build_loads_from_view(_, _), do: []
+
+  # Append the resource's attachment relationships when AshStorage is in use.
+  # Soft dependency: when AshStorage isn't compiled in, this is a no-op.
+  defp with_attachment_loads(loads, resource) do
+    loads = List.wrap(loads)
+
+    if Code.ensure_loaded?(AshStorage) and Code.ensure_loaded?(AshStorage.Info) and
+         AshStorage in Spark.extensions(resource) do
+      extras =
+        resource
+        |> AshStorage.Info.attachments()
+        |> Enum.map(& &1.name)
+        |> Enum.reject(&(&1 in loads))
+
+      loads ++ extras
+    else
+      loads
+    end
+  rescue
+    _ -> List.wrap(loads)
+  end
 
   @spec build_loads_from_columns([map()] | map(), Ash.Resource.t()) :: [atom() | {atom(), any()}]
   def build_loads_from_columns(columns, resource) when is_map(columns) do
