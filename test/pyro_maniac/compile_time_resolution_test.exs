@@ -160,6 +160,17 @@ defmodule PyroManiac.CompileTimeResolutionTest do
     end
   end
 
+  describe "belongs_to label stripping" do
+    test "belongs_to _id field drops the _id suffix from the auto label" do
+      assert get_field(BatchPage, :create, :recipe_id).label == "Recipe"
+      assert get_field(BatchPage, :create, :brewer_id).label == "Brewer"
+    end
+
+    test "belongs_to _id field resolves to :combobox" do
+      assert get_field(BatchPage, :create, :recipe_id).type == :combobox
+    end
+  end
+
   describe "enum_options resolution" do
     test "custom Ash enum populates enum_options" do
       field = get_field(RecipePage, :create, :style)

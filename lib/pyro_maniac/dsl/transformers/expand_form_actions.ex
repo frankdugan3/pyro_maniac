@@ -345,7 +345,25 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
         field
       end
 
-    validate_field_type(field, context)
+    field
+    |> maybe_strip_id_label(belongs_to)
+    |> validate_field_type(context)
+  end
+
+  # When a field maps to a belongs_to relationship and its name ends in `_id`,
+  # drop the `_id` from the auto-generated label (e.g. `:supplier_id` -> "Supplier").
+  # A custom label declared in the DSL is left untouched.
+  defp maybe_strip_id_label(field, nil), do: field
+
+  defp maybe_strip_id_label(%Field{name: name, label: label} = field, _belongs_to) do
+    name_str = Atom.to_string(name)
+
+    if String.ends_with?(name_str, "_id") and label == default_label(name) do
+      stripped = String.replace_suffix(name_str, "_id", "")
+      Map.put(field, :label, default_label(stripped))
+    else
+      field
+    end
   end
 
   defp belongs_to_for(resource, field_name) do
