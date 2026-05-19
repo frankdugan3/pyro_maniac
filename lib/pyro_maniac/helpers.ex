@@ -5,23 +5,54 @@ defmodule PyroManiac.Helpers do
 
   @doc """
   Stringifies the column sorting for storage in a url param.
+
+  A sort key may be an atom, a binary, or — when the sort was decoded by
+  `Ash.Sort.parse_input/2` against a calculation or aggregate — an
+  `Ash.Query.Calculation` / `Ash.Query.Aggregate` struct. Input-parsed
+  calc/aggregate structs carry a placeholder `:name` (`:__calc__` /
+  `:__agg__`); their real field identity is `:calc_name` / `:agg_name`, so
+  those are used for encoding.
+
+  ## Examples
+
+      iex> encode_sort([{:name, :asc}, {:code, :desc}])
+      "name,-code"
+
+      iex> encode_sort([{%Ash.Query.Calculation{calc_name: :calibration_status, name: :__calc__}, :desc}])
+      "-calibration_status"
+
+      iex> encode_sort([{%Ash.Query.Aggregate{agg_name: :order_count, name: :__agg__}, :asc}])
+      "order_count"
   """
   def encode_sort(sort) do
     sort
     |> List.wrap()
     |> Enum.map_join(",", fn
       nil -> ""
-      k when is_atom(k) -> "#{k}"
       k when is_binary(k) -> k
       {_k, nil} -> ""
-      {k, :asc} -> "#{k}"
-      {k, :asc_nils_last} -> "#{k}"
-      {k, :asc_nils_first} -> "++#{k}"
-      {k, :desc} -> "-#{k}"
-      {k, :desc_nils_first} -> "-#{k}"
-      {k, :desc_nils_last} -> "--#{k}"
+      {k, :asc} -> field_name(k)
+      {k, :asc_nils_last} -> field_name(k)
+      {k, :asc_nils_first} -> "++" <> field_name(k)
+      {k, :desc} -> "-" <> field_name(k)
+      {k, :desc_nils_first} -> "-" <> field_name(k)
+      {k, :desc_nils_last} -> "--" <> field_name(k)
+      k -> field_name(k)
     end)
   end
+
+  # A sort key resolves to its field name. `Ash.Sort.parse_input/2` yields
+  # `Ash.Query.Calculation` / `Ash.Query.Aggregate` structs whose `:name` is
+  # a placeholder (`:__calc__` / `:__agg__`); the real field identity is
+  # `:calc_name` / `:agg_name`. Atoms/binaries pass through unchanged.
+  defp field_name(%Ash.Query.Calculation{calc_name: name}) when not is_nil(name),
+    do: to_string(name)
+
+  defp field_name(%Ash.Query.Aggregate{agg_name: name}) when not is_nil(name),
+    do: to_string(name)
+
+  defp field_name(%{name: name}), do: to_string(name)
+  defp field_name(name), do: to_string(name)
 
   @doc """
   Toggles the column sorting.
