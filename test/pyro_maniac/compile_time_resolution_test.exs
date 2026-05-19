@@ -294,6 +294,53 @@ defmodule PyroManiac.CompileTimeResolutionTest do
     end
   end
 
+  describe "attachment column tagging" do
+    defmodule AttachmentColumnPage do
+      @moduledoc false
+      use PyroManiac, resource: Brewery.Recipe
+
+      views do
+        view [:read, :list] do
+          type :data_table
+          default_sort "name"
+          exclude([:id, :recipe_ingredients, :batches, :photos_urls])
+          column(:name)
+          column(:style)
+          column(:description)
+          column(:status)
+          column(:target_abv)
+          column(:target_og)
+          column(:target_fg)
+          column(:gravity_spread)
+          column(:ingredient_count)
+          column(:batch_count)
+          column(:photos)
+        end
+      end
+    end
+
+    test "an AshStorage attachment column resolves to type :attachment" do
+      column = get_column(AttachmentColumnPage, :data_table, :photos)
+
+      assert column.type == :attachment
+      assert column.__attachment_destination__ == Brewery.StorageAttachment
+    end
+
+    test "non-attachment columns keep type :default" do
+      column = get_column(AttachmentColumnPage, :data_table, :name)
+
+      assert column.type == :default
+      assert column.__attachment_destination__ == nil
+    end
+  end
+
+  defp get_column(module, type, name) do
+    module
+    |> Info.view_for(:read, type)
+    |> Map.get(:columns)
+    |> Enum.find(&(&1.name == name))
+  end
+
   defp get_field(module, action_name, field_name) do
     module
     |> Info.form_for(action_name)

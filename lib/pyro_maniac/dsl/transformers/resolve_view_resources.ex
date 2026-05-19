@@ -4,6 +4,7 @@ defmodule PyroManiac.Dsl.Transformers.ResolveViewResources do
   use PyroManiac.Dsl.Transformers
 
   alias PyroManiac.Dsl.Error
+  alias PyroManiac.View.Column
   alias PyroManiac.View.View
 
   @ash_resource_transformers Resource.Dsl.transformers()
@@ -35,6 +36,7 @@ defmodule PyroManiac.Dsl.Transformers.ResolveViewResources do
         |> resolve_resource(resource, nil, module)
         |> validate_not_excluded(excluded_actions, module)
         |> resolve_nested_views(resource, module)
+        |> tag_attachment_columns()
       end
 
     dsl =
@@ -46,6 +48,48 @@ defmodule PyroManiac.Dsl.Transformers.ResolveViewResources do
     Enum.reduce(views, dsl, fn view, dsl ->
       Transformer.add_entity(dsl, [:views], view, prepend: true)
     end)
+  end
+
+  # Tags columns whose source is an `AshStorage` attachment relationship as
+  # `type: :attachment` (recording the attachment destination resource), so
+  # downstream renderers show the attachment affordance by default without
+  # requiring an explicit `type:` in the DSL. Soft dependency: a no-op when
+  # `AshStorage` isn't compiled or present on the resource. Only single-segment
+  # column sources on the view's own resource are tagged; an explicit
+  # non-default `type:` is left untouched.
+  defp tag_attachment_columns(%View{} = view) do
+    columns =
+      Enum.map(view.columns || [], fn
+        %Column{type: :default, source: [name]} = column ->
+          case attachment_destination(view.resource, name) do
+            nil -> column
+            dest -> %{column | type: :attachment, __attachment_destination__: dest}
+          end
+
+        column ->
+          column
+      end)
+
+    nested = Enum.map(view.views || [], &tag_attachment_columns/1)
+
+    %{view | columns: columns, views: nested}
+  end
+
+  defp tag_attachment_columns(other), do: other
+
+  defp attachment_destination(nil, _name), do: nil
+
+  defp attachment_destination(resource, name) do
+    if Code.ensure_loaded?(AshStorage) and Code.ensure_loaded?(AshStorage.Info) and
+         AshStorage in Spark.extensions(resource) and
+         Enum.any?(AshStorage.Info.attachments(resource), &(&1.name == name)) do
+      case Ash.Resource.Info.relationship(resource, name) do
+        %{destination: dest} -> dest
+        _ -> nil
+      end
+    end
+  rescue
+    _ -> nil
   end
 
   defp resolve_resource(
