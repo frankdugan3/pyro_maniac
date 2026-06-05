@@ -154,16 +154,7 @@ defmodule PyroManiac.MixProject do
   end
 
   def application do
-    opts = [
-      extra_applications: [:logger, :postgrex],
-      env: [
-        clarity_content_providers: [
-          PyroManiac.Clarity.NavigationDiagram,
-          PyroManiac.Clarity.PageDiagram,
-          PyroManiac.Clarity.KanBanDiagram
-        ]
-      ]
-    ]
+    opts = [extra_applications: [:logger, :postgrex]]
 
     if Mix.env() == :dev do
       Keyword.put(opts, :mod, {Brewery.Application, []})
@@ -196,7 +187,6 @@ defmodule PyroManiac.MixProject do
       {:ash_postgres, "~> 2.0"},
       # Optional deps
       {:ash_storage, github: "ash-project/ash_storage", branch: "main", optional: true},
-      {:clarity, "~> 0.4", optional: true},
       {:igniter, "~> 0.6", optional: true, override: true}
     ]
   end
