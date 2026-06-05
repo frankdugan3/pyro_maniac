@@ -6,8 +6,6 @@ defmodule PyroManiac.DataLoader do
   construction, filtering, sorting, pagination, and result normalization.
   """
 
-  require Ash.Query
-
   @type load_result :: %{
           entries: list(),
           error: term() | nil,

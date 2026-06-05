@@ -8,7 +8,7 @@ defmodule PyroManiac.MixProject do
   Extensible, declarative, framework-agnostic UI DSL for Ash Framework resources.
   """
 
-  @elixir_requirement "~> 1.19"
+  @elixir_requirement "~> 1.20"
 
   def project do
     [

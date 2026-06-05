@@ -338,7 +338,7 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
         )
       end
 
-      if field && !field.public? do
+      if !field.public? do
         Error.raise!(
           module: module,
           location: Entity.property_anno(column, :source) || Entity.anno(column),
@@ -671,8 +671,15 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
        when not is_nil(delegate_to),
        do: validate_non_delegated_view(view, module)
 
-  defp validate_nested_view(%View{name: []} = view, module),
-    do: validate_non_delegated_view(view, module)
+  defp validate_nested_view(%View{name: []} = view, module) do
+    Error.raise!(
+      module: module,
+      location: Entity.anno(view),
+      path: [:views, :view],
+      why: "non-delegated views require `name` to be set",
+      fix: "add an action name like `view :read do ... end`"
+    )
+  end
 
   defp validate_nested_view(%View{resource: nil}, _module), do: :ok
 

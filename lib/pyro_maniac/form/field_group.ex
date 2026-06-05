@@ -15,7 +15,7 @@ defmodule PyroManiac.Form.FieldGroup do
         type: PyroManiac.Dsl.Type.css_class()
       ],
       label: [
-        doc: "The label of this group (defaults to capitalized name).",
+        doc: "The label of this group (defaults to the capitalized last path segment).",
         type: :string
       ],
       path: [

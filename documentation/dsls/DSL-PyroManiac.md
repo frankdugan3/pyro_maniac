@@ -636,7 +636,7 @@ Configure the appearance of form field groups in the `PyroManiac` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#forms-action-field_group-label){: #forms-action-field_group-label } | `String.t` |  | The label of this group (defaults to capitalized name). |
+| [`label`](#forms-action-field_group-label){: #forms-action-field_group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
 ### Options
 
 | Name | Type | Default | Docs |
@@ -800,7 +800,7 @@ Configure the appearance of form field groups in the `PyroManiac` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#forms-action-step-field_group-label){: #forms-action-step-field_group-label } | `String.t` |  | The label of this group (defaults to capitalized name). |
+| [`label`](#forms-action-step-field_group-label){: #forms-action-step-field_group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
 ### Options
 
 | Name | Type | Default | Docs |
@@ -1009,7 +1009,7 @@ Configure the appearance of form field groups in the `PyroManiac` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#forms-bulk_action-field_group-label){: #forms-bulk_action-field_group-label } | `String.t` |  | The label of this group (defaults to capitalized name). |
+| [`label`](#forms-bulk_action-field_group-label){: #forms-bulk_action-field_group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
 ### Options
 
 | Name | Type | Default | Docs |
@@ -1173,7 +1173,7 @@ Configure the appearance of form field groups in the `PyroManiac` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#forms-bulk_action-step-field_group-label){: #forms-bulk_action-step-field_group-label } | `String.t` |  | The label of this group (defaults to capitalized name). |
+| [`label`](#forms-bulk_action-step-field_group-label){: #forms-bulk_action-step-field_group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
 ### Options
 
 | Name | Type | Default | Docs |

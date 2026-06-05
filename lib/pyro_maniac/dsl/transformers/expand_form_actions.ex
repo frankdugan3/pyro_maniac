@@ -244,11 +244,14 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
 
         group
         |> Map.put(:path, group_path)
-        |> Map.put(:label, group.label || default_label(group))
+        |> Map.put(:label, group.label || group_default_label(group_path))
         |> expand_field_description(context)
         |> Map.put(:fields, expand_fields(group.fields, context, group_path))
     end)
   end
+
+  defp group_default_label([]), do: nil
+  defp group_default_label(path), do: default_label(List.last(path))
 
   defp expand_action_description(action, context) do
     description = Map.get(action, :description, context.default_description)
