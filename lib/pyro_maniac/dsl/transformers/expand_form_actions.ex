@@ -353,9 +353,6 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     |> validate_field_type(context)
   end
 
-  # When a field maps to a belongs_to relationship and its name ends in `_id`,
-  # drop the `_id` from the auto-generated label (e.g. `:supplier_id` -> "Supplier").
-  # A custom label declared in the DSL is left untouched.
   defp maybe_strip_id_label(field, nil), do: field
 
   defp maybe_strip_id_label(%Field{name: name, label: label} = field, _belongs_to) do
@@ -886,20 +883,30 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
   defp validate_attachment_upload_declared(action, action_resource, module) do
     declared = attachment_field_names(action.fields)
 
-    for name <- attachment_names(action_resource), name not in declared do
+    for name <- file_argument_names(action, action_resource), name not in declared do
       Error.raise!(
         module: module,
         location: Entity.anno(action),
         path: [:forms, :action, action.name],
         why:
-          "resource #{inspect(action_resource)} has an :#{name} attachment via AshStorage but " <>
-            "this form action does not declare an :attachment field for it",
-        fix:
-          "add `field :#{name}, type: :attachment` to this action, or exclude :#{name} if " <>
-            "attachments are not needed"
+          "action #{inspect(action.name)} has a file argument :#{name} but this form does not " <>
+            "declare a (non-`form_only?`) `type: :attachment` field for it",
+        fix: "add `field :#{name}, type: :attachment` to this action"
       )
     end
   end
+
+  defp file_argument_names(action, action_resource) do
+    action_resource
+    |> Ash.Resource.Info.action(action.name)
+    |> Map.fetch!(:arguments)
+    |> Enum.filter(&file_type?(&1.type))
+    |> Enum.map(& &1.name)
+  end
+
+  defp file_type?(Ash.Type.File), do: true
+  defp file_type?({:array, type}), do: file_type?(type)
+  defp file_type?(_), do: false
 
   defp attachment_names(resource) do
     if Code.ensure_loaded?(AshStorage) and AshStorage in Spark.extensions(resource) do
@@ -921,7 +928,7 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     fields
     |> List.wrap()
     |> Enum.flat_map(fn
-      %Field{type: :attachment, name: name} -> [name]
+      %Field{type: :attachment, form_only?: false, name: name} -> [name]
       %Step{fields: step_fields} -> attachment_field_names(step_fields)
       %FieldGroup{fields: group_fields} -> attachment_field_names(group_fields)
       _ -> []

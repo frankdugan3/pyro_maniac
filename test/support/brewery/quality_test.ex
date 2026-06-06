@@ -93,5 +93,13 @@ defmodule Brewery.QualityTest do
       primary? true
       require_atomic? false
     end
+
+    # Exercises the form-DSL attachment validator: an action that accepts files
+    # via an `Ash.Type.File` argument must declare a `type: :attachment` field.
+    update :archive do
+      accept []
+      require_atomic? false
+      argument :lab_reports, {:array, Ash.Type.File}, allow_nil?: false
+    end
   end
 end

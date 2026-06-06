@@ -28,6 +28,6 @@ defmodule BreweryWeb.QualityTestLive do
   end
 
   forms do
-    exclude [:create, :update]
+    exclude [:create, :update, :archive]
   end
 end
