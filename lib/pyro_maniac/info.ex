@@ -326,6 +326,8 @@ defmodule PyroManiac.Info do
   * The relationship / calculation / aggregate loads implied by the view's
     columns (`:data_table`), sections (`:grid`), fields, or explicit
     `loads:` (`:render`).
+  * The view's `ensure_loaded` load statement, so those fields are always
+    loaded regardless of the view's columns, fields, or sections.
   * The resource's `AshStorage` attachment relationships, when the
     optional `AshStorage` extension is loaded and present on the resource —
     so a view that surfaces an attachment badge or count always has the
@@ -335,8 +337,15 @@ defmodule PyroManiac.Info do
   def build_loads_from_view(view, resource) do
     view
     |> do_build_loads_from_view(resource)
+    |> merge_ensure_loaded(view)
     |> with_attachment_loads(resource)
   end
+
+  defp merge_ensure_loaded(loads, %View{ensure_loaded: [_ | _] = ensure_loaded}) do
+    Enum.uniq(loads ++ ensure_loaded)
+  end
+
+  defp merge_ensure_loaded(loads, _view), do: loads
 
   defp do_build_loads_from_view(%View{columns: columns, type: :data_table}, resource) do
     build_loads_from_columns(columns, resource)

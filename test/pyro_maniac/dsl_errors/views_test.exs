@@ -831,6 +831,66 @@ defmodule PyroManiac.DslErrors.ViewsTest do
     end
   end
 
+  describe "ensure_loaded" do
+    test "ensure_loaded with unknown field" do
+      assert_dsl_error ~r/\[:bogus\] is an invalid Ash load statement for Brewery\.Staff/ do
+        defmodule EnsureLoadedUnknownField do
+          use PyroManiac, resource: Brewery.Staff
+
+          forms do
+            exclude([:create, :update, :deactivate])
+          end
+
+          views do
+            view :read do
+              type :data_table
+              ensure_loaded([:bogus])
+              exclude([:id, :name_email])
+              column :name
+              column :email
+              column :role
+              column :active
+            end
+          end
+        end
+      end
+    end
+
+    test "ensure_loaded not allowed on delegated views" do
+      expected = """
+      [PyroManiac.DslErrors.ViewsTest.EnsureLoadedOnDelegated]
+      views -> view -> delegated defined in <FILE:LINE>:
+        `ensure_loaded` is not allowed on `:delegated` views — the delegated module owns its own loads
+
+        Fix: set `ensure_loaded` on the views inside the delegated module instead
+      │
+      <LINE> │               ensure_loaded([:name])
+      │               ~~~~~~~~~~~~~~~~~~~~~~
+      │
+      └─ <FILE:LINE>: (file)\
+      """
+
+      assert_dsl_error expected do
+        defmodule EnsureLoadedOnDelegated do
+          use PyroManiac, resource: Brewery.Recipe
+
+          forms do
+            exclude([:create, :update, :activate, :retire])
+          end
+
+          views do
+            view do
+              type :delegated
+              relationship :batches
+              delegate_to PyroManiac.DslErrors.ViewsTest.EnsureLoadedOnDelegated
+              ensure_loaded([:name])
+            end
+          end
+        end
+      end
+    end
+  end
+
   describe "default_sort key validation" do
     test "default_sort references column not defined in view (with did-you-mean)" do
       expected = """

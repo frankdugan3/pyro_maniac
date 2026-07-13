@@ -2,6 +2,7 @@ defmodule PyroManiac.Dsl.Type do
   @moduledoc false
 
   @css_class {:or, [nil, :string, {:fun, [:map], :string}]}
+  @load {:list, {:or, [:atom, {:tuple, [:atom, :any]}]}}
   @pagination {:one_of, [:keyset, :offset, :none]}
   @render_fn {:fun, [:map], :any}
   @sort {:or,
@@ -47,6 +48,11 @@ defmodule PyroManiac.Dsl.Type do
   def edit_with do
     {:or, [nil, :atom, {:tuple, [:atom, :atom]}, @render_fn]}
   end
+
+  @doc """
+  An Ash load statement: a list of field names and/or nested `{relationship, loads}` keywords.
+  """
+  def load, do: @load
 
   @doc """
   Ash pagination strategies.

@@ -107,6 +107,13 @@ defmodule PyroManiac.View.View do
         doc: "Fields to exclude from this view.",
         type: {:list, :atom}
       ],
+      ensure_loaded: [
+        default: [],
+        doc:
+          "Ash load statement always applied when loading data for this view, " <>
+            "in addition to the loads inferred from columns, fields, and sections.",
+        type: PyroManiac.Dsl.Type.load()
+      ],
       on_create: [
         doc: "How to handle PubSub create notifications.",
         type: PyroManiac.Dsl.Type.on_create()

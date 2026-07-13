@@ -117,6 +117,18 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
       )
     end
 
+    if view.ensure_loaded != [] do
+      Error.raise!(
+        module: module,
+        location: Entity.property_anno(view, :ensure_loaded) || Entity.anno(view),
+        path: [:views, :view, :delegated],
+        why:
+          "`ensure_loaded` is not allowed on `:delegated` views — " <>
+            "the delegated module owns its own loads",
+        fix: "set `ensure_loaded` on the views inside the delegated module instead"
+      )
+    end
+
     if view.columns != [] or view.fields != [] or view.sections != [] or
          (is_list(view.views) and view.views != []) do
       Error.raise!(
@@ -154,7 +166,29 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
     end
   end
 
-  defp validate_view(%View{type: :data_table} = view, resource, module) do
+  defp validate_view(%View{} = view, resource, module) do
+    validate_ensure_loaded(view, resource, module)
+    do_validate_view(view, resource, module)
+  end
+
+  defp validate_ensure_loaded(%View{ensure_loaded: []}, _resource, _module), do: :ok
+
+  defp validate_ensure_loaded(%View{ensure_loaded: ensure_loaded} = view, resource, module) do
+    query = Ash.Query.load(Ash.Query.new(resource), ensure_loaded)
+
+    if !query.valid? do
+      Error.raise!(
+        module: module,
+        location: Entity.property_anno(view, :ensure_loaded) || Entity.anno(view),
+        path: [:views, :view, hd(view.name), :ensure_loaded],
+        why:
+          "#{inspect(ensure_loaded)} is an invalid Ash load statement for #{inspect(resource)}.\n\n" <>
+            Ash.Error.error_descriptions(query.errors)
+      )
+    end
+  end
+
+  defp do_validate_view(%View{type: :data_table} = view, resource, module) do
     validate_action_exists(view, resource, module)
     validate_no_duplicate_columns(view, module)
     validate_all_columns_valid(view, resource, module)
@@ -166,7 +200,7 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
     validate_nested_views(view, module)
   end
 
-  defp validate_view(%View{type: :render} = view, _resource, module) do
+  defp do_validate_view(%View{type: :render} = view, _resource, module) do
     if is_nil(view.render) && is_nil(view.component) do
       Error.raise!(
         module: module,
@@ -178,7 +212,7 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
     end
   end
 
-  defp validate_view(%View{type: :kanban} = view, resource, module) do
+  defp do_validate_view(%View{type: :kanban} = view, resource, module) do
     validate_action_exists(view, resource, module)
 
     if !PyroManiac.KanBan.Info.has_kanban?(resource) do
@@ -195,7 +229,7 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
     validate_nested_views(view, module)
   end
 
-  defp validate_view(%View{type: :calendar} = view, resource, module) do
+  defp do_validate_view(%View{type: :calendar} = view, resource, module) do
     validate_action_exists(view, resource, module)
 
     if is_nil(view.date_field) do
@@ -214,7 +248,7 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
     validate_nested_views(view, module)
   end
 
-  defp validate_view(%View{type: :gantt} = view, resource, module) do
+  defp do_validate_view(%View{type: :gantt} = view, resource, module) do
     validate_action_exists(view, resource, module)
     candidates = date_attribute_names(resource)
 
@@ -243,7 +277,7 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
     validate_nested_views(view, module)
   end
 
-  defp validate_view(%View{} = view, resource, module) do
+  defp do_validate_view(%View{} = view, resource, module) do
     validate_action_exists(view, resource, module)
     validate_nested_views(view, module)
   end
