@@ -94,12 +94,13 @@ defmodule PyroManiac.Dsl.Transformers.ValidatePage do
     {:ok, dsl}
   end
 
-  defp validate_tenant_resource(config, _dsl, module) do
+  defp validate_tenant_resource(config, dsl, module) do
     tenant_resource = config.resource
+    page_resource = Transformer.get_persisted(dsl, :resource)
 
     ash_postgres_info = Module.concat([:AshPostgres, :DataLayer, :Info])
 
-    if Code.ensure_loaded?(ash_postgres_info) do
+    if context_multitenancy?(page_resource) and Code.ensure_loaded?(ash_postgres_info) do
       template = ash_postgres_info.manage_tenant_template(tenant_resource)
 
       if !template do
@@ -138,23 +139,29 @@ defmodule PyroManiac.Dsl.Transformers.ValidatePage do
     if resource do
       strategy = Resource.Info.multitenancy_strategy(resource)
 
-      if strategy != :context do
+      if strategy not in [:context, :attribute] do
         Error.raise!(
           module: module,
           location: Transformer.get_section_anno(dsl, [:page]),
           path: [:page, :tenant_from],
           why:
-            "tenant_from requires the page resource to use `multitenancy strategy: :context`, " <>
-              "but #{inspect(resource)} has multitenancy strategy: #{inspect(strategy)}",
+            "tenant_from requires the page resource to be multitenant " <>
+              "(`strategy :context` or `strategy :attribute`), but #{inspect(resource)} has " <>
+              "multitenancy strategy: #{inspect(strategy)}",
           fix:
-            "set `multitenancy do strategy :context end` on #{inspect(resource)}, or remove " <>
-              "`tenant_from` from this page"
+            "set `multitenancy do strategy :context end` (or `strategy :attribute`) on " <>
+              "#{inspect(resource)}, or remove `tenant_from` from this page"
         )
       end
     end
 
     :ok
   end
+
+  defp context_multitenancy?(nil), do: false
+
+  defp context_multitenancy?(resource),
+    do: Resource.Info.multitenancy_strategy(resource) == :context
 
   defp label_field_suggestions(name, resource) do
     candidates =
