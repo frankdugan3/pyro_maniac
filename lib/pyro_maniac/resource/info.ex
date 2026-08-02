@@ -10,7 +10,7 @@ defmodule PyroManiac.Resource.Info do
   end
 
   @doc "Returns the default label value for a given record, rendered through Presenter."
-  @spec record_label(Ash.Resource.t(), Ash.Resource.record(), any()) :: String.t()
+  @spec record_label(Ash.Resource.t(), Ash.Resource.Record.t(), any()) :: String.t()
   def record_label(resource, record, scope \\ nil) do
     field = default_label(resource)
     value = field && Map.get(record, field)

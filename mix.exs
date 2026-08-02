@@ -18,10 +18,7 @@ defmodule PyroManiac.MixProject do
       consolidate_protocols: Mix.env() not in [:dev, :test],
       deps: deps(),
       description: @description,
-      dialyzer: [
-        plt_add_apps: [:ash, :spark, :ecto, :mix, :ex_unit],
-        ignore_warnings: ".dialyzer_ignore.exs"
-      ],
+      dialyzer: [plt_add_apps: [:ash, :spark, :ecto, :mix, :ex_unit]],
       docs: &docs/0,
       elixir: @elixir_requirement,
       elixirc_paths: elixirc_paths(Mix.env()),
