@@ -4,7 +4,7 @@ defmodule PyroManiac.Info do
   """
 
   alias PyroManiac.Form.{Action, BulkAction, FieldGroup}
-  alias PyroManiac.Page.{ExtraAction, TenantFrom}
+  alias PyroManiac.Page.ExtraAction
   alias PyroManiac.Search
   alias PyroManiac.TypeInfer
   alias PyroManiac.View.View
@@ -47,13 +47,6 @@ defmodule PyroManiac.Info do
   @spec track_presence?(PyroManiac.t()) :: boolean()
   def track_presence?(pyro_maniac) do
     Spark.Dsl.Extension.get_opt(pyro_maniac, [:page], :track_presence?, false)
-  end
-
-  @spec tenant_from(PyroManiac.t()) :: TenantFrom.t() | nil
-  def tenant_from(pyro_maniac) do
-    pyro_maniac
-    |> Spark.Dsl.Extension.get_entities([:page])
-    |> Enum.find(&match?(%TenantFrom{}, &1))
   end
 
   @spec page_extra_actions(PyroManiac.t()) :: [ExtraAction.t()]

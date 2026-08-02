@@ -26,7 +26,6 @@ defmodule PyroManiac.DataLoader do
   - `:page_params` — map of pagination params (`"offset"`, `"limit"`, `"after"`, `"before"`)
   - `:pagination_config` — action pagination struct/map
   - `:default_page_size` — DSL default page size override
-  - `:tenant` — tenant string for multi-tenant queries
   """
   @spec load_list(module(), atom(), map()) :: load_result()
   def load_list(resource, action_name, opts \\ %{}) do
@@ -43,12 +42,9 @@ defmodule PyroManiac.DataLoader do
     action = Ash.Resource.Info.action(resource, action_name)
     resolved_pagination = pagination_config || (action && action.pagination)
 
-    tenant = opts[:tenant]
-
     query =
       resource
       |> Ash.Query.for_read(action_name, arguments, scope: scope)
-      |> maybe_apply_tenant(tenant)
       |> maybe_apply_filter(filter)
       |> maybe_apply_sort(sort)
       |> maybe_apply_loads(loads)
@@ -90,21 +86,15 @@ defmodule PyroManiac.DataLoader do
 
   @doc """
   Load a single record by primary key.
-
-  ## Opts
-
-  - `:tenant` — tenant string for multi-tenant queries
   """
-  @spec load_record(module(), term(), term(), keyword()) :: struct() | nil
-  def load_record(resource, id, scope, opts \\ []) do
+  @spec load_record(module(), term(), term()) :: struct() | nil
+  def load_record(resource, id, scope) do
     [pk_field | _] = Ash.Resource.Info.primary_key(resource)
     filter = %{pk_field => id}
-    tenant = opts[:tenant]
     label_loads = PyroManiac.Info.default_label_load(resource)
 
     resource
     |> Ash.Query.filter_input(filter)
-    |> maybe_apply_tenant(tenant)
     |> Ash.Query.load(label_loads)
     |> Ash.read_one(scope: scope)
     |> case do
@@ -119,19 +109,16 @@ defmodule PyroManiac.DataLoader do
   ## Opts
 
   - `:scope` — Ash scope
-  - `:tenant` — tenant string for multi-tenant queries
   """
   @spec run_action(module(), atom(), map(), map()) :: {:ok, struct()} | {:error, term()}
   def run_action(resource, action_name, params, opts \\ %{}) do
     scope = opts[:scope]
-    tenant = opts[:tenant]
     action = Ash.Resource.Info.action(resource, action_name)
 
     case action.type do
       :create ->
         resource
         |> Ash.Changeset.for_create(action_name, params, scope: scope)
-        |> maybe_set_tenant_on_changeset(tenant)
         |> Ash.create()
 
       :update ->
@@ -140,7 +127,6 @@ defmodule PyroManiac.DataLoader do
 
         record
         |> Ash.Changeset.for_update(action_name, attrs, scope: scope)
-        |> maybe_set_tenant_on_changeset(tenant)
         |> Ash.update()
 
       :destroy ->
@@ -148,18 +134,9 @@ defmodule PyroManiac.DataLoader do
 
         record
         |> Ash.Changeset.for_destroy(action_name, %{}, scope: scope)
-        |> maybe_set_tenant_on_changeset(tenant)
         |> Ash.destroy()
     end
   end
-
-  defp maybe_set_tenant_on_changeset(changeset, nil), do: changeset
-
-  defp maybe_set_tenant_on_changeset(changeset, tenant),
-    do: Ash.Changeset.set_tenant(changeset, tenant)
-
-  defp maybe_apply_tenant(query, nil), do: query
-  defp maybe_apply_tenant(query, tenant), do: Ash.Query.set_tenant(query, tenant)
 
   defp maybe_apply_filter(query, nil), do: query
   defp maybe_apply_filter(query, filter) when filter == %{}, do: query

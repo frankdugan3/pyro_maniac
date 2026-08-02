@@ -6,7 +6,6 @@ defmodule PyroManiac.Dsl do
       %Spark.Dsl.Section{
         describe: "Page-level configuration for the PyroManiac UI.",
         entities: [
-          PyroManiac.Page.TenantFrom.__entity__(),
           PyroManiac.Page.ExtraAction.__entity__()
         ],
         name: :page,
