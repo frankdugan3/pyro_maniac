@@ -38,16 +38,16 @@ across recent versions.
 
 ## Sub-rules
 
-| Topic                                   | When to read                                                                                |
-| --------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [page](usage-rules/page.md)             | Defining a page module: `use PyroManiac`, the `page` section, `tenant_from`, `extra_action` |
-| [views](usage-rules/views.md)           | The `views` section: every view type and its entities                                       |
-| [forms](usage-rules/forms.md)           | The `forms` section: `action`, `bulk_action`, fields, groups, steps                         |
-| [searches](usage-rules/searches.md)     | The `searches` section: filter tabs                                                         |
-| [resource](usage-rules/resource.md)     | Adding `PyroManiac.Resource` to an Ash resource                                             |
-| [navigation](usage-rules/navigation.md) | Declaring a `PyroManiac.Navigation` module                                                  |
-| [kan_ban](usage-rules/kan_ban.md)       | Adding `PyroManiac.KanBan` to a resource for kanban support                                 |
-| [info](usage-rules/info.md)             | Runtime introspection via `PyroManiac.Info`                                                 |
+| Topic                                   | When to read                                                                 |
+| --------------------------------------- | ---------------------------------------------------------------------------- |
+| [page](usage-rules/page.md)             | Defining a page module: `use PyroManiac`, the `page` section, `extra_action` |
+| [views](usage-rules/views.md)           | The `views` section: every view type and its entities                        |
+| [forms](usage-rules/forms.md)           | The `forms` section: `action`, `bulk_action`, fields, groups, steps          |
+| [searches](usage-rules/searches.md)     | The `searches` section: filter tabs                                          |
+| [resource](usage-rules/resource.md)     | Adding `PyroManiac.Resource` to an Ash resource                              |
+| [navigation](usage-rules/navigation.md) | Declaring a `PyroManiac.Navigation` module                                   |
+| [kan_ban](usage-rules/kan_ban.md)       | Adding `PyroManiac.KanBan` to a resource for kanban support                  |
+| [info](usage-rules/info.md)             | Runtime introspection via `PyroManiac.Info`                                  |
 
 ## Generating code
 

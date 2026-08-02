@@ -126,8 +126,7 @@ end
 (`:data_table` | `:grid` | `:calendar` | `:gantt` | `:kanban` | `:list`,
 default `:data_table`), `track_presence?` (default `true`).
 
-Nested entities: `tenant_from` (singleton, modes `:scope`/`:select`/`:combobox`),
-`extra_action` (custom toolbar/row buttons).
+Nested entities: `extra_action` (custom toolbar/row buttons).
 
 ### `views` section
 
@@ -227,7 +226,7 @@ does **not** ship a routes generator.
 
 - `resource/1`, `default_label/1`, `loads/1`
 - `title/1`, `description/1`, `route/1`, `default_viewer/1`, `track_presence?/1`
-- `tenant_from/1`, `page_extra_actions/1`, `view_extra_actions/1`
+- `page_extra_actions/1`, `view_extra_actions/1`
 - `views/1`, `view_for/3`, `views_of_type/2`, `primary_view/2`,
   `view_for_action/2`
 - `form_actions/1`, `form_actions_for_resource/2`, `form_for/2-3`,

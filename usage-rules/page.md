@@ -55,43 +55,6 @@ page do
 end
 ```
 
-## Multi-tenancy: `tenant_from`
-
-`tenant_from` is a singleton entity inside the `page` section. It declares
-how the renderer should resolve the active tenant.
-
-```elixir
-page do
-  title "Recipes"
-
-  tenant_from :scope
-end
-```
-
-Modes:
-
-- `:scope` — Tenant is set by the Ash scope (plug, hook, etc.). No selector UI.
-- `:select` — Renderer renders a `<select>` populated from a tenant resource.
-- `:combobox` — Same as `:select` but renderer should use a searchable combobox.
-
-`:select` and `:combobox` require additional keys:
-
-```elixir
-tenant_from :select do
-  resource MyApp.Accounts.Organization
-  label_field :name
-  param "org"
-  read_action :read_active
-end
-```
-
-| Key           | Required when         | Notes                                          |
-| ------------- | --------------------- | ---------------------------------------------- |
-| `resource`    | `:select`/`:combobox` | Tenant resource to read from                   |
-| `label_field` | `:select`/`:combobox` | Display field on the tenant resource           |
-| `param`       | optional              | URL query parameter name (default `"tenant"`)  |
-| `read_action` | optional              | Read action to load tenants (default: primary) |
-
 ## Custom toolbar buttons: `extra_action`
 
 `extra_action` adds a custom action button rendered by the renderer in

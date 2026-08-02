@@ -159,7 +159,7 @@ action :onboard do
   end
 
   step :preferences do
-    field :default_tenant_id
+    field :timezone
   end
 
   step :review do

@@ -20,7 +20,6 @@ detail.
 | `route/1`              | Route path (string or nil)                                                                     |
 | `default_viewer/1`     | Default viewer atom                                                                            |
 | `track_presence?/1`    | Boolean                                                                                        |
-| `tenant_from/1`        | The `TenantFrom` struct or nil                                                                 |
 | `page_extra_actions/1` | List of page-level `ExtraAction` structs                                                       |
 | `loads/1`              | Ash load statement for the `default_label` (calculation/aggregate) — empty list for attributes |
 
