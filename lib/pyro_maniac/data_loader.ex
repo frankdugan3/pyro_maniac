@@ -25,6 +25,10 @@ defmodule PyroManiac.DataLoader do
   - `:filter` — filter map passed to `Ash.Query.filter_input/2` — pulled from URL params or scoped by callers (e.g. `%{vendor_id: id}` or `%{"name" => %{"contains" => "ipa"}}`)
   - `:page_params` — map of pagination params (`"offset"`, `"limit"`, `"after"`, `"before"`)
   - `:pagination_config` — action pagination struct/map
+  - `:pagination_type` — `:keyset`, `:offset` or `:none`; the view's declared
+    strategy. Defaults to whatever the action supports — see `pagination_type/3`.
+  - `:count?` — whether to ask for a total count. Defaults per strategy — see
+    `count?/2`.
   - `:default_page_size` — DSL default page size override
   """
   @spec load_list(module(), atom(), map()) :: load_result()
@@ -35,12 +39,10 @@ defmodule PyroManiac.DataLoader do
     sort = opts[:sort] || []
     loads = opts[:loads] || []
     aggregates = opts[:aggregates] || []
-    page_params = opts[:page_params] || %{}
-    pagination_config = opts[:pagination_config]
-    default_page_size = opts[:default_page_size]
 
     action = Ash.Resource.Info.action(resource, action_name)
-    resolved_pagination = pagination_config || (action && action.pagination)
+    resolved_pagination = opts[:pagination_config] || (action && action.pagination)
+    type = resolve_pagination_type(resolved_pagination, opts[:pagination_type])
 
     query =
       resource
@@ -51,26 +53,65 @@ defmodule PyroManiac.DataLoader do
       |> maybe_apply_aggregates(aggregates)
 
     query
-    |> execute_read(resolved_pagination, page_params, default_page_size, scope)
+    |> execute_read(type, resolved_pagination, opts, scope)
     |> normalize_result()
   end
 
-  defp execute_read(query, %{offset?: true} = pagination, page_params, default_page_size, scope) do
-    Ash.read(query,
-      page: build_page_opts(page_params, pagination, default_page_size),
-      scope: scope
-    )
+  @doc """
+  The pagination strategy a read of `action_name` will use.
+
+  `declared` is a view's `pagination` DSL option and wins whenever the action
+  actually offers that strategy. Defaults to offset if available, keyset otherwise.
+  """
+  @spec pagination_type(module(), atom(), :keyset | :offset | :none | nil) ::
+          :keyset | :offset | :none
+  def pagination_type(resource, action_name, declared \\ nil) do
+    action = Ash.Resource.Info.action(resource, action_name)
+    resolve_pagination_type(action && action.pagination, declared)
   end
 
-  defp execute_read(query, %{keyset?: true} = pagination, page_params, default_page_size, scope) do
-    Ash.read(query,
-      page: build_page_opts(page_params, pagination, default_page_size),
-      scope: scope
-    )
+  defp resolve_pagination_type(pagination, _declared) when pagination in [nil, false], do: :none
+
+  defp resolve_pagination_type(pagination, declared) do
+    cond do
+      declared == :none -> :none
+      declared == :keyset and get_pagination_field(pagination, :keyset?) -> :keyset
+      declared == :offset and get_pagination_field(pagination, :offset?) -> :offset
+      get_pagination_field(pagination, :offset?) -> :offset
+      get_pagination_field(pagination, :keyset?) -> :keyset
+      true -> :none
+    end
   end
 
-  defp execute_read(query, _pagination, _page_params, _default_page_size, scope) do
+  @doc """
+  Whether a paginated read of `action_name` should ask for a total count.
+
+  Offset counts by default if allowed.
+  """
+  @spec count?(module(), atom(), boolean() | nil, :keyset | :offset | :none | nil) :: boolean()
+  def count?(resource, action_name, declared \\ nil, type \\ nil) do
+    action = Ash.Resource.Info.action(resource, action_name)
+    pagination = action && action.pagination
+
+    resolve_count?(type || resolve_pagination_type(pagination, nil), declared, pagination)
+  end
+
+  defp resolve_count?(_type, _declared, pagination) when pagination in [nil, false], do: false
+
+  defp resolve_count?(type, declared, pagination) do
+    cond do
+      get_pagination_field(pagination, :countable) not in [true, :by_default] -> false
+      is_boolean(declared) -> declared
+      true -> type == :offset
+    end
+  end
+
+  defp execute_read(query, :none, _pagination, _opts, scope) do
     Ash.read(query, scope: scope)
+  end
+
+  defp execute_read(query, type, pagination, opts, scope) do
+    Ash.read(query, page: build_page_opts(type, pagination, opts), scope: scope)
   end
 
   defp normalize_result({:ok, %Ash.Page.Offset{} = page}),
@@ -156,43 +197,33 @@ defmodule PyroManiac.DataLoader do
     end)
   end
 
-  defp build_page_opts(page_params, pagination_config, dsl_default_page_size) do
+  defp build_page_opts(type, pagination_config, opts) do
+    page_params = opts[:page_params] || %{}
+
     default_limit =
-      dsl_default_page_size ||
+      opts[:default_page_size] ||
         get_pagination_field(pagination_config, :default_limit, 25)
 
-    limit = parse_int(page_params["limit"]) || default_limit
+    [
+      limit: parse_int(page_params["limit"]) || default_limit,
+      count: resolve_count?(type, opts[:count?], pagination_config)
+    ]
+    |> put_position(type, page_params)
+  end
 
-    opts = [limit: limit]
+  defp put_position(opts, :offset, page_params),
+    do: Keyword.put(opts, :offset, parse_int(page_params["offset"]) || 0)
 
-    opts =
-      if page_params["after"] || page_params["before"] do
-        opts
-      else
-        offset = parse_int(page_params["offset"]) || 0
-        Keyword.put(opts, :offset, offset)
-      end
-
-    opts =
-      if page_params["after"] do
-        Keyword.put(opts, :after, page_params["after"])
-      else
-        opts
-      end
-
-    opts =
-      if page_params["before"] do
-        Keyword.put(opts, :before, page_params["before"])
-      else
-        opts
-      end
-
-    if get_pagination_field(pagination_config, :countable) do
-      Keyword.put(opts, :count, true)
-    else
-      opts
+  defp put_position(opts, :keyset, page_params) do
+    case {presence(page_params["after"]), presence(page_params["before"])} do
+      {nil, nil} -> opts
+      {nil, before_cursor} -> Keyword.put(opts, :before, before_cursor)
+      {after_cursor, _} -> Keyword.put(opts, :after, after_cursor)
     end
   end
+
+  defp presence(value) when is_binary(value) and value != "", do: value
+  defp presence(_value), do: nil
 
   defp get_pagination_field(config, field, default),
     do: get_pagination_field(config, field) || default

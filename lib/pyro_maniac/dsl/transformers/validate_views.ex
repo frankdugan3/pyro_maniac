@@ -323,6 +323,69 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
           fix: "pick a read action, or change action #{inspect(name)} to type :read"
         )
       end
+
+      validate_pagination_supported(view, name, resource_action, resource, module)
+      validate_count_supported(view, name, resource_action, resource, module)
+    end
+  end
+
+  defp validate_count_supported(%View{count?: true} = view, name, action, resource, module) do
+    if action.pagination == false or
+         (action.pagination && action.pagination.countable not in [true, :by_default]) do
+      Error.raise!(
+        module: module,
+        location: Entity.property_anno(view, :count?) || Entity.anno(view),
+        path: [:views, :view, name, :count?],
+        why:
+          "view declares `count? true` but action #{inspect(name)} on #{inspect(resource)} " <>
+            "is not countable",
+        fix:
+          "add `countable true` to the action's `pagination` block on #{inspect(resource)}, " <>
+            "or drop `count?` and let the strategy's default stand"
+      )
+    end
+  end
+
+  defp validate_count_supported(_view, _name, _action, _resource, _module), do: :ok
+
+  defp validate_pagination_supported(%View{pagination: nil}, _name, _action, _resource, _module),
+    do: :ok
+
+  defp validate_pagination_supported(
+         %View{pagination: :none},
+         _name,
+         _action,
+         _resource,
+         _module
+       ),
+       do: :ok
+
+  defp validate_pagination_supported(
+         %View{pagination: type} = view,
+         name,
+         action,
+         resource,
+         module
+       ) do
+    supported? =
+      case {type, action.pagination} do
+        {_type, pagination} when pagination in [nil, false] -> false
+        {:keyset, pagination} -> pagination.keyset?
+        {:offset, pagination} -> pagination.offset?
+      end
+
+    if !supported? do
+      Error.raise!(
+        module: module,
+        location: Entity.property_anno(view, :pagination) || Entity.anno(view),
+        path: [:views, :view, name, :pagination],
+        why:
+          "view declares `pagination #{inspect(type)}` but action #{inspect(name)} on " <>
+            "#{inspect(resource)} does not support it",
+        fix:
+          "add `#{type}? true` to the action's `pagination` block on #{inspect(resource)}, " <>
+            "or declare a strategy it already supports"
+      )
     end
   end
 

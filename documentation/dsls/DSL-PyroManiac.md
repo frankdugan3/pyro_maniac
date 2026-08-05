@@ -129,6 +129,7 @@ Declare a view for displaying resource data. Can be nested recursively.
 | [`page_sizes`](#views-view-page_sizes){: #views-view-page_sizes } | `list(pos_integer)` |  | Available page size options for pagination controls. |
 | [`default_sort`](#views-view-default_sort){: #views-view-default_sort } | `String.t \| list({atom, :asc \| :desc \| :asc_nils_first \| :asc_nils_last \| :desc_nils_first \| :desc_nils_last}) \| list(atom) \| list(String.t) \| nil` |  | Default sort specification. |
 | [`pagination`](#views-view-pagination){: #views-view-pagination } | `:keyset \| :offset \| :none` |  | Pagination type. Auto-detected from resource action if not set. |
+| [`count?`](#views-view-count?){: #views-view-count? } | `boolean` |  | Display page count. Defaults to true for offset if allowed. |
 | [`read_action`](#views-view-read_action){: #views-view-read_action } | `atom` |  | Override which read action to use on the target resource. |
 | [`exclude`](#views-view-exclude){: #views-view-exclude } | `list(atom)` | `[]` | Fields to exclude from this view. |
 | [`ensure_loaded`](#views-view-ensure_loaded){: #views-view-ensure_loaded } | `list(atom \| {atom, any})` | `[]` | Ash load statement always applied when loading data for this view, in addition to the loads inferred from columns, fields, and sections. |

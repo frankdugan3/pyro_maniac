@@ -1289,5 +1289,97 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         end
       end
     end
+
+    test "pagination the read action does not support" do
+      expected = ~r"""
+      views -> view -> list -> pagination defined in <FILE:LINE>:
+        view declares `pagination :keyset` but action :list on Brewery\.Recipe does not support it
+
+        Fix: add `keyset\? true` to the action's `pagination` block on Brewery\.Recipe, or declare a strategy it already supports\
+      """
+
+      assert_dsl_error expected do
+        defmodule UnsupportedPagination do
+          use PyroManiac, resource: Brewery.Recipe
+
+          forms do
+            exclude([:create, :update, :activate, :retire])
+          end
+
+          views do
+            view :list do
+              type :data_table
+              default_sort "name"
+              pagination :keyset
+
+              exclude([
+                :id,
+                :recipe_ingredients,
+                :batches,
+                :photos,
+                :photos_urls,
+                :gravity_spread
+              ])
+
+              column :name
+              column :style
+              column :description
+              column :status
+              column :target_abv
+              column :target_og
+              column :target_fg
+              column :ingredient_count
+              column :batch_count
+            end
+          end
+        end
+      end
+    end
+
+    test "count? true on a read action that is not countable" do
+      expected = ~r"""
+      views -> view -> list -> count\? defined in <FILE:LINE>:
+        view declares `count\? true` but action :list on Brewery\.Recipe is not countable
+
+        Fix: add `countable true` to the action's `pagination` block on Brewery\.Recipe, or drop `count\?` and let the strategy's default stand\
+      """
+
+      assert_dsl_error expected do
+        defmodule UncountableCount do
+          use PyroManiac, resource: Brewery.Recipe
+
+          forms do
+            exclude([:create, :update, :activate, :retire])
+          end
+
+          views do
+            view :list do
+              type :data_table
+              default_sort "name"
+              count? true
+
+              exclude([
+                :id,
+                :recipe_ingredients,
+                :batches,
+                :photos,
+                :photos_urls,
+                :gravity_spread
+              ])
+
+              column :name
+              column :style
+              column :description
+              column :status
+              column :target_abv
+              column :target_og
+              column :target_fg
+              column :ingredient_count
+              column :batch_count
+            end
+          end
+        end
+      end
+    end
   end
 end

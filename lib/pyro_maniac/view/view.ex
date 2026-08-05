@@ -98,6 +98,10 @@ defmodule PyroManiac.View.View do
         doc: "Pagination type. Auto-detected from resource action if not set.",
         type: PyroManiac.Dsl.Type.pagination()
       ],
+      count?: [
+        doc: "Display page count. Defaults to true for offset if allowed.",
+        type: :boolean
+      ],
       read_action: [
         doc: "Override which read action to use on the target resource.",
         type: :atom
