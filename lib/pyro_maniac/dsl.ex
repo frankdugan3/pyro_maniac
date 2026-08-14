@@ -95,6 +95,7 @@ defmodule PyroManiac.Dsl do
     ],
     transformers: [
       __MODULE__.Transformers.ResolveViewResources,
+      __MODULE__.Transformers.ExpandViewArguments,
       __MODULE__.Transformers.ValidateViews,
       __MODULE__.Transformers.ExpandFormActions,
       __MODULE__.Transformers.ValidatePage

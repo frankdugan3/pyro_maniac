@@ -106,6 +106,13 @@ defmodule PyroManiac.View.View do
         doc: "Override which read action to use on the target resource.",
         type: :atom
       ],
+      __arguments__: [
+        private?: true,
+        hide: true,
+        default: [],
+        doc: "Read action arguments as resolved fields. Set by the transformer.",
+        type: {:list, :any}
+      ],
       exclude: [
         default: [],
         doc: "Fields to exclude from this view.",

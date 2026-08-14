@@ -1,5 +1,6 @@
 # Used by "mix format"
 spark_locals_without_parens = [
+  __arguments__: 1,
   __attachment_destination__: 1,
   __enum_type__: 1,
   action: 1,
