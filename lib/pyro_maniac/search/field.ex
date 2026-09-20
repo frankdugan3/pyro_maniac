@@ -20,6 +20,11 @@ defmodule PyroManiac.Search.Field do
         required: true,
         type: :atom
       ],
+      negated?: [
+        default: false,
+        doc: "Negate the field's predicate (e.g. `not contains`).",
+        type: :boolean
+      ],
       operator: [
         default: :contains,
         doc: "Operator for predicates.",

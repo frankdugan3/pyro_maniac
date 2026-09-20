@@ -1283,6 +1283,7 @@ Declare a field in the search form.
 | Name | Type | Default | Docs |
 |------|------|---------|------|
 | [`label`](#searches-search-field-label){: #searches-search-field-label } | `String.t` |  | Input label (defaults to humanized name). |
+| [`negated?`](#searches-search-field-negated?){: #searches-search-field-negated? } | `boolean` | `false` | Negate the field's predicate (e.g. `not contains`). |
 | [`operator`](#searches-search-field-operator){: #searches-search-field-operator } | `atom` | `:contains` | Operator for predicates. |
 | [`source`](#searches-search-field-source){: #searches-search-field-source } | `list(atom \| list(atom))` |  | Source fields/paths to search across (defaults to [name]). Values are OR'd. |
 | [`value`](#searches-search-field-value){: #searches-search-field-value } | `any` |  | Default value to pre-fill the field. |

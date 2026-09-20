@@ -84,6 +84,7 @@ spark_locals_without_parens = [
   module: 1,
   move_action: 1,
   multiple?: 1,
+  negated?: 1,
   on_create: 1,
   on_destroy: 1,
   on_update: 1,
