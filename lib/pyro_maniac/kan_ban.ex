@@ -7,6 +7,24 @@ defmodule PyroManiac.KanBan do
   attribute (if missing), a dedicated update action for card moves, and
   a read action for per-lane loading.
 
+  The priority is a string: a fractional index (`PyroManiac.KanBan.FractionalIndex`).
+  A card gets a key between its two neighbors, so a move changes only the
+  moved card. The column uses `COLLATE "C"`, so the database sorts the keys
+  by byte, as the index needs.
+
+  The transformer also adds these changes:
+
+  - `PyroManiac.KanBan.AssignRank` on each create: a card without a priority
+    goes to the end of its lane.
+  - `PyroManiac.KanBan.RerankOnLaneChange` on each update except the move
+    action: an update that changes the lane but not the priority (for
+    example, a form) puts the card at the end of its new lane. Without it,
+    the card keeps a priority that can already be in use in the new lane.
+
+  The move action and the database functions need
+  `PyroManiac.KanBan.PostgresExtension` in the `installed_extensions` of
+  the repo.
+
   ## Usage
 
       defmodule MyApp.Task do
@@ -37,7 +55,7 @@ defmodule PyroManiac.KanBan do
         type: :atom,
         required: true,
         doc:
-          "The integer attribute used for card ordering within lanes. Created automatically if it doesn't exist on the resource."
+          "The string attribute used for card ordering within lanes (a fractional index). Created automatically if it doesn't exist on the resource."
       ],
       move_action: [
         type: :atom,
@@ -49,7 +67,7 @@ defmodule PyroManiac.KanBan do
         type: :atom,
         required: true,
         doc:
-          "The name of the read action created for per-lane kanban loading. Accepts a `lane_value` argument and limits results to `per_lane`."
+          "The name of the read action created for per-lane kanban loading. Accepts an optional `lane_value` argument that filters to one lane, sorts by the priority, and limits results to `per_lane`."
       ],
       per_lane: [
         type: :pos_integer,

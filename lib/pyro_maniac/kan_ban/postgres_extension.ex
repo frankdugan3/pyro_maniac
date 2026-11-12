@@ -2,11 +2,18 @@ defmodule PyroManiac.KanBan.PostgresExtension do
   @moduledoc """
   AshPostgres custom extension that installs the `pyro_fractional_key_between`
   PL/pgSQL function for atomic kanban card ordering.
+
+  ## Versions
+
+  - 1: the first version.
+  - 2: `pyro_fractional_key_between` compares the keys with `COLLATE "C"`.
+    Version 1 used the collation of the database. Then a card could not
+    move before the first card of a lane (`midpoint overflow`).
   """
 
   use AshPostgres.CustomExtension,
     name: "pyro_kanban",
-    latest_version: 1
+    latest_version: 2
 
   @base_digits "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
@@ -15,6 +22,12 @@ defmodule PyroManiac.KanBan.PostgresExtension do
     Enum.map_join(sql_functions(), "\n\n", fn {_name, sql} ->
       "execute(#{inspect(sql)})"
     end)
+  end
+
+  # Version 1 to 2: only the main function changed. `CREATE OR REPLACE`
+  # replaces it.
+  def install(1) do
+    "execute(#{inspect(main_function())})"
   end
 
   @impl true
@@ -168,10 +181,13 @@ defmodule PyroManiac.KanBan.PostgresExtension do
     BEGIN
       IF prev IS NULL AND next IS NULL THEN RETURN 'a0'; END IF;
 
+      -- Each comparison of two keys uses COLLATE "C" (the order of the bytes).
+      -- With the collation of the database, 'a' and 'A' sort near each other,
+      -- and the keys are not in the order of the index.
       IF prev IS NULL THEN
         ia := pyro_fi_get_integer_part(next);
         fb := substring(next FROM length(ia) + 1);
-        IF ia > pyro_fi_smallest_integer() THEN RETURN pyro_fi_decrement_integer(ia);
+        IF ia COLLATE "C" > pyro_fi_smallest_integer() THEN RETURN pyro_fi_decrement_integer(ia);
         ELSE RETURN ia || pyro_fi_midpoint('', fb, '#{bd}', 62);
         END IF;
       END IF;
@@ -185,7 +201,7 @@ defmodule PyroManiac.KanBan.PostgresExtension do
         END IF;
       END IF;
 
-      IF prev >= next THEN
+      IF prev COLLATE "C" >= next THEN
         RAISE EXCEPTION 'prev must be less than next';
       END IF;
 
@@ -199,7 +215,7 @@ defmodule PyroManiac.KanBan.PostgresExtension do
       END IF;
 
       incremented := pyro_fi_increment_integer(ia);
-      IF incremented IS NOT NULL AND incremented < next THEN RETURN incremented; END IF;
+      IF incremented IS NOT NULL AND incremented COLLATE "C" < next THEN RETURN incremented; END IF;
 
       RETURN ia || pyro_fi_midpoint(fa, NULL, '#{bd}', 62);
     END; $fn$

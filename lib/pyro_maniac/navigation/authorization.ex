@@ -61,10 +61,13 @@ defmodule PyroManiac.Navigation.Authorization do
     _ -> :error
   end
 
+  # A page can have only a board. Thus a `:kanban` view also gives the read
+  # action, after the table and the grid.
   defp fetch_default_read_action(page_module, resource) do
     view =
       PyroManiac.Info.primary_view(page_module, :data_table) ||
-        PyroManiac.Info.primary_view(page_module, :grid)
+        PyroManiac.Info.primary_view(page_module, :grid) ||
+        PyroManiac.Info.primary_view(page_module, :kanban)
 
     action_name =
       case view do

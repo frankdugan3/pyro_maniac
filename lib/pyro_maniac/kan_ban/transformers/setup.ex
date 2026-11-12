@@ -29,6 +29,7 @@ defmodule PyroManiac.KanBan.Transformers.Setup do
     dsl_state = set_column_collation(dsl_state, priority)
     dsl_state = ensure_unique_index(dsl_state, lane, priority)
     dsl_state = add_assign_rank_change(dsl_state, lane, priority)
+    dsl_state = add_rerank_change(dsl_state, lane, priority, move_action)
     dsl_state = create_move_action(dsl_state, move_action, lane, priority, module)
 
     dsl_state =
@@ -123,6 +124,18 @@ defmodule PyroManiac.KanBan.Transformers.Setup do
     dsl_state
   end
 
+  defp add_rerank_change(dsl_state, lane, priority, move_action) do
+    {:ok, dsl_state} =
+      Builder.add_change(
+        dsl_state,
+        {PyroManiac.KanBan.RerankOnLaneChange,
+         lane: lane, priority: priority, move_action: move_action},
+        on: [:update]
+      )
+
+    dsl_state
+  end
+
   defp set_column_collation(dsl_state, priority) do
     table = Transformer.get_option(dsl_state, [:postgres], :table)
     col = Atom.to_string(priority)
@@ -140,11 +153,15 @@ defmodule PyroManiac.KanBan.Transformers.Setup do
   defp ensure_unique_index(dsl_state, lane, priority) do
     table = Transformer.get_option(dsl_state, [:postgres], :table)
 
-    index = %AshPostgres.CustomIndex{
-      fields: [lane, priority],
-      name: "#{table}_kanban_rank_index",
-      unique: true
-    }
+    # `build_entity` applies the defaults of the DSL schema (for example
+    # `include_base_filter?` and `all_tenants?`). A struct that is made
+    # directly has `nil` for them, and AshPostgres expects booleans.
+    {:ok, index} =
+      Transformer.build_entity(AshPostgres.DataLayer, [:postgres, :custom_indexes], :index,
+        fields: [lane, priority],
+        name: "#{table}_kanban_rank_index",
+        unique: true
+      )
 
     Transformer.add_entity(dsl_state, [:postgres, :custom_indexes], index)
   end
@@ -178,7 +195,7 @@ defmodule PyroManiac.KanBan.Transformers.Setup do
     dsl_state
   end
 
-  defp create_read_action(dsl_state, action_name, _lane, priority, per_lane, count?, module) do
+  defp create_read_action(dsl_state, action_name, lane, priority, per_lane, count?, module) do
     if Ash.Resource.Info.action(dsl_state, action_name) do
       Error.raise!(
         module: module,
@@ -196,10 +213,18 @@ defmodule PyroManiac.KanBan.Transformers.Setup do
     {:ok, pagination} =
       Builder.build_pagination(keyset?: true, countable: count?, default_limit: per_lane)
 
+    {:ok, lane_argument} =
+      Builder.build_action_argument(:lane_value, :string,
+        allow_nil?: true,
+        description: "The lane to read. All lanes when not set."
+      )
+
     {:ok, dsl_state} =
       Builder.add_action(dsl_state, :read, action_name,
+        arguments: [lane_argument],
         pagination: pagination,
         preparations: [
+          Builder.build_preparation({PyroManiac.KanBan.FilterLane, lane: lane}),
           Builder.build_preparation({Ash.Resource.Preparation.Build, sort: [{priority, :asc}]})
         ]
       )
