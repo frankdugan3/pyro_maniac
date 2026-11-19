@@ -4,8 +4,10 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
   use PyroManiac.Dsl.Transformers
 
   alias PyroManiac.Dsl.Error
+  alias PyroManiac.Dsl.Expression
   alias PyroManiac.Dsl.FieldResolver
-  alias PyroManiac.Form.{Action, BulkAction, Field, FieldGroup, Step}
+
+  alias PyroManiac.Form.{Action, BulkAction, Compound, Field, Group, Row, Step, Tree}
 
   @ash_resource_transformers Resource.Dsl.transformers()
 
@@ -26,11 +28,9 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
 
   defp expand_form_actions(dsl) do
     context = %{
-      default_class: Transformer.get_option(dsl, [:forms], :class, nil),
       default_description: Transformer.get_option(dsl, [:forms], :description, nil),
       dsl: dsl,
       excluded_actions: Transformer.get_option(dsl, [:forms], :exclude, []),
-      extra_form_types: Transformer.get_option(dsl, [:forms], :extra_form_types, []),
       path_root: [:forms],
       module: Transformer.get_persisted(dsl, :module, nil),
       resource: Transformer.get_persisted(dsl, :resource, nil),
@@ -89,15 +89,14 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     action =
       action
       |> Map.put(:label, action.label || default_label(name))
-      |> Map.put(:class, action.class || context.default_class)
       |> expand_action_description(context)
 
     if delegated? do
       action
     else
       action
-      |> Map.put(:fields, expand_fields(action.fields, context))
-      |> resolve_action_field_types(action_resource, name, context)
+      |> Map.put(:fields, expand_fields(action.fields, action_resource))
+      |> resolve_entities(action_resource, name, context)
     end
   end
 
@@ -191,15 +190,14 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     ba =
       ba
       |> Map.put(:label, ba.label || default_label(name))
-      |> Map.put(:class, ba.class || context.default_class)
       |> expand_bulk_action_description(context)
 
     if delegated? do
       ba
     else
       ba
-      |> Map.put(:fields, expand_fields(ba.fields, context))
-      |> resolve_action_field_types(context.resource, name, context)
+      |> Map.put(:fields, expand_fields(ba.fields, context.resource))
+      |> resolve_entities(context.resource, name, context)
     end
   end
 
@@ -217,30 +215,30 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     Map.put(ba, :description, description)
   end
 
-  defp expand_fields(fields, context, root_path \\ []) do
-    Enum.map(fields, fn
-      %Step{} = step ->
-        step_path = maybe_append_path(root_path, step.path)
+  # Sets `__full_path__`, the default labels, and the inherited descriptions.
+  defp expand_fields(fields, resource) do
+    Tree.map_down(fields, [], fn
+      %Step{} = step, root ->
+        full = maybe_append_path(root, step.path)
 
-        step
-        |> Map.put(:path, step_path)
-        |> Map.put(:label, step.label || default_label(step))
-        |> Map.put(:fields, expand_fields(step.fields, context, step_path))
+        {%{step | __full_path__: full, label: step.label || default_label(step)}, full}
 
-      %Field{} = field ->
-        field
-        |> Map.put(:path, maybe_append_path(root_path, field.path))
-        |> Map.put(:label, field.label || default_label(field))
-        |> expand_field_description(context)
+      %Group{} = group, root ->
+        full = maybe_append_path(root, group.path)
 
-      %FieldGroup{} = group ->
-        group_path = maybe_append_path(root_path, group.path)
+        {%{group | __full_path__: full, label: group.label || group_default_label(full)}, full}
 
-        group
-        |> Map.put(:path, group_path)
-        |> Map.put(:label, group.label || group_default_label(group_path))
-        |> expand_field_description(context)
-        |> Map.put(:fields, expand_fields(group.fields, context, group_path))
+      %module{} = layout, root when module in [Row, Compound] ->
+        {%{layout | __full_path__: root}, root}
+
+      input, root ->
+        full = maybe_append_path(root, input.path)
+
+        input =
+          %{input | __full_path__: full, label: input.label || default_label(input)}
+          |> expand_input_description(resource)
+
+        {input, full}
     end)
   end
 
@@ -260,43 +258,122 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     Map.put(action, :description, description)
   end
 
-  defp expand_field_description(%{description: :inherit} = field, context) do
+  defp expand_input_description(%{description: :inherit} = input, resource) do
     description =
-      context.resource
-      |> PyroManiac.Info.resource_by_path(field.path)
-      |> Resource.Info.field(field.name)
-      |> Map.get(:description)
+      case resource
+           |> PyroManiac.Info.resource_by_path(input.__full_path__)
+           |> Resource.Info.field(input.name) do
+        nil -> nil
+        field -> Map.get(field, :description)
+      end
 
-    Map.put(field, :description, description)
+    %{input | description: description}
   end
 
-  defp expand_field_description(field, _context), do: field
+  defp expand_input_description(input, _resource), do: input
 
-  defp resolve_action_field_types(action, resource, action_name, context) do
+  # Resolves each input and each `visible?`.
+  defp resolve_entities(action, resource, action_name, context) do
+    level_inputs =
+      action.fields
+      |> Tree.inputs()
+      |> Enum.group_by(& &1.__full_path__, & &1.name)
+
+    context = Map.put(context, :level_inputs, level_inputs)
+
     Map.update!(action, :fields, fn fields ->
-      resolve_field_types(fields, resource, action_name, context)
+      Tree.map(fields, &resolve_entity(&1, resource, action_name, context))
     end)
   end
 
-  defp resolve_field_types(fields, resource, action_name, context) do
-    Enum.map(fields, fn
-      %Step{} = step ->
-        Map.update!(step, :fields, &resolve_field_types(&1, resource, action_name, context))
+  defp resolve_entity(entity, resource, action_name, context) do
+    entity =
+      if Tree.input?(entity),
+        do: FieldResolver.resolve(entity, resource, action_name, context),
+        else: entity
 
-      %FieldGroup{} = group ->
-        Map.update!(
-          group,
-          :fields,
-          &resolve_field_types(&1, resource, action_name, context)
+    resolve_visibility(entity, resource, action_name, context)
+  end
+
+  defp resolve_visibility(%{visible?: nil} = entity, _resource, _action_name, _context),
+    do: entity
+
+  defp resolve_visibility(%{visible?: condition} = entity, resource, action_name, context) do
+    if is_function(condition) do
+      Error.raise!(
+        module: context.module,
+        location: Entity.property_anno(entity, :visible?) || Entity.anno(entity),
+        path: [:forms, :action, action_name],
+        why: "`visible?` is an Ash expression, not a function",
+        fix: "use `visible? expr(...)`, for example `visible? expr(standard == true)`"
+      )
+    end
+
+    level = visibility_level(entity)
+    attributes = visibility_refs!(entity, condition, resource, level, action_name, context)
+    args = Expression.arg_names(condition)
+    if level == [], do: validate_visibility_args!(entity, args, resource, action_name, context)
+
+    %{entity | __depends_on__: Enum.uniq(attributes ++ args)}
+  end
+
+  defp resolve_visibility(entity, _resource, _action_name, _context), do: entity
+
+  # The refs of the expression at its level. `parent(...)` refers to the
+  # level above it.
+  defp visibility_refs!(entity, condition, resource, level, action_name, context) do
+    level_resource = PyroManiac.Info.resource_by_path(resource, level)
+
+    parent_resource =
+      if level != [], do: PyroManiac.Info.resource_by_path(resource, Enum.drop(level, -1))
+
+    case Expression.validate_refs(level_resource, condition,
+           in_memory_only?: true,
+           parent: parent_resource
+         ) do
+      {:ok, names} ->
+        names
+
+      {:error, message} ->
+        Error.raise!(
+          module: context.module,
+          location: Entity.property_anno(entity, :visible?) || Entity.anno(entity),
+          path: [:forms, :action, action_name],
+          why: "the `visible?` expression is invalid: #{message}"
         )
-
-      %Field{} = field ->
-        resolve_field(field, resource, action_name, context)
-    end)
+    end
   end
 
-  defp resolve_field(field, resource, action_name, context),
-    do: FieldResolver.resolve(field, resource, action_name, context)
+  # `^arg(:name)` is an argument of the action (checked at the top level,
+  # where the action is known).
+  defp validate_visibility_args!(entity, args, resource, action_name, context) do
+    arguments =
+      resource
+      |> Resource.Info.action(action_name)
+      |> Map.get(:arguments, [])
+      |> Enum.map(& &1.name)
+
+    for arg <- args, arg not in arguments do
+      Error.raise!(
+        module: context.module,
+        location: Entity.property_anno(entity, :visible?) || Entity.anno(entity),
+        path: [:forms, :action, action_name],
+        why:
+          "the `visible?` expression uses `^arg(#{inspect(arg)})`, which is not an argument of #{inspect(action_name)}",
+        suggestions: Error.did_you_mean(arg, arguments)
+      )
+    end
+  end
+
+  # The level at which a `visible?` is evaluated. A group with a `path` shows or
+  # hides all its rows, so its level is the level that contains it. The
+  # level of the other entities is their full path.
+  defp visibility_level(%Group{path: [_ | _] = path, __full_path__: full_path}),
+    do: Enum.drop(full_path, -length(path))
+
+  defp visibility_level(entity), do: entity.__full_path__
+
+  # Validation -----------------------------------------------------------------
 
   defp validate(dsl) do
     module = Transformer.get_persisted(dsl, :module, nil)
@@ -321,8 +398,12 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
       validate_all_fields_in_action(action, action_resource, module)
       validate_all_accepted_included(action, action_resource, module)
       validate_all_arguments_included(action, action_resource, module)
-      validate_form_only_fields_not_in_action(action, action_resource, module)
       validate_attachment_upload_declared(action, action_resource, module)
+      validate_layout(action, [:forms, :action, action.name], module)
+    end
+
+    for ba <- bulk_actions do
+      validate_layout(ba, [:forms, :bulk_action, ba.name], module)
     end
 
     validate_bulk_actions_valid(bulk_actions, resource, module)
@@ -396,18 +477,15 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
 
   defp validate_steps_or_fields(action, module) do
     has_steps = Enum.any?(action.fields, &is_struct(&1, Step))
+    has_other = Enum.any?(action.fields, &(not is_struct(&1, Step)))
 
-    has_bare_fields =
-      Enum.any?(action.fields, &(is_struct(&1, Field) || is_struct(&1, FieldGroup)))
-
-    if has_steps && has_bare_fields do
+    if has_steps && has_other do
       Error.raise!(
         module: module,
         location: Entity.anno(action),
         path: [:forms, :action, action.name],
-        why:
-          "action must have either steps or bare fields/field_groups at the top level, not both",
-        fix: "wrap the bare fields in a `step` block, or remove the steps"
+        why: "action must have either steps or inputs and groups at the top level, not both",
+        fix: "wrap the other entities in a `step` block, or remove the steps"
       )
     end
   end
@@ -448,7 +526,9 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
   end
 
   defp validate_exactly_one_autofocus(action, module) do
-    if count_autofocus(action.fields) != 1 do
+    count = action.fields |> Tree.inputs() |> Enum.count(& &1.autofocus)
+
+    if count != 1 do
       Error.raise!(
         module: module,
         location: Entity.anno(action),
@@ -459,19 +539,13 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     end
   end
 
-  defp count_autofocus(fields, total \\ 0) do
-    Enum.reduce(fields, total, fn
-      %Step{fields: step_fields}, acc -> count_autofocus(step_fields, acc)
-      %FieldGroup{fields: group_fields}, acc -> count_autofocus(group_fields, acc)
-      %Field{autofocus: true}, acc -> acc + 1
-      _, acc -> acc
-    end)
-  end
-
   defp validate_no_duplicate_fields(action, module) do
-    fields = collect_field_keys(action.fields)
+    keys =
+      action.fields
+      |> Tree.inputs()
+      |> Enum.map(fn input -> {input_key(input), input} end)
 
-    case find_duplicate(fields, &elem(&1, 0)) do
+    case find_duplicate(keys, &elem(&1, 0)) do
       nil ->
         :ok
 
@@ -485,26 +559,16 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     end
   end
 
-  defp collect_field_keys(fields, acc \\ []) do
-    Enum.reduce(fields, acc, fn
-      %Step{fields: step_fields}, acc ->
-        collect_field_keys(step_fields, acc)
+  defp input_key(%{name: name, __full_path__: []}), do: inspect(name)
+  defp input_key(%{name: name, __full_path__: path}), do: Enum.join(path ++ [name], ".")
 
-      %FieldGroup{fields: group_fields}, acc ->
-        collect_field_keys(group_fields, acc)
-
-      %Field{name: name, path: []} = field, acc ->
-        [{inspect(name), field} | acc]
-
-      %Field{name: name, path: path} = field, acc ->
-        [{Enum.join(path ++ [name], "."), field} | acc]
-    end)
-  end
-
+  # The labels of the parts of a compound are scoped to the compound (a
+  # screen reader reads "Temperature, Unit"), so they are compared with the
+  # compound label as a prefix.
   defp validate_no_duplicate_field_labels(action, module) do
-    fields = collect_field_labels(action.fields)
+    labels = collect_labels(action.fields, nil)
 
-    case find_duplicate(fields, &elem(&1, 0)) do
+    case find_duplicate(labels, &elem(&1, 0)) do
       nil ->
         :ok
 
@@ -518,16 +582,28 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     end
   end
 
-  defp collect_field_labels(fields, acc \\ []) do
-    Enum.reduce(fields, acc, fn
-      %Step{fields: step_fields}, acc ->
-        collect_field_labels(step_fields, acc)
+  defp collect_labels(entities, compound_label) do
+    Enum.flat_map(entities, fn
+      %Group{label: label} = group ->
+        [{label_key(label, group.__full_path__), group} | collect_labels(group.fields, nil)]
 
-      %FieldGroup{fields: group_fields, label: label, path: path} = group, acc ->
-        collect_field_labels(group_fields, [{label_key(label, path), group} | acc])
+      %Compound{label: label} = compound ->
+        [
+          {label_key(label, compound.__full_path__), compound}
+          | collect_labels(compound.fields, label)
+        ]
 
-      %Field{label: label, path: path} = field, acc ->
-        [{label_key(label, path), field} | acc]
+      entity ->
+        cond do
+          Tree.input?(entity) and compound_label ->
+            [{label_key("#{compound_label}, #{entity.label}", entity.__full_path__), entity}]
+
+          Tree.input?(entity) ->
+            [{label_key(entity.label, entity.__full_path__), entity}]
+
+          true ->
+            collect_labels(Tree.children(entity), compound_label)
+        end
     end)
   end
 
@@ -536,13 +612,10 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
 
   defp validate_all_fields_in_action(action, action_resource, module) do
     resource_action = Ash.Resource.Info.action(action_resource, action.name)
-
-    inputs =
-      resource_action.accept ++ Enum.map(resource_action.arguments, & &1.name)
-
+    inputs = resource_action.accept ++ Enum.map(resource_action.arguments, & &1.name)
     inputs_set = MapSet.new(inputs)
 
-    for {field_name, field_struct} <- collect_action_input_fields_with_struct(action.fields),
+    for {field_name, field_struct} <- action_input_entities(action.fields),
         not MapSet.member?(inputs_set, field_name) do
       Error.raise!(
         module: module,
@@ -555,36 +628,37 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     end
   end
 
-  defp collect_action_input_fields_with_struct(fields, acc \\ []) do
-    Enum.reduce(fields, acc, fn
-      %Step{fields: step_fields}, acc ->
-        collect_action_input_fields_with_struct(step_fields, acc)
+  # The top-level inputs of the action, and the first segment of each nested
+  # path (the argument that manages the relationship), with the entity.
+  defp action_input_entities(fields) do
+    fields
+    |> Tree.all()
+    |> Enum.flat_map(fn
+      %Field{type: :attachment} ->
+        []
 
-      %FieldGroup{fields: group_fields, path: []}, acc ->
-        collect_action_input_fields_with_struct(group_fields, acc)
+      %module{__full_path__: [name | _]} = entity when module in [Group, Step] ->
+        if entity.path != [], do: [{name, entity}], else: []
 
-      %FieldGroup{path: [name]} = group, acc ->
-        [{name, group} | acc]
+      entity ->
+        cond do
+          not Tree.input?(entity) ->
+            []
 
-      %Field{form_only?: true}, acc ->
-        acc
+          entity.__full_path__ == [] ->
+            [{entity.name, entity}]
 
-      %Field{type: :attachment}, acc ->
-        acc
+          entity.path != [] and length(entity.__full_path__) == length(entity.path) ->
+            [{hd(entity.__full_path__), entity}]
 
-      %Field{name: name, path: []} = field, acc ->
-        [{name, field} | acc]
-
-      %Field{path: [name]} = field, acc ->
-        [{name, field} | acc]
-
-      _, acc ->
-        acc
+          true ->
+            []
+        end
     end)
   end
 
   defp validate_all_accepted_included(action, action_resource, module) do
-    fields = collect_attribute_fields(action.fields)
+    fields = action.fields |> action_input_entities() |> MapSet.new(&elem(&1, 0))
     set_names = collect_set_names(action.sets)
 
     for accept <- Ash.Resource.Info.action(action_resource, action.name).accept,
@@ -602,33 +676,13 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     end
   end
 
-  defp collect_attribute_fields(fields) do
-    Enum.reduce(fields, MapSet.new(), fn
-      %Step{fields: step_fields}, acc ->
-        MapSet.union(acc, collect_attribute_fields(step_fields))
-
-      %FieldGroup{fields: group_fields, path: []}, acc ->
-        MapSet.union(acc, collect_attribute_fields(group_fields))
-
-      %FieldGroup{path: [name]}, acc ->
-        MapSet.put(acc, name)
-
-      %Field{form_only?: true}, acc ->
-        acc
-
-      %Field{name: name, path: []}, acc ->
-        MapSet.put(acc, name)
-
-      %Field{path: [name]}, acc ->
-        MapSet.put(acc, name)
-
-      _, acc ->
-        acc
-    end)
-  end
-
   defp validate_all_arguments_included(action, action_resource, module) do
-    fields = collect_argument_fields(action.fields)
+    fields =
+      action.fields
+      |> action_input_entities()
+      |> MapSet.new(&elem(&1, 0))
+      |> MapSet.union(MapSet.new(attachment_field_names(action.fields)))
+
     set_names = collect_set_names(action.sets)
 
     for argument <- Ash.Resource.Info.action(action_resource, action.name).arguments,
@@ -644,67 +698,7 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
     end
   end
 
-  defp collect_argument_fields(fields) do
-    Enum.reduce(fields, MapSet.new(), fn
-      %Step{fields: step_fields}, acc ->
-        MapSet.union(acc, collect_argument_fields(step_fields))
-
-      %FieldGroup{fields: group_fields, path: []}, acc ->
-        MapSet.union(acc, collect_argument_fields(group_fields))
-
-      %FieldGroup{path: [name]}, acc ->
-        MapSet.put(acc, name)
-
-      %Field{form_only?: true}, acc ->
-        acc
-
-      %Field{name: name, path: []}, acc ->
-        MapSet.put(acc, name)
-
-      %Field{path: [name]}, acc ->
-        MapSet.put(acc, name)
-
-      _, acc ->
-        acc
-    end)
-  end
-
   defp collect_set_names(sets), do: MapSet.new(sets || [], & &1.name)
-
-  defp validate_form_only_fields_not_in_action(action, action_resource, module) do
-    resource_action = Ash.Resource.Info.action(action_resource, action.name)
-
-    inputs =
-      MapSet.new(resource_action.accept ++ Enum.map(resource_action.arguments, & &1.name))
-
-    for {name, field_struct} <- collect_form_only_fields_with_struct(action.fields),
-        MapSet.member?(inputs, name) do
-      Error.raise!(
-        module: module,
-        location: Entity.anno(field_struct),
-        path: [:forms, :action, action.name, :field, name],
-        why: "form_only field #{inspect(name)} shadows an accepted attribute or argument",
-        fix:
-          "rename the form_only field, or remove `form_only?: true` so it maps to the action input"
-      )
-    end
-  end
-
-  defp collect_form_only_fields_with_struct(fields, acc \\ []) do
-    Enum.reduce(fields, acc, fn
-      %Step{fields: step_fields}, acc ->
-        collect_form_only_fields_with_struct(step_fields, acc)
-
-      %FieldGroup{fields: group_fields, path: []}, acc ->
-        collect_form_only_fields_with_struct(group_fields, acc)
-
-      %Field{form_only?: true, name: name, path: []} = field, acc ->
-        [{name, field} | acc]
-
-      _, acc ->
-        acc
-    end)
-  end
 
   defp validate_attachment_upload_declared(action, action_resource, module) do
     declared = attachment_field_names(action.fields)
@@ -716,7 +710,7 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
         path: [:forms, :action, action.name],
         why:
           "action #{inspect(action.name)} has a file argument :#{name} but this form does not " <>
-            "declare a (non-`form_only?`) `type: :attachment` field for it",
+            "declare a `type: :attachment` field for it",
         fix: "add `field :#{name}, type: :attachment` to this action"
       )
     end
@@ -751,15 +745,86 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
   end
 
   defp attachment_field_names(fields) do
-    fields
-    |> List.wrap()
-    |> Enum.flat_map(fn
-      %Field{type: :attachment, form_only?: false, name: name} -> [name]
-      %Step{fields: step_fields} -> attachment_field_names(step_fields)
-      %FieldGroup{fields: group_fields} -> attachment_field_names(group_fields)
-      _ -> []
-    end)
+    for %Field{type: :attachment, name: name} <- Tree.inputs(fields), do: name
   end
+
+  # The rules of section 4.4 of the plan for `row`, `compound`, and `group`.
+  defp validate_layout(action, path, module) do
+    for entity <- Tree.all(action.fields) do
+      validate_layout_entity(entity, path, module)
+    end
+  end
+
+  defp validate_layout_entity(%Row{fields: children} = row, path, module) do
+    if length(children) < 2 do
+      Error.raise!(
+        module: module,
+        location: Entity.anno(row),
+        path: path ++ [:row],
+        why: "a `row` needs at least 2 children",
+        fix: "add an input to the row, or remove the `row` block"
+      )
+    end
+
+    for %{size: :prose} = child <- children do
+      Error.raise!(
+        module: module,
+        location: Entity.anno(child),
+        path: path ++ [:row, child.name],
+        why: "#{inspect(child.name)} has the size `:prose`, which always uses the full row",
+        fix: "move it out of the `row`"
+      )
+    end
+  end
+
+  defp validate_layout_entity(%Compound{fields: parts, label: label} = compound, path, module) do
+    if length(parts) < 2 do
+      Error.raise!(
+        module: module,
+        location: Entity.anno(compound),
+        path: path ++ [:compound, label],
+        why: "compound #{inspect(label)} has fewer than 2 parts. One input is not a compound",
+        fix: "add a part, or use the input without `compound`"
+      )
+    end
+
+    for %{size: size} = part <- parts, size in [:phrase, :prose] do
+      Error.raise!(
+        module: module,
+        location: Entity.anno(part),
+        path: path ++ [:compound, label],
+        why:
+          "#{inspect(part.name)} has the size #{inspect(size)}. The parts of a compound are tiny inputs",
+        fix: "set a smaller `size`, or move it out of the compound"
+      )
+    end
+  end
+
+  defp validate_layout_entity(%Group{collapsed?: true, collapsible?: false} = group, path, module) do
+    Error.raise!(
+      module: module,
+      location: Entity.property_anno(group, :collapsed?) || Entity.anno(group),
+      path: path ++ [:group, group.label],
+      why: "group #{inspect(group.label)} has `collapsed? true` but not `collapsible? true`",
+      fix: "add `collapsible? true`"
+    )
+  end
+
+  defp validate_layout_entity(%Group{collapsed?: true} = group, path, module) do
+    if Enum.any?(Tree.inputs(group.fields), & &1.autofocus) do
+      Error.raise!(
+        module: module,
+        location: Entity.anno(group),
+        path: path ++ [:group, group.label],
+        why:
+          "group #{inspect(group.label)} starts closed, but it contains the input with " <>
+            "`autofocus`. The focus would go to an input that the user cannot see",
+        fix: "move `autofocus` to another input, or remove `collapsed? true`"
+      )
+    end
+  end
+
+  defp validate_layout_entity(_entity, _path, _module), do: :ok
 
   defp validate_bulk_actions_valid(bulk_actions, resource, module) do
     for bulk_action <- bulk_actions do
@@ -799,32 +864,21 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
       |> Enum.flat_map(& &1.keys)
       |> MapSet.new()
 
-    for bulk_action <- bulk_actions do
-      field_names_with_struct = collect_bulk_action_field_names_with_struct(bulk_action.fields)
-
-      for {field_name, field_struct} <- field_names_with_struct,
-          MapSet.member?(identity_keys, field_name) do
-        Error.raise!(
-          module: module,
-          location: Entity.anno(field_struct) || Entity.anno(bulk_action),
-          path: [:forms, :bulk_action, bulk_action.name, :field, field_name],
-          why:
-            "bulk_action #{inspect(bulk_action.name)} includes identity field " <>
-              "#{inspect(field_name)}, which is not allowed",
-          fix:
-            "remove the field — bulk actions cannot mutate identity attributes since they " <>
-              "must remain consistent across selected rows"
-        )
-      end
+    for bulk_action <- bulk_actions,
+        input <- Tree.inputs(bulk_action.fields),
+        MapSet.member?(identity_keys, input.name) do
+      Error.raise!(
+        module: module,
+        location: Entity.anno(input) || Entity.anno(bulk_action),
+        path: [:forms, :bulk_action, bulk_action.name, :field, input.name],
+        why:
+          "bulk_action #{inspect(bulk_action.name)} includes identity field " <>
+            "#{inspect(input.name)}, which is not allowed",
+        fix:
+          "remove the field — bulk actions cannot mutate identity attributes since they " <>
+            "must remain consistent across selected rows"
+      )
     end
-  end
-
-  defp collect_bulk_action_field_names_with_struct(fields) do
-    Enum.flat_map(fields, fn
-      %Field{name: name} = field -> [{name, field}]
-      %FieldGroup{fields: children} -> collect_bulk_action_field_names_with_struct(children)
-      %Step{fields: children} -> collect_bulk_action_field_names_with_struct(children)
-    end)
   end
 
   defp find_duplicate(entities, key_fn) do
@@ -877,7 +931,7 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
 
     %{
       action
-      | class: action.class || source.class,
+      | max_columns: action.max_columns || source.max_columns,
         description: action.description || source.description,
         fields: source.fields,
         label: action.label || source.label,
@@ -920,7 +974,7 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
 
     %{
       ba
-      | class: ba.class || source.class,
+      | max_columns: ba.max_columns || source.max_columns,
         description: ba.description || source.description,
         fields: source.fields,
         label: ba.label || source.label

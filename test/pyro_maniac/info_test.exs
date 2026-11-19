@@ -26,11 +26,7 @@ defmodule PyroManiac.InfoTest do
       exclude([:deactivate])
 
       action [:create, :update] do
-        class "max-w-md justify-self-center"
-
-        field_group "Identity" do
-          class "md:grid-cols-2"
-
+        group "Identity" do
           field :name do
             description "Full name"
             autofocus(true)
@@ -39,10 +35,8 @@ defmodule PyroManiac.InfoTest do
           field :email
         end
 
-        field_group "Role & Status" do
-          class "md:grid-cols-2"
-
-          field :role do
+        group "Role & Status" do
+          select :role do
             label("Role")
           end
 

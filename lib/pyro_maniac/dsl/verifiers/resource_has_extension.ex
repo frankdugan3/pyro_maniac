@@ -3,7 +3,7 @@ defmodule PyroManiac.Dsl.Verifiers.ResourceHasExtension do
   use PyroManiac.Dsl.Verifiers
 
   alias PyroManiac.Dsl.Error
-  alias PyroManiac.Form.{Action, FieldGroup}
+  alias PyroManiac.Form.{Action, Tree}
   alias PyroManiac.View.View
 
   @impl true
@@ -122,19 +122,25 @@ defmodule PyroManiac.Dsl.Verifiers.ResourceHasExtension do
     end
   end
 
+  # Each entity with a relative `path` (a group, a step, or a nested input)
+  # follows the relationships of that path.
   defp walk_fields(fields, resource) do
-    Enum.flat_map(fields || [], fn
-      %FieldGroup{fields: children, path: [rel_name | _rest]} ->
-        case Ash.Resource.Info.relationship(resource, rel_name) do
-          nil -> []
-          rel -> [{rel_name, rel.destination} | walk_fields(children, rel.destination)]
-        end
-
-      %FieldGroup{fields: children} ->
-        walk_fields(children, resource)
-
-      _ ->
-        []
+    Enum.flat_map(fields || [], fn entity ->
+      {pairs, destination} = follow_path(Map.get(entity, :path) || [], resource)
+      pairs ++ walk_fields(Tree.children(entity), destination)
     end)
+  end
+
+  defp follow_path([], resource), do: {[], resource}
+
+  defp follow_path([rel_name | rest], resource) do
+    case Ash.Resource.Info.relationship(resource, rel_name) do
+      nil ->
+        {[], resource}
+
+      rel ->
+        {pairs, destination} = follow_path(rest, rel.destination)
+        {[{rel_name, rel.destination} | pairs], destination}
+    end
   end
 end

@@ -59,8 +59,19 @@ defmodule PyroManiac.TypeInfer do
   @doc "Returns true if the Ash type is numeric (integer, float, or decimal)."
   def numeric_type?(type), do: integer_type?(type) || float_type?(type)
 
-  @doc "Returns true if the Ash type is an interval/duration."
+  @doc """
+  Returns true if the Ash type is an interval/duration: `:interval`, or an
+  `Ash.Type` module that stores an interval (`storage_type/1` is
+  `:interval`), for example an application interval type.
+  """
   def interval_type?(:interval), do: true
+
+  def interval_type?(type) when is_atom(type) and not is_nil(type) do
+    Ash.Type.ash_type?(type) and Ash.Type.storage_type(type, []) == :interval
+  rescue
+    _error -> false
+  end
+
   def interval_type?(_), do: false
 
   @doc "Returns true if the Ash type is a long text type."
@@ -70,32 +81,109 @@ defmodule PyroManiac.TypeInfer do
   def text_type?(:text), do: true
   def text_type?(_), do: false
 
-  @doc "Returns true if the attribute info represents an enum."
-  def enum_type?(attr_info) do
-    has_one_of_constraint?(attr_info) || custom_enum?(attr_info.type)
+  @doc """
+  The closed set of values of a type with its constraints, or `nil`.
+
+  Each value is a map `%{value:, label:, description:}`, in the order of the
+  type. The sources, in order:
+
+  1. A `one_of` constraint.
+  2. A `one_of` in the `items` constraints of an `{:array, type}`.
+  3. An `Ash.Type.NewType`: its own constraints (`subtype_constraints/0`),
+     merged with the given constraints, then rules 1 and 2 for its
+     `subtype_of/0`.
+  4. An `Ash.Type.Enum` (`values/0`, with `label/1` and `description/1`).
+
+  ## Examples
+
+      iex> PyroManiac.TypeInfer.closed_values(:atom, one_of: [:open, :closed_now])
+      [%{value: :open, label: "open", description: nil}, %{value: :closed_now, label: "closed now", description: nil}]
+
+      iex> PyroManiac.TypeInfer.closed_values({:array, :atom}, items: [one_of: [:a]])
+      [%{value: :a, label: "a", description: nil}]
+
+      iex> PyroManiac.TypeInfer.closed_values(:string, [])
+      nil
+  """
+  @spec closed_values(term(), keyword()) :: [map()] | nil
+  def closed_values(type, constraints \\ [])
+
+  def closed_values(type, constraints) when is_list(constraints) do
+    do_closed_values(normalize_type(type), constraints)
   end
 
-  @doc "Returns true if the attribute info represents an array enum."
-  def array_enum_type?(%{type: {:array, _}} = attr_info), do: enum_type?(attr_info)
-  def array_enum_type?(_), do: false
+  def closed_values(type, _constraints), do: closed_values(type, [])
 
-  @doc "Returns true if the type has enum values (one_of constraint or custom enum)."
-  def has_enum_values?(type, constraints) do
-    constraints[:one_of] != nil ||
-      (is_atom(type) && Code.ensure_loaded?(type) && function_exported?(type, :values, 0))
+  defp do_closed_values({:array, inner}, constraints) do
+    item_constraints = Keyword.get(constraints, :items, [])
+
+    item_constraints =
+      case Keyword.fetch(constraints, :one_of) do
+        {:ok, values} -> Keyword.put_new(item_constraints, :one_of, values)
+        :error -> item_constraints
+      end
+
+    do_closed_values(normalize_type(inner), item_constraints)
   end
 
-  @doc "Returns enum values for a type, or nil. Accepts optional constraints."
-  def enum_values(type, constraints \\ [])
+  defp do_closed_values(type, constraints) do
+    cond do
+      is_list(constraints[:one_of]) and constraints[:one_of] != [] ->
+        Enum.map(constraints[:one_of], &option(type, &1))
 
-  def enum_values(type, constraints) when is_atom(type) do
-    case Keyword.get(constraints, :one_of) do
-      values when is_list(values) and values != [] -> values
-      _ -> if custom_enum?(type), do: type.values()
+      new_type?(type) ->
+        merged = Keyword.merge(type.subtype_constraints(), constraints)
+        do_closed_values(normalize_type(Ash.Type.NewType.subtype_of(type)), merged)
+
+      custom_enum?(type) ->
+        Enum.map(type.values(), &option(type, &1))
+
+      true ->
+        nil
     end
   end
 
-  def enum_values(_, _), do: nil
+  defp option(type, value) do
+    %{value: value, label: enum_label(type, value), description: enum_description(type, value)}
+  end
+
+  defp normalize_type({:array, inner}), do: {:array, inner}
+  defp normalize_type(type) when is_atom(type), do: Ash.Type.get_type(type)
+  defp normalize_type(type), do: type
+
+  defp new_type?(type) when is_atom(type) do
+    Code.ensure_loaded?(type) and Ash.Type.NewType.new_type?(type) and
+      function_exported?(type, :subtype_constraints, 0)
+  end
+
+  defp new_type?(_), do: false
+
+  defp enum_description(type, value) when is_atom(type) do
+    if custom_enum?(type) and function_exported?(type, :description, 1),
+      do: type.description(value)
+  end
+
+  defp enum_description(_, _), do: nil
+
+  @doc "Returns true if the attribute info has a closed set of values."
+  def enum_type?(attr_info) do
+    closed_values(attr_info.type, Map.get(attr_info, :constraints) || []) != nil
+  end
+
+  @doc "Returns true if the attribute info is an array with a closed set of values."
+  def array_enum_type?(%{type: {:array, _}} = attr_info), do: enum_type?(attr_info)
+  def array_enum_type?(_), do: false
+
+  @doc "Returns true if the type has a closed set of values."
+  def has_enum_values?(type, constraints), do: closed_values(type, constraints || []) != nil
+
+  @doc "Returns the closed set of values of a type, or nil."
+  def enum_values(type, constraints \\ []) do
+    case closed_values(type, constraints || []) do
+      nil -> nil
+      options -> Enum.map(options, & &1.value)
+    end
+  end
 
   @doc """
   Infer the input type for a Form field.
@@ -109,15 +197,20 @@ defmodule PyroManiac.TypeInfer do
   def infer_input_type(field, attr_info) do
     cond do
       boolean_type?(attr_info.type) -> :boolean
-      array_enum_type?(attr_info) -> :select
-      enum_type?(attr_info) -> :select
-      numeric_type?(attr_info.type) -> :number
-      date_type?(attr_info.type) -> :date
-      naive_datetime_type?(attr_info.type) -> :naive_datetime
-      datetime_type?(attr_info.type) -> :datetime
-      time_type?(attr_info.type) -> :time
-      interval_type?(attr_info.type) -> :interval
-      true -> infer_from_field_name(field)
+      array_enum_type?(attr_info) or enum_type?(attr_info) -> :select
+      true -> temporal_or_number_type(attr_info.type) || infer_from_field_name(field)
+    end
+  end
+
+  defp temporal_or_number_type(type) do
+    cond do
+      numeric_type?(type) -> :number
+      date_type?(type) -> :date
+      naive_datetime_type?(type) -> :naive_datetime
+      datetime_type?(type) -> :datetime
+      time_type?(type) -> :time
+      interval_type?(type) -> :interval
+      true -> nil
     end
   end
 
@@ -209,22 +302,11 @@ defmodule PyroManiac.TypeInfer do
 
   def enum_label(_, value), do: fallback_label(value)
 
-  @doc "Get `{label, value}` options for an enum type or `one_of` constraint."
-  def enum_options(type, constraints \\ [])
-
-  def enum_options({:array, inner}, constraints) when is_atom(inner),
-    do: enum_options(inner, constraints)
-
-  def enum_options(type, constraints) do
-    cond do
-      values = constraints[:one_of] ->
-        Enum.map(values, fn v -> {fallback_label(v), v} end)
-
-      is_atom(type) && Code.ensure_loaded?(type) && function_exported?(type, :values, 0) ->
-        Enum.map(type.values(), fn v -> {enum_label(type, v), v} end)
-
-      true ->
-        nil
+  @doc "Get `{label, value}` options for a closed set of values (see `closed_values/2`)."
+  def enum_options(type, constraints \\ []) do
+    case closed_values(type, constraints || []) do
+      nil -> nil
+      options -> Enum.map(options, &{&1.label, &1.value})
     end
   end
 
@@ -243,23 +325,15 @@ defmodule PyroManiac.TypeInfer do
   def filter_type(type, constraints \\ [])
 
   def filter_type(type, constraints) when is_atom(type) do
-    if Keyword.has_key?(constraints, :one_of) do
+    if has_enum_values?(type, constraints) do
       :enum
     else
-      Map.get_lazy(@filter_types, type, fn -> filter_type_for_atom(type) end)
+      Map.get(@filter_types, type, :string)
     end
   end
 
   def filter_type({:array, _}, _), do: :string
   def filter_type(_, _), do: :string
-
-  defp filter_type_for_atom(type) do
-    if custom_enum?(type), do: :enum, else: :string
-  end
-
-  defp has_one_of_constraint?(attr_info) do
-    attr_info.constraints[:one_of] != nil
-  end
 
   defp custom_enum?(type) when is_atom(type) do
     Code.ensure_loaded?(type) && function_exported?(type, :values, 0)

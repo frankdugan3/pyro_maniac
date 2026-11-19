@@ -41,7 +41,7 @@ The `page` section configures page-level metadata. Schema:
 | Key               | Type                                                                        | Default       | Notes                                                              |
 | ----------------- | --------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------ |
 | `title`           | `:string`                                                                   | required      | Document title and page header                                     |
-| `description`     | `:string` or render fn                                                      | nil           | Rendered below the title                                           |
+| `description`     | `:string` or a render module                                                | nil           | Rendered below the title                                           |
 | `route`           | `:string`                                                                   | nil           | URL path (e.g. `"/recipes"`, `"/recipes/:id"`). Renderer uses this |
 | `default_viewer`  | `:data_table` \| `:grid` \| `:calendar` \| `:gantt` \| `:kanban` \| `:list` | `:data_table` | Initial viewer when the page has multiple                          |
 | `track_presence?` | `:boolean`                                                                  | `true`        | Toggle presence tracking via the configured presence backend       |
@@ -76,8 +76,11 @@ Schema:
 | -------- | --------- | ------------------------------------------------------------------------------------------------ |
 | `name`   | `:atom`   | Required. Unique identifier                                                                      |
 | `label`  | `:string` | Required. Display text                                                                           |
-| `button` | render fn | Optional. Custom button renderer; receives `:action`, `:base_path`, `:params`, optionally `:row` |
-| `render` | render fn | Optional. Renders the action target (modal, panel, etc.) with the same assigns                   |
+| `button` | module    | Optional. A render module for the button; receives `:action`, `:base_path`, `:params`, optionally `:row` |
+| `render` | module    | Optional. A render module for the action target (modal, panel, etc.) with the same assigns               |
+
+A render module implements the render behaviour of the renderer (for
+LiveView, `PyroManiac.LiveView.Render`). The DSL holds no functions.
 
 If neither `button` nor `render` is supplied, the renderer uses its
 default link/action treatment.
@@ -91,5 +94,9 @@ default link/action treatment.
   resource block is required; missing it raises a verifier error from
   `PyroManiac.Dsl.Verifiers.ResourceHasExtension`.
 - **Mixing render concerns into the page module.** Do not import
-  `Phoenix.Component`, define `render/1`, or reference renderer modules.
-  The page module exists only to configure data.
+  `Phoenix.Component` or define `render/1` in the page module. The page
+  module exists only to configure data. Custom rendering goes in a
+  separate render module (it can be nested in the page module), and the
+  DSL refers to it by name.
+- **A function in the DSL** (`render &fun/1`, `when fn ... end`). Use a
+  render module, or an Ash expression for `when` and `tone`.

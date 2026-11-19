@@ -16,7 +16,7 @@ detail.
 | `resource/1`           | The Ash resource module bound to the page                                                      |
 | `default_label/1`      | The resource's `default_label` field (atom)                                                    |
 | `title/1`              | Page title (string, required)                                                                  |
-| `description/1`        | Page description (string, render fn, or nil)                                                   |
+| `description/1`        | Page description (string, render module, or nil)                                               |
 | `route/1`              | Route path (string or nil)                                                                     |
 | `default_viewer/1`     | Default viewer atom                                                                            |
 | `track_presence?/1`    | Boolean                                                                                        |
@@ -44,6 +44,8 @@ detail.
 | `form_for/3`                  | Form action by name + target resource |
 | `form_for_action_type/2`      | First form for `:create` or `:update` |
 | `form_for_action_type/3`      | Same, scoped to a target resource     |
+| `form_fields/1`               | The inputs of a form action, in order (flattened from the layout tree) |
+| `form_layout/1`               | The layout tree of a form action as plain maps (`kind`, options, `children`, `depends_on`). No functions, so it encodes as JSON for other renderers |
 | `bulk_actions/1`              | All `BulkAction` entities             |
 | `bulk_action_for/2`           | Bulk action by name                   |
 

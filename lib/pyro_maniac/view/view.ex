@@ -78,10 +78,6 @@ defmodule PyroManiac.View.View do
         doc: "Description text for this view.",
         type: PyroManiac.Dsl.Type.inheritable(:string)
       ],
-      class: [
-        doc: "Container CSS classes.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
       default_page_size: [
         doc: "Default page size. Falls back to action's default_limit, then 25.",
         type: :pos_integer
@@ -105,13 +101,6 @@ defmodule PyroManiac.View.View do
       read_action: [
         doc: "Override which read action to use on the target resource.",
         type: :atom
-      ],
-      __arguments__: [
-        private?: true,
-        hide: true,
-        default: [],
-        doc: "Read action arguments as resolved fields. Set by the transformer.",
-        type: {:list, :any}
       ],
       exclude: [
         default: [],
@@ -156,49 +145,9 @@ defmodule PyroManiac.View.View do
         doc: "Which columns are visible by default (`:data_table` only).",
         type: {:list, :atom}
       ],
-      body_class: [
-        doc: "Data table tbody classes.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
-      body_row_class: [
-        doc: "Data table tbody > tr classes.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
-      caption_class: [
-        doc: "Data table caption classes.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
-      header_class: [
-        doc: "Data table thead classes.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
-      header_row_class: [
-        doc: "Data table thead > tr classes.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
-      footer_class: [
-        doc: "Data table tfoot classes.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
-      footer_row_class: [
-        doc: "Data table tfoot > tr classes.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
-      footer_cell_class: [
-        doc: "Data table tfoot > tr > td classes.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
-      grid_class: [
-        doc: "CSS grid container class (`:grid` only).",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
       group_by: [
         doc: "Field to group records into swimlanes (`:kanban` and optionally `:gantt`).",
         type: :atom
-      ],
-      lane_class: [
-        doc: "Swimlane container CSS class (`:kanban` only).",
-        type: PyroManiac.Dsl.Type.css_class()
       ],
       kanban_action: [
         doc:
@@ -238,13 +187,9 @@ defmodule PyroManiac.View.View do
         doc: "Self-referencing field for tree hierarchy (`:list` only, optional).",
         type: :atom
       ],
-      indent_class: [
-        doc: "Per-level indentation CSS class (`:list` only).",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
       render: [
-        doc: "Custom render function (`:render` only). Receives assigns.",
-        type: PyroManiac.Dsl.Type.render_fn()
+        doc: "A render module (`:render` only). The renderer requires its render behaviour.",
+        type: PyroManiac.Dsl.Type.render_module()
       ],
       component: [
         doc: "LiveComponent module to embed (`:render` only, alternative to `render`).",
@@ -268,6 +213,14 @@ defmodule PyroManiac.View.View do
         doc:
           "For `:delegated` views, the PyroManiac module to mount as a full autonomous sub-Viewer. Required when `type` is `:delegated`, forbidden otherwise.",
         type: {:spark, PyroManiac}
+      ]
+    ],
+    private_fields: [
+      __arguments__: [
+        default: [],
+        doc:
+          "The public arguments of the read action, as resolved inputs. Set by the transformer.",
+        type: {:list, :any}
       ]
     ],
     transform: {__MODULE__, :__set_defaults__, []}

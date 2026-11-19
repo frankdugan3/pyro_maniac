@@ -62,5 +62,30 @@ defmodule Brewery.Supplier do
       primary? true
       require_atomic? false
     end
+
+    update :rename do
+      description "Rename the supplier, with a reason."
+      require_atomic? false
+      accept [:name]
+      argument :reason, :string, allow_nil?: false
+    end
+
+    read :suggest_codes do
+      description "The different supplier codes that contain the search text."
+
+      argument :search, :string,
+        allow_nil?: false,
+        default: "",
+        constraints: [allow_empty?: true]
+
+      prepare build(limit: 10, sort: [code: :asc], distinct: [:code], select: [:code])
+      filter expr(contains(code, ^arg(:search)))
+    end
+
+    read :by_prefix do
+      description "The suppliers whose code starts with a prefix."
+      argument :prefix, :string, allow_nil?: false
+      filter expr(contains(code, ^arg(:prefix)))
+    end
   end
 end

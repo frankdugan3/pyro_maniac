@@ -13,12 +13,12 @@ defmodule PyroManiacTest do
 
       action [:create, :update] do
         field :name, autofocus: true
-        field :style
+        select :style
         field :description
         field :target_abv
         field :target_og
         field :target_fg
-        field :status
+        select :status
         field :photos, type: :attachment
       end
     end

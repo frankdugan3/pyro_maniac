@@ -129,8 +129,7 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
       )
     end
 
-    if view.columns != [] or view.fields != [] or view.sections != [] or
-         (is_list(view.views) and view.views != []) do
+    if delegated_view_has_children?(view) do
       Error.raise!(
         module: module,
         location: Entity.anno(view),
@@ -142,6 +141,11 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
           "remove all child entities from this view, or change `type :delegated` to a regular type"
       )
     end
+  end
+
+  defp delegated_view_has_children?(view) do
+    nested = if is_list(view.views), do: view.views, else: []
+    Enum.any?([view.columns, view.fields, view.sections, nested], &(&1 != []))
   end
 
   defp validate_non_delegated_view(%View{} = view, module) do

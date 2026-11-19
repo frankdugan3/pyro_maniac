@@ -6,18 +6,16 @@ defmodule PyroManiac.View.Field do
   (`:grid`, `:list`, `:kanban`, `:calendar`, `:gantt`). Unlike columns, fields
   are pre-laid-out by the developer and not interactively managed by the user.
   """
+  @moduledoc group: "PyroManiac"
 
   use PyroManiac.Dsl.Entity,
     name: :field,
     args: [:name],
     describe: "Declare a field to display within a view.",
+    imports: [Ash.Expr],
     schema: [
-      class: [
-        doc: "CSS classes for this field.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
       empty_text: [
-        default: "\u2014",
+        default: "—",
         doc: "Text to display when the value is nil or not loaded.",
         type: :string
       ],
@@ -31,11 +29,28 @@ defmodule PyroManiac.View.Field do
         type: :atom
       ],
       render: [
-        doc: "Custom render function. Receives assigns with `:record`, `:field`, and `:value`.",
-        type: PyroManiac.Dsl.Type.render_fn()
+        doc: "A render module for the value. The renderer requires its render behaviour.",
+        type: PyroManiac.Dsl.Type.render_module()
+      ],
+      size: [
+        default: :auto,
+        doc:
+          "The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type.",
+        type: PyroManiac.Dsl.Type.size()
       ],
       source: [
         doc: "Source path for data (defaults to [name]). Use for relationship traversal.",
+        type: {:list, :atom}
+      ],
+      tone: [
+        doc: "The meaning of the value: a tone, or an Ash expression that gives a tone or `nil`.",
+        type: :any
+      ]
+    ],
+    private_fields: [
+      __tone_refs__: [
+        default: [],
+        doc: "The fields that the `tone` expression needs. Set by the transformer.",
         type: {:list, :atom}
       ]
     ],

@@ -37,6 +37,7 @@ defmodule PyroManiac.Dsl.Transformers.ResolveViewResources do
         |> validate_not_excluded(excluded_actions, module)
         |> resolve_nested_views(resource, module)
         |> tag_attachment_columns()
+        |> resolve_tones_and_sizes(module)
       end
 
     dsl =
@@ -76,6 +77,130 @@ defmodule PyroManiac.Dsl.Transformers.ResolveViewResources do
   end
 
   defp tag_attachment_columns(other), do: other
+
+  # Validates `tone` (a tone atom or an Ash expression) on columns and view
+  # fields, and records the fields that the expression needs. Resolves the
+  # `size: :auto` of view fields.
+  defp resolve_tones_and_sizes(%View{} = view, module) do
+    resource = view.resource
+
+    columns = Enum.map(view.columns || [], &resolve_tone(&1, resource, view, module))
+
+    fields =
+      Enum.map(view.fields || [], fn field ->
+        field |> resolve_tone(resource, view, module) |> resolve_view_field_size(resource)
+      end)
+
+    sections =
+      Enum.map(view.sections || [], fn section ->
+        section_fields =
+          Enum.map(section.fields || [], fn field ->
+            field |> resolve_tone(resource, view, module) |> resolve_view_field_size(resource)
+          end)
+
+        %{section | fields: section_fields}
+      end)
+
+    nested = Enum.map(view.views || [], &resolve_tones_and_sizes(&1, module))
+
+    %{view | columns: columns, fields: fields, sections: sections, views: nested}
+  end
+
+  defp resolve_tones_and_sizes(other, _module), do: other
+
+  defp resolve_tone(%{tone: nil} = entity, _resource, _view, _module), do: entity
+
+  defp resolve_tone(%{tone: tone} = entity, resource, view, module) do
+    tones = PyroManiac.Dsl.Type.tones()
+
+    cond do
+      tone in tones ->
+        entity
+
+      is_atom(tone) ->
+        Error.raise!(
+          module: module,
+          location: Entity.property_anno(entity, :tone) || Entity.anno(entity),
+          path: [:views, :view, view_name(view), entity.name, :tone],
+          why: "#{inspect(tone)} is not a tone. The tones are #{inspect(tones)}",
+          suggestions: Error.did_you_mean(tone, tones)
+        )
+
+      is_function(tone) or is_nil(resource) ->
+        Error.raise!(
+          module: module,
+          location: Entity.property_anno(entity, :tone) || Entity.anno(entity),
+          path: [:views, :view, view_name(view), entity.name, :tone],
+          why: "`tone` is a tone or an Ash expression",
+          fix: "use for example `tone :danger` or `tone expr(if overdue?, do: :danger)`"
+        )
+
+      true ->
+        resolve_tone_expression(entity, resource, view, module)
+    end
+  end
+
+  defp resolve_tone(entity, _resource, _view, _module), do: entity
+
+  # The refs of a `tone` expression are loaded with the rows, so they can be
+  # any field (`in_memory_only?: false`).
+  defp resolve_tone_expression(entity, resource, view, module) do
+    case PyroManiac.Dsl.Expression.validate_refs(resource, entity.tone, in_memory_only?: false) do
+      {:ok, names} ->
+        %{entity | __tone_refs__: names}
+
+      {:error, message} ->
+        Error.raise!(
+          module: module,
+          location: Entity.property_anno(entity, :tone) || Entity.anno(entity),
+          path: [:views, :view, view_name(view), entity.name, :tone],
+          why: "the `tone` expression is invalid: #{message}"
+        )
+    end
+  end
+
+  defp view_name(%View{name: [name | _]}), do: name
+  defp view_name(_view), do: :view
+
+  defp resolve_view_field_size(
+         %PyroManiac.View.Field{size: :auto, source: [name]} = field,
+         resource
+       )
+       when not is_nil(resource) do
+    size =
+      case Ash.Resource.Info.field(resource, name) do
+        %{type: type} = info ->
+          cond do
+            PyroManiac.TypeInfer.text_type?(type) -> :prose
+            PyroManiac.TypeInfer.boolean_type?(type) -> :term
+            PyroManiac.TypeInfer.numeric_type?(type) -> :term
+            PyroManiac.TypeInfer.date_type?(type) -> :term
+            PyroManiac.TypeInfer.time_type?(type) -> :term
+            true -> constraint_size(info)
+          end
+
+        _ ->
+          :name
+      end
+
+    %{field | size: size}
+  end
+
+  defp resolve_view_field_size(%PyroManiac.View.Field{size: :auto} = field, _resource),
+    do: %{field | size: :name}
+
+  defp resolve_view_field_size(field, _resource), do: field
+
+  defp constraint_size(%{constraints: constraints}) when is_list(constraints) do
+    case Keyword.get(constraints, :max_length) do
+      max when is_integer(max) and max <= 10 -> :code
+      max when is_integer(max) and max <= 24 -> :term
+      max when is_integer(max) and max >= 100 -> :phrase
+      _ -> :name
+    end
+  end
+
+  defp constraint_size(_info), do: :name
 
   defp attachment_destination(nil, _name), do: nil
 

@@ -17,9 +17,9 @@ defmodule PyroManiac.DelegateToTest do
 
       action [:create, :update] do
         field :batch_number, autofocus: true
-        field :recipe_id
-        field :brewer_id
-        field :status
+        combobox :recipe_id
+        combobox :brewer_id
+        select :status
         field :brew_date
         field :package_date
         field :actual_og
@@ -30,7 +30,7 @@ defmodule PyroManiac.DelegateToTest do
       end
 
       bulk_action :update do
-        field :status, autofocus: true
+        select :status, autofocus: true
         field :notes
       end
     end
@@ -66,12 +66,12 @@ defmodule PyroManiac.DelegateToTest do
 
         action [:create, :update] do
           field :name, autofocus: true
-          field :style
+          select :style
           field :description
           field :target_abv
           field :target_og
           field :target_fg
-          field :status
+          select :status
           field :photos, type: :attachment
         end
 
@@ -140,12 +140,12 @@ defmodule PyroManiac.DelegateToTest do
 
           action [:create, :update] do
             field :name, autofocus: true
-            field :style
+            select :style
             field :description
             field :target_abv
             field :target_og
             field :target_fg
-            field :status
+            select :status
             field :photos, type: :attachment
           end
 
@@ -206,9 +206,9 @@ defmodule PyroManiac.DelegateToTest do
 
             action :update do
               field :batch_number, autofocus: true
-              field :recipe_id
-              field :brewer_id
-              field :status
+              combobox :recipe_id
+              combobox :brewer_id
+              select :status
               field :brew_date
               field :package_date
               field :actual_og
@@ -237,12 +237,12 @@ defmodule PyroManiac.DelegateToTest do
 
             action [:create, :update] do
               field :name, autofocus: true
-              field :style
+              select :style
               field :description
               field :target_abv
               field :target_og
               field :target_fg
-              field :status
+              select :status
               field :photos, type: :attachment
             end
 
@@ -270,12 +270,12 @@ defmodule PyroManiac.DelegateToTest do
 
                          action [:create, :update] do
                            field :name, autofocus: true
-                           field :style
+                           select :style
                            field :description
                            field :target_abv
                            field :target_og
                            field :target_fg
-                           field :status
+                           select :status
                            field :photos, type: :attachment
                          end
 
@@ -502,9 +502,9 @@ defmodule PyroManiac.DelegateToTest do
 
         action :update do
           field :batch_number, autofocus: true
-          field :recipe_id
-          field :brewer_id
-          field :status
+          combobox :recipe_id
+          combobox :brewer_id
+          select :status
           field :brew_date
           field :package_date
           field :actual_og

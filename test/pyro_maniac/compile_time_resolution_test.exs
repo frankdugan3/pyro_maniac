@@ -13,12 +13,12 @@ defmodule PyroManiac.CompileTimeResolutionTest do
 
       action [:create, :update] do
         field :name, autofocus: true
-        field :style
+        select :style
         field :description
         field :target_abv
         field :target_og
         field :target_fg
-        field :status
+        select :status
         field :photos, type: :attachment
       end
     end
@@ -64,7 +64,7 @@ defmodule PyroManiac.CompileTimeResolutionTest do
       action [:create, :update] do
         field :name, autofocus: true
         field :email
-        field :role
+        select :role
         field :active
       end
     end
@@ -79,7 +79,7 @@ defmodule PyroManiac.CompileTimeResolutionTest do
 
       action [:create, :update] do
         field :batch_number, autofocus: true
-        field :status
+        select :status
         field :brew_date
         field :package_date
         field :actual_og
@@ -87,8 +87,8 @@ defmodule PyroManiac.CompileTimeResolutionTest do
         field :actual_abv
         field :volume_liters
         field :notes
-        field :recipe_id
-        field :brewer_id
+        combobox :recipe_id
+        combobox :brewer_id
       end
     end
 
@@ -126,17 +126,21 @@ defmodule PyroManiac.CompileTimeResolutionTest do
   describe "field type resolution" do
     test "string fields resolve to :text" do
       field = get_field(RecipePage, :create, :name)
-      assert field.type == :text
+      assert %PyroManiac.Form.Field{type: :text} = field
     end
 
-    test "enum fields (custom Ash enum) resolve to :select" do
-      field = get_field(RecipePage, :create, :style)
-      assert field.type == :select
+    test "a custom Ash enum is a select with the options of the enum" do
+      select = get_field(RecipePage, :create, :style)
+      assert %PyroManiac.Form.Select{} = select
+
+      assert %{value: :ipa, label: "IPA"} =
+               Enum.find(select.__enum_options__, &(&1.value == :ipa))
     end
 
-    test "enum fields (one_of constraint) resolve to :select" do
-      field = get_field(RecipePage, :create, :status)
-      assert field.type == :select
+    test "a one_of constraint is a select with the values" do
+      select = get_field(RecipePage, :create, :status)
+      assert %PyroManiac.Form.Select{} = select
+      assert Enum.map(select.__enum_options__, & &1.value) == [:draft, :active, :retired]
     end
 
     test "decimal fields resolve to :number" do
@@ -160,50 +164,106 @@ defmodule PyroManiac.CompileTimeResolutionTest do
     end
   end
 
-  describe "belongs_to label stripping" do
-    test "belongs_to _id field drops the _id suffix from the auto label" do
+  describe "belongs_to combobox" do
+    test "the label drops the _id suffix" do
       assert get_field(BatchPage, :create, :recipe_id).label == "Recipe"
       assert get_field(BatchPage, :create, :brewer_id).label == "Brewer"
     end
 
-    test "belongs_to _id field resolves to :combobox" do
-      assert get_field(BatchPage, :create, :recipe_id).type == :combobox
+    test "it selects a record of the destination with the defaults" do
+      combobox = get_field(BatchPage, :create, :recipe_id)
+
+      assert %PyroManiac.Form.Combobox{__mode__: :select} = combobox
+      assert combobox.__resource__ == Brewery.Recipe
+      assert combobox.read_action == :read
+      assert combobox.value_key == :id
+      assert combobox.label_key == :name
+      assert combobox.search == [:name]
+      assert combobox.sort == [name: :asc]
+      assert combobox.limit == 20
     end
   end
 
-  describe "enum_options resolution" do
-    test "custom Ash enum populates enum_options" do
-      field = get_field(RecipePage, :create, :style)
-      assert is_list(field.enum_options)
-      refute Enum.empty?(field.enum_options)
-      assert {"IPA", :ipa} in field.enum_options
-    end
+  defmodule FreeTextComboboxPage do
+    @moduledoc false
+    use PyroManiac, resource: Brewery.Supplier
 
-    test "one_of constraint populates enum_options" do
-      field = get_field(RecipePage, :create, :status)
-      assert is_list(field.enum_options)
-      refute Enum.empty?(field.enum_options)
-      values = Enum.map(field.enum_options, &elem(&1, 1))
-      assert :draft in values
-      assert :active in values
-      assert :retired in values
-    end
+    forms do
+      exclude([:update, :rename])
 
-    test "non-enum fields have empty enum_options" do
-      field = get_field(RecipePage, :create, :name)
-      assert field.enum_options == []
+      action :create do
+        combobox :name, autofocus: true
+
+        combobox :code do
+          read_action :suggest_codes
+          argument :search, search()
+          search false
+        end
+
+        combobox :contact_email do
+          filter expr(is_nil(^input(:name)) or name == ^input(:name))
+        end
+
+        field :phone
+        field :active
+        field :notes
+      end
     end
   end
 
-  describe "allow_nil? resolution" do
-    test "required fields have allow_nil? false" do
-      field = get_field(RecipePage, :create, :name)
-      assert field.allow_nil? == false
+  describe "free-text combobox" do
+    test "the defaults search, sort, and show the field of the form resource" do
+      combobox = get_field(FreeTextComboboxPage, :create, :name)
+
+      assert %PyroManiac.Form.Combobox{__mode__: :free_text} = combobox
+      assert combobox.__resource__ == Brewery.Supplier
+      assert combobox.read_action == :read
+      assert combobox.value_key == :name
+      assert combobox.label_key == :name
+      assert combobox.search == [:name]
+      assert combobox.sort == [name: :asc]
     end
 
-    test "optional fields have allow_nil? true" do
-      field = get_field(RecipePage, :create, :description)
-      assert field.allow_nil? == true
+    test "an explicit read action with search() in an argument" do
+      combobox = get_field(FreeTextComboboxPage, :create, :code)
+
+      assert combobox.read_action == :suggest_codes
+      assert combobox.search == false
+      assert [%{name: :search, value: {:_context, [:pyro_maniac, :search]}}] = combobox.arguments
+    end
+
+    test "^input(name) in the filter is recorded" do
+      combobox = get_field(FreeTextComboboxPage, :create, :contact_email)
+      assert combobox.__inputs__ == [:name]
+    end
+  end
+
+  describe "private fields" do
+    test "allow nil is resolved from the attribute" do
+      assert get_field(RecipePage, :create, :name)."__allow_nil?__" == false
+      assert get_field(RecipePage, :create, :description)."__allow_nil?__" == true
+    end
+
+    test "a non-enum field has no options" do
+      assert get_field(RecipePage, :create, :name).__enum_options__ == []
+    end
+
+    test "the full path of a top-level input is empty" do
+      assert get_field(RecipePage, :create, :name).__full_path__ == []
+    end
+  end
+
+  describe "size resolution" do
+    test "a field gets a size from its type" do
+      assert get_field(RecipePage, :create, :target_abv).size == :term
+      assert get_field(RecipePage, :create, :photos).size == :prose
+      assert get_field(BatchPage, :create, :brew_date).size == :term
+    end
+
+    test "a string without max_length is a name, and a select or a combobox is a name" do
+      assert get_field(RecipePage, :create, :name).size == :name
+      assert get_field(RecipePage, :create, :status).size == :name
+      assert get_field(BatchPage, :create, :recipe_id).size == :name
     end
   end
 
@@ -266,31 +326,174 @@ defmodule PyroManiac.CompileTimeResolutionTest do
     end
   end
 
-  describe "extensible field types" do
-    test "extra_form_types allows custom types" do
-      defmodule V.CompileTime.ExtraFormTypes do
+  defmodule MoneyInput do
+    @moduledoc false
+    @behaviour PyroManiac.Form.InputType
+
+    @impl true
+    def schema, do: [currency: [type: :atom, default: :usd, doc: "The currency."]]
+
+    @impl true
+    def default_size, do: :term
+  end
+
+  describe "input entity" do
+    test "an app input type with options" do
+      defmodule V.CompileTime.MoneyInputPage do
         @moduledoc false
         use PyroManiac, resource: Brewery.Recipe
 
         forms do
-          extra_form_types([:money])
           exclude([:update, :activate, :retire])
 
           action :create do
             field :name, autofocus: true
-            field :style
+            select :style
             field :description
-            field :target_abv, type: :money
-            field :target_og
+            input(:target_abv, {PyroManiac.CompileTimeResolutionTest.MoneyInput, currency: :eur})
+            input(:target_og, PyroManiac.CompileTimeResolutionTest.MoneyInput)
             field :target_fg
-            field :status
+            select :status
             field :photos, type: :attachment
           end
         end
       end
 
-      field = get_field(V.CompileTime.ExtraFormTypes, :create, :target_abv)
-      assert field.type == :money
+      input = get_field(V.CompileTime.MoneyInputPage, :create, :target_abv)
+      assert %PyroManiac.Form.Input{} = input
+      assert input.__opts__ == [currency: :eur]
+      assert input.size == :term
+
+      assert get_field(V.CompileTime.MoneyInputPage, :create, :target_og).__opts__ == [
+               currency: :usd
+             ]
+    end
+  end
+
+  describe "visible? expressions" do
+    test "the attributes and the arguments of the expression are in __depends_on__" do
+      defmodule V.CompileTime.WhenPage do
+        @moduledoc false
+        use PyroManiac, resource: Brewery.Recipe
+
+        forms do
+          exclude([:update, :activate, :retire])
+
+          action :create do
+            field :name, autofocus: true
+            select :style
+            field :description, visible?: expr(status == :draft and not is_nil(name))
+            field :target_abv
+            field :target_og
+            field :target_fg
+            select :status
+            field :photos, type: :attachment
+          end
+        end
+      end
+
+      field = get_field(V.CompileTime.WhenPage, :create, :description)
+      assert Enum.sort(field.__depends_on__) == [:name, :status]
+    end
+
+    # `parent(...)` refers to the form one level up, as in Ash. The `visible?`
+    # of an input in a nested form is at its full path, so its parent is the
+    # form. The `visible?` of a group with a `path` is at the level that
+    # contains the group (it shows or hides all the rows).
+    defmodule V.CompileTime.ParentVisiblePage do
+      @moduledoc false
+      use PyroManiac, resource: Brewery.Shipment
+
+      forms do
+        action :create do
+          field :reference, autofocus: true
+          select :carrier
+
+          group "Lines" do
+            path [:lines]
+            visible? expr(carrier != :pickup)
+            field :description
+            field :quantity
+            field :pallet_count, visible?: expr(parent(carrier) == :truck and quantity > 0)
+          end
+        end
+      end
+    end
+
+    # Regression: the option was `when`. Elixir parses a line that starts
+    # with `when` as the guard operator of the line before it (and as the
+    # first line of a block, it is a syntax error). Thus a `when` in the block
+    # of a group, a row, a compound, or a step could not be written.
+    defmodule V.CompileTime.VisibleBlockPage do
+      @moduledoc false
+      use PyroManiac, resource: Brewery.Shipment
+
+      forms do
+        action :create do
+          row do
+            visible? expr(carrier != :pickup)
+            field :reference, autofocus: true
+            select :carrier
+          end
+
+          group "Lines" do
+            path [:lines]
+            field :description
+
+            compound "Amount" do
+              description "The quantity and the pallets."
+              visible? expr(not is_nil(description))
+              field :quantity
+              field :pallet_count
+            end
+          end
+        end
+      end
+    end
+
+    test "visible? can be the first line or a later line of a block" do
+      [row, group] = Info.form_for(V.CompileTime.VisibleBlockPage, :create).fields
+      [_description, compound] = group.fields
+
+      assert row.__depends_on__ == [:carrier]
+      assert compound.__depends_on__ == [:description]
+    end
+
+    test "a parent reference is in __depends_on__ as {:parent, name}" do
+      [_reference, _carrier, group] =
+        Info.form_for(V.CompileTime.ParentVisiblePage, :create).fields
+
+      [_description, _quantity, pallets] = group.fields
+      assert Enum.sort(pallets.__depends_on__) == [:quantity, {:parent, :carrier}]
+
+      # The group is at the level of the form: `carrier` is an attribute of
+      # the shipment, not of a line.
+      assert group.__depends_on__ == [:carrier]
+    end
+
+    test "form_layout/1 gives a parent dependency as a map" do
+      layout =
+        V.CompileTime.ParentVisiblePage
+        |> Info.form_for(:create)
+        |> Info.form_layout()
+
+      [_, _, %{children: [_, _, pallets]}] = layout.children
+      assert %{parent: :carrier} in pallets.depends_on
+      assert is_binary(JSON.encode!(layout))
+    end
+  end
+
+  describe "Info.form_layout/1" do
+    test "gives a plain tree that encodes as JSON" do
+      layout =
+        RecipePage
+        |> Info.form_for(:create)
+        |> Info.form_layout()
+
+      assert %{kind: :form, children: [first | _]} = layout
+      assert first.kind == :field
+      assert first.name == :name
+      assert is_binary(JSON.encode!(layout))
     end
   end
 
@@ -344,16 +547,7 @@ defmodule PyroManiac.CompileTimeResolutionTest do
   defp get_field(module, action_name, field_name) do
     module
     |> Info.form_for(action_name)
-    |> Map.get(:fields)
-    |> find_field(field_name)
-  end
-
-  defp find_field(fields, name) do
-    Enum.find_value(fields, fn
-      %PyroManiac.Form.Field{name: ^name} = field -> field
-      %PyroManiac.Form.FieldGroup{fields: children} -> find_field(children, name)
-      %PyroManiac.Form.Step{fields: children} -> find_field(children, name)
-      _ -> nil
-    end)
+    |> Info.form_fields()
+    |> Enum.find(&(&1.name == field_name))
   end
 end

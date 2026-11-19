@@ -22,14 +22,14 @@ defmodule PyroManiac.Page.ExtraAction do
         doc: "Display label for the action button."
       ],
       button: [
-        type: PyroManiac.Dsl.Type.render_fn(),
+        type: PyroManiac.Dsl.Type.render_module(),
         doc:
-          "Render function for the action button. Receives assigns with `:action`, `:base_path`, `:params`, and (for row-level) `:row`. Defaults to a generic link button."
+          "A render module for the action button. It gets `:action`, `:base_path`, `:params`, and (for row-level) `:row`. The renderer requires its render behaviour. Defaults to a generic link button."
       ],
       render: [
-        type: PyroManiac.Dsl.Type.render_fn(),
+        type: PyroManiac.Dsl.Type.render_module(),
         doc:
-          "Render function for the action content (e.g. a modal or panel). Receives assigns with `:action`, `:base_path`, `:params`, and (for row-level) `:row`. Defaults to a generic action renderer."
+          "A render module for the action content (e.g. a modal or panel). It gets `:action`, `:base_path`, `:params`, and (for row-level) `:row`. The renderer requires its render behaviour. Defaults to a generic action renderer."
       ]
     ]
 end

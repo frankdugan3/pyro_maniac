@@ -30,9 +30,10 @@ defmodule PyroManiac.Navigation.Item do
         doc: "Display text. Auto-derived from name if omitted.",
         type: :string
       ],
-      class: [
-        doc: "Customize class.",
-        type: PyroManiac.Dsl.Type.css_class()
+      tone: [
+        doc:
+          "The meaning of the item: `:neutral`, `:info`, `:success`, `:warning`, or `:danger`. Each renderer maps it to its own style.",
+        type: {:one_of, PyroManiac.Dsl.Type.tones()}
       ],
       icon: [
         doc: "Icon name to be passed to the renderer.",

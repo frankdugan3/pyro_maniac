@@ -60,6 +60,10 @@ Each item must have **exactly one** of `page`, `module`, or `href`:
 | `page`      | A PyroManiac page module — validated, authorization-aware        |
 | `module`    | A non-PyroManiac module — always visible                         |
 | `href`      | External URL — opens in a new tab. No `path` required            |
+| `tone`      | `:neutral`, `:info`, `:success`, `:warning`, or `:danger`        |
+
+A `group` has a `tone` too. There is no `class`: the renderer maps the
+tone to its styles. For example, `tone :danger` marks an experimental item.
 
 Examples:
 

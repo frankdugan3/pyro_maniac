@@ -20,7 +20,7 @@ Page-level configuration for the PyroManiac UI.
 | Name | Type | Default | Docs |
 |------|------|---------|------|
 | [`title`](#page-title){: #page-title .spark-required} | `String.t` |  | Page title used for the document title and rendered as a page header. |
-| [`description`](#page-description){: #page-description } | `String.t \| (map -> any)` |  | Optional page description rendered below the title. Accepts a string or a render function that receives assigns. |
+| [`description`](#page-description){: #page-description } | `String.t \| atom` |  | Optional page description rendered below the title. A string, or a render module (the renderer requires its render behaviour). |
 | [`route`](#page-route){: #page-route } | `String.t` |  | URL path for this page (e.g. `"/recipes"`, `"/recipes/:id"`). Renderers may use this to generate route declarations; navigation items can auto-resolve paths from the page module. |
 | [`default_viewer`](#page-default_viewer){: #page-default_viewer } | `:data_table \| :grid \| :calendar \| :gantt \| :kanban \| :list` | `:data_table` | The default viewer type for the page. |
 | [`track_presence?`](#page-track_presence?){: #page-track_presence? } | `boolean` | `true` | When true, tracks which users are viewing or editing records on this page via the configured presence backend. |
@@ -49,8 +49,8 @@ Add a custom action to the page toolbar, data table rows, or card actions.
 | Name | Type | Default | Docs |
 |------|------|---------|------|
 | [`label`](#page-extra_action-label){: #page-extra_action-label .spark-required} | `String.t` |  | Display label for the action button. |
-| [`button`](#page-extra_action-button){: #page-extra_action-button } | `(map -> any)` |  | Render function for the action button. Receives assigns with `:action`, `:base_path`, `:params`, and (for row-level) `:row`. Defaults to a generic link button. |
-| [`render`](#page-extra_action-render){: #page-extra_action-render } | `(map -> any)` |  | Render function for the action content (e.g. a modal or panel). Receives assigns with `:action`, `:base_path`, `:params`, and (for row-level) `:row`. Defaults to a generic action renderer. |
+| [`button`](#page-extra_action-button){: #page-extra_action-button } | `atom` |  | A render module for the action button. It gets `:action`, `:base_path`, `:params`, and (for row-level) `:row`. The renderer requires its render behaviour. Defaults to a generic link button. |
+| [`render`](#page-extra_action-render){: #page-extra_action-render } | `atom` |  | A render module for the action content (e.g. a modal or panel). It gets `:action`, `:base_path`, `:params`, and (for row-level) `:row`. The renderer requires its render behaviour. Defaults to a generic action renderer. |
 
 
 
@@ -124,7 +124,6 @@ Declare a view for displaying resource data. Can be nested recursively.
 | [`relationship`](#views-view-relationship){: #views-view-relationship } | `atom` |  | Which relationship to traverse (for nested views). |
 | [`label`](#views-view-label){: #views-view-label } | `String.t` |  | Display label for this view (defaults to capitalized name). |
 | [`description`](#views-view-description){: #views-view-description } | `String.t \| :inherit` |  | Description text for this view. |
-| [`class`](#views-view-class){: #views-view-class } | `nil \| String.t \| (map -> String.t)` |  | Container CSS classes. |
 | [`default_page_size`](#views-view-default_page_size){: #views-view-default_page_size } | `pos_integer` |  | Default page size. Falls back to action's default_limit, then 25. |
 | [`page_sizes`](#views-view-page_sizes){: #views-view-page_sizes } | `list(pos_integer)` |  | Available page size options for pagination controls. |
 | [`default_sort`](#views-view-default_sort){: #views-view-default_sort } | `String.t \| list({atom, :asc \| :desc \| :asc_nils_first \| :asc_nils_last \| :desc_nils_first \| :desc_nils_last}) \| list(atom) \| list(String.t) \| nil` |  | Default sort specification. |
@@ -140,17 +139,7 @@ Declare a view for displaying resource data. Can be nested recursively.
 | [`multiple?`](#views-view-multiple?){: #views-view-multiple? } | `boolean` | `false` | Allow multiple rows to be expanded simultaneously. When false, acts as accordion. |
 | [`selectable?`](#views-view-selectable?){: #views-view-selectable? } | `boolean` | `true` | Enable row selection for bulk actions (`:data_table` only). |
 | [`default_display`](#views-view-default_display){: #views-view-default_display } | `list(atom)` |  | Which columns are visible by default (`:data_table` only). |
-| [`body_class`](#views-view-body_class){: #views-view-body_class } | `nil \| String.t \| (map -> String.t)` |  | Data table tbody classes. |
-| [`body_row_class`](#views-view-body_row_class){: #views-view-body_row_class } | `nil \| String.t \| (map -> String.t)` |  | Data table tbody > tr classes. |
-| [`caption_class`](#views-view-caption_class){: #views-view-caption_class } | `nil \| String.t \| (map -> String.t)` |  | Data table caption classes. |
-| [`header_class`](#views-view-header_class){: #views-view-header_class } | `nil \| String.t \| (map -> String.t)` |  | Data table thead classes. |
-| [`header_row_class`](#views-view-header_row_class){: #views-view-header_row_class } | `nil \| String.t \| (map -> String.t)` |  | Data table thead > tr classes. |
-| [`footer_class`](#views-view-footer_class){: #views-view-footer_class } | `nil \| String.t \| (map -> String.t)` |  | Data table tfoot classes. |
-| [`footer_row_class`](#views-view-footer_row_class){: #views-view-footer_row_class } | `nil \| String.t \| (map -> String.t)` |  | Data table tfoot > tr classes. |
-| [`footer_cell_class`](#views-view-footer_cell_class){: #views-view-footer_cell_class } | `nil \| String.t \| (map -> String.t)` |  | Data table tfoot > tr > td classes. |
-| [`grid_class`](#views-view-grid_class){: #views-view-grid_class } | `nil \| String.t \| (map -> String.t)` |  | CSS grid container class (`:grid` only). |
 | [`group_by`](#views-view-group_by){: #views-view-group_by } | `atom` |  | Field to group records into swimlanes (`:kanban` and optionally `:gantt`). |
-| [`lane_class`](#views-view-lane_class){: #views-view-lane_class } | `nil \| String.t \| (map -> String.t)` |  | Swimlane container CSS class (`:kanban` only). |
 | [`kanban_action`](#views-view-kanban_action){: #views-view-kanban_action } | `atom` |  | Update action for kanban card moves (`:kanban` only). Must accept both the `group_by` and `priority` fields. |
 | [`priority`](#views-view-priority){: #views-view-priority } | `atom` |  | Integer attribute for card ordering within lanes (`:kanban` only). Enables drag reordering. The attribute must be an integer type on the resource. Sets `default_sort` automatically. |
 | [`date_field`](#views-view-date_field){: #views-view-date_field } | `atom` |  | Field for event date or start date (`:calendar` only). |
@@ -160,8 +149,7 @@ Declare a view for displaying resource data. Can be nested recursively.
 | [`end_field`](#views-view-end_field){: #views-view-end_field } | `atom` |  | Field for task end date (`:gantt` only). |
 | [`progress_field`](#views-view-progress_field){: #views-view-progress_field } | `atom` |  | Field for completion percentage (`:gantt` only, optional). |
 | [`parent_field`](#views-view-parent_field){: #views-view-parent_field } | `atom` |  | Self-referencing field for tree hierarchy (`:list` only, optional). |
-| [`indent_class`](#views-view-indent_class){: #views-view-indent_class } | `nil \| String.t \| (map -> String.t)` |  | Per-level indentation CSS class (`:list` only). |
-| [`render`](#views-view-render){: #views-view-render } | `(map -> any)` |  | Custom render function (`:render` only). Receives assigns. |
+| [`render`](#views-view-render){: #views-view-render } | `atom` |  | A render module (`:render` only). The renderer requires its render behaviour. |
 | [`component`](#views-view-component){: #views-view-component } | `atom` |  | LiveComponent module to embed (`:render` only, alternative to `render`). |
 | [`component_id_suffix`](#views-view-component_id_suffix){: #views-view-component_id_suffix } | `String.t` |  | Component ID suffix (`:render` only). |
 | [`props`](#views-view-props){: #views-view-props } | `keyword` | `[]` | Static props passed to the LiveComponent (`:render` only). |
@@ -190,16 +178,15 @@ Declare non-default behavior for a specific data table column.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`cell_class`](#views-view-column-cell_class){: #views-view-column-cell_class } | `nil \| String.t \| (map -> String.t)` |  | Customize cell class. |
 | [`description`](#views-view-column-description){: #views-view-column-description } | `String.t \| :inherit` |  | Description of column. |
-| [`edit_with`](#views-view-column-edit_with){: #views-view-column-edit_with } | `nil \| atom \| {atom, atom} \| (map -> any)` |  | Inline edit config. An atom (e.g. `:text`) uses primary update action. A tuple `{:action, :type}` specifies both. A render function for custom UI. `nil` disables editing. |
+| [`edit_with`](#views-view-column-edit_with){: #views-view-column-edit_with } | `nil \| atom \| {atom, atom}` |  | Inline edit config. An atom (e.g. `:text`) uses primary update action. A tuple `{:action, :type}` specifies both. `nil` disables editing. |
 | [`filterable?`](#views-view-column-filterable?){: #views-view-column-filterable? } | `boolean` | `true` | Enable filtering on this column. Note: If technically unfilterable, automatically set to false. |
-| [`header_class`](#views-view-column-header_class){: #views-view-column-header_class } | `nil \| String.t \| (map -> String.t)` |  | Customize header class. |
 | [`keyset_sortable?`](#views-view-column-keyset_sortable?){: #views-view-column-keyset_sortable? } | `boolean` | `true` | Enable keyset-paged sorting. Note: If technically unsortable, automatically set to false. |
 | [`label`](#views-view-column-label){: #views-view-column-label } | `String.t` |  | The label of the column (defaults to capitalized name). |
-| [`render_cell_data`](#views-view-column-render_cell_data){: #views-view-column-render_cell_data } | `(map -> any)` | `&PyroManiac.View.Column.render_cell_data/1` |  |
+| [`render`](#views-view-column-render){: #views-view-column-render } | `atom` |  | A render module for the cell. The renderer requires its render behaviour. Without it, the cell shows `render_cell_data/1`. |
 | [`sortable?`](#views-view-column-sortable?){: #views-view-column-sortable? } | `boolean` | `true` | Enable unpaged and offset-paged sorting. Note: If technically unsortable, automatically set to false. |
 | [`source`](#views-view-column-source){: #views-view-column-source } | `list(atom)` |  | Source path for data (defaults to name). |
+| [`tone`](#views-view-column-tone){: #views-view-column-tone } | `any` |  | The meaning of each cell: `:neutral`, `:info`, `:success`, `:warning`, `:danger`, or an Ash expression that gives one of them or `nil`. |
 | [`type`](#views-view-column-type){: #views-view-column-type } | `:default \| :textarea \| :attachment` | `:default` | The type of the column. |
 
 
@@ -231,11 +218,12 @@ Declare a field to display within a view.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#views-view-field-class){: #views-view-field-class } | `nil \| String.t \| (map -> String.t)` |  | CSS classes for this field. |
 | [`empty_text`](#views-view-field-empty_text){: #views-view-field-empty_text } | `String.t` | `"—"` | Text to display when the value is nil or not loaded. |
 | [`label`](#views-view-field-label){: #views-view-field-label } | `String.t` |  | The label for this field (defaults to capitalized name). |
-| [`render`](#views-view-field-render){: #views-view-field-render } | `(map -> any)` |  | Custom render function. Receives assigns with `:record`, `:field`, and `:value`. |
+| [`render`](#views-view-field-render){: #views-view-field-render } | `atom` |  | A render module for the value. The renderer requires its render behaviour. |
+| [`size`](#views-view-field-size){: #views-view-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type. |
 | [`source`](#views-view-field-source){: #views-view-field-source } | `list(atom)` |  | Source path for data (defaults to [name]). Use for relationship traversal. |
+| [`tone`](#views-view-field-tone){: #views-view-field-tone } | `any` |  | The meaning of the value: a tone, or an Ash expression that gives a tone or `nil`. |
 
 
 
@@ -270,10 +258,9 @@ Declare a section grouping fields and relationships within a grid view.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#views-view-section-class){: #views-view-section-class } | `nil \| String.t \| (map -> String.t)` |  | CSS classes for this section. |
 | [`collapsed?`](#views-view-section-collapsed?){: #views-view-section-collapsed? } | `boolean` | `false` | Whether the section starts collapsed (only relevant when collapsible? is true). |
 | [`collapsible?`](#views-view-section-collapsible?){: #views-view-section-collapsible? } | `boolean` | `false` | Whether the section can be collapsed/expanded by the user. |
-| [`render`](#views-view-section-render){: #views-view-section-render } | `(map -> any)` |  | Custom render function for the entire section. Receives assigns with `:record` and `:section`. |
+| [`render`](#views-view-section-render){: #views-view-section-render } | `atom` |  | A render module for the entire section. The renderer requires its render behaviour. |
 
 
 ### views.view.section.field
@@ -297,11 +284,12 @@ Declare a field to display within a view.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#views-view-section-field-class){: #views-view-section-field-class } | `nil \| String.t \| (map -> String.t)` |  | CSS classes for this field. |
 | [`empty_text`](#views-view-section-field-empty_text){: #views-view-section-field-empty_text } | `String.t` | `"—"` | Text to display when the value is nil or not loaded. |
 | [`label`](#views-view-section-field-label){: #views-view-section-field-label } | `String.t` |  | The label for this field (defaults to capitalized name). |
-| [`render`](#views-view-section-field-render){: #views-view-section-field-render } | `(map -> any)` |  | Custom render function. Receives assigns with `:record`, `:field`, and `:value`. |
+| [`render`](#views-view-section-field-render){: #views-view-section-field-render } | `atom` |  | A render module for the value. The renderer requires its render behaviour. |
+| [`size`](#views-view-section-field-size){: #views-view-section-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type. |
 | [`source`](#views-view-section-field-source){: #views-view-section-field-source } | `list(atom)` |  | Source path for data (defaults to [name]). Use for relationship traversal. |
+| [`tone`](#views-view-section-field-tone){: #views-view-section-field-tone } | `any` |  | The meaning of the value: a tone, or an Ash expression that gives a tone or `nil`. |
 
 
 
@@ -334,13 +322,12 @@ Declare a relationship to display within a grid view section.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#views-view-section-relationship-class){: #views-view-section-relationship-class } | `nil \| String.t \| (map -> String.t)` |  | CSS classes for this relationship display. |
 | [`display`](#views-view-section-relationship-display){: #views-view-section-relationship-display } | `:list \| :table \| :grid \| :count \| :badge` | `:list` | How to render the related records. `:list` for a simple list, `:table` for a table, `:grid` for a card grid, `:count` for just a count, `:badge` for badge-style count. |
 | [`empty_text`](#views-view-section-relationship-empty_text){: #views-view-section-relationship-empty_text } | `String.t` | `"None"` | Text to display when there are no related records. |
 | [`label`](#views-view-section-relationship-label){: #views-view-section-relationship-label } | `String.t` |  | The label for this relationship (defaults to capitalized name). |
 | [`limit`](#views-view-section-relationship-limit){: #views-view-section-relationship-limit } | `pos_integer` |  | Maximum number of related records to display. |
 | [`link?`](#views-view-section-relationship-link?){: #views-view-section-relationship-link? } | `boolean` | `true` | Whether related records should be linked to their show page. |
-| [`render`](#views-view-section-relationship-render){: #views-view-section-relationship-render } | `(map -> any)` |  | Custom render function. Receives assigns with `:record`, `:relationship`, and `:related`. |
+| [`render`](#views-view-section-relationship-render){: #views-view-section-relationship-render } | `atom` |  | A render module for the related records. The renderer requires its render behaviour. |
 
 
 ### views.view.section.relationship.field
@@ -364,11 +351,12 @@ Declare a field to display within a view.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#views-view-section-relationship-field-class){: #views-view-section-relationship-field-class } | `nil \| String.t \| (map -> String.t)` |  | CSS classes for this field. |
 | [`empty_text`](#views-view-section-relationship-field-empty_text){: #views-view-section-relationship-field-empty_text } | `String.t` | `"—"` | Text to display when the value is nil or not loaded. |
 | [`label`](#views-view-section-relationship-field-label){: #views-view-section-relationship-field-label } | `String.t` |  | The label for this field (defaults to capitalized name). |
-| [`render`](#views-view-section-relationship-field-render){: #views-view-section-relationship-field-render } | `(map -> any)` |  | Custom render function. Receives assigns with `:record`, `:field`, and `:value`. |
+| [`render`](#views-view-section-relationship-field-render){: #views-view-section-relationship-field-render } | `atom` |  | A render module for the value. The renderer requires its render behaviour. |
+| [`size`](#views-view-section-relationship-field-size){: #views-view-section-relationship-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type. |
 | [`source`](#views-view-section-relationship-field-source){: #views-view-section-relationship-field-source } | `list(atom)` |  | Source path for data (defaults to [name]). Use for relationship traversal. |
+| [`tone`](#views-view-section-relationship-field-tone){: #views-view-section-relationship-field-tone } | `any` |  | The meaning of the value: a tone, or an Ash expression that gives a tone or `nil`. |
 
 
 
@@ -442,8 +430,8 @@ Add a custom action to the page toolbar, data table rows, or card actions.
 | Name | Type | Default | Docs |
 |------|------|---------|------|
 | [`label`](#views-view-extra_action-label){: #views-view-extra_action-label .spark-required} | `String.t` |  | Display label for the action button. |
-| [`button`](#views-view-extra_action-button){: #views-view-extra_action-button } | `(map -> any)` |  | Render function for the action button. Receives assigns with `:action`, `:base_path`, `:params`, and (for row-level) `:row`. Defaults to a generic link button. |
-| [`render`](#views-view-extra_action-render){: #views-view-extra_action-render } | `(map -> any)` |  | Render function for the action content (e.g. a modal or panel). Receives assigns with `:action`, `:base_path`, `:params`, and (for row-level) `:row`. Defaults to a generic action renderer. |
+| [`button`](#views-view-extra_action-button){: #views-view-extra_action-button } | `atom` |  | A render module for the action button. It gets `:action`, `:base_path`, `:params`, and (for row-level) `:row`. The renderer requires its render behaviour. Defaults to a generic link button. |
+| [`render`](#views-view-extra_action-render){: #views-view-extra_action-render } | `atom` |  | A render module for the action content (e.g. a modal or panel). It gets `:action`, `:base_path`, `:params`, and (for row-level) `:row`. The renderer requires its render behaviour. Defaults to a generic action renderer. |
 
 
 
@@ -469,21 +457,197 @@ Configure the appearance of forms in the `PyroManiac` extension.
 ### Nested DSLs
  * [action](#forms-action)
    * field
-   * field_group
+   * combobox
+     * argument
+   * select
+   * input
+   * group
      * field
+     * combobox
+       * argument
+     * select
+     * input
+     * row
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+       * compound
+         * field
+         * combobox
+           * argument
+         * select
+         * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * row
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
    * step
      * field
-     * field_group
+     * combobox
+       * argument
+     * select
+     * input
+     * group
        * field
+       * combobox
+         * argument
+       * select
+       * input
+       * row
+         * field
+         * combobox
+           * argument
+         * select
+         * input
+         * compound
+           * field
+           * combobox
+             * argument
+           * select
+           * input
+       * compound
+         * field
+         * combobox
+           * argument
+         * select
+         * input
+     * row
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+       * compound
+         * field
+         * combobox
+           * argument
+         * select
+         * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
    * set
  * [bulk_action](#forms-bulk_action)
    * field
-   * field_group
+   * combobox
+     * argument
+   * select
+   * input
+   * group
      * field
+     * combobox
+       * argument
+     * select
+     * input
+     * row
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+       * compound
+         * field
+         * combobox
+           * argument
+         * select
+         * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * row
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
    * step
      * field
-     * field_group
+     * combobox
+       * argument
+     * select
+     * input
+     * group
        * field
+       * combobox
+         * argument
+       * select
+       * input
+       * row
+         * field
+         * combobox
+           * argument
+         * select
+         * input
+         * compound
+           * field
+           * combobox
+             * argument
+           * select
+           * input
+       * compound
+         * field
+         * combobox
+           * argument
+         * select
+         * input
+     * row
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+       * compound
+         * field
+         * combobox
+           * argument
+         * select
+         * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
 
 
 
@@ -493,10 +657,8 @@ Configure the appearance of forms in the `PyroManiac` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#forms-class){: #forms-class } | `nil \| String.t \| (map -> String.t)` |  | The default class for the form. |
 | [`description`](#forms-description){: #forms-description } | `String.t \| :inherit` |  | The default description for forms. |
 | [`exclude`](#forms-exclude){: #forms-exclude } | `list(atom)` | `[]` | The actions to exclude from forms. |
-| [`extra_form_types`](#forms-extra_form_types){: #forms-extra_form_types } | `list(atom)` | `[]` | Additional field type atoms accepted by the form DSL. |
 
 
 
@@ -506,16 +668,104 @@ action name
 ```
 
 
-Configure the appearance forms forms for specific action(s).
+Configure the forms for specific action(s).
 
 ### Nested DSLs
  * [field](#forms-action-field)
- * [field_group](#forms-action-field_group)
+ * [combobox](#forms-action-combobox)
+   * argument
+ * [select](#forms-action-select)
+ * [input](#forms-action-input)
+ * [group](#forms-action-group)
    * field
+   * combobox
+     * argument
+   * select
+   * input
+   * row
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [row](#forms-action-row)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [compound](#forms-action-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
  * [step](#forms-action-step)
    * field
-   * field_group
+   * combobox
+     * argument
+   * select
+   * input
+   * group
      * field
+     * combobox
+       * argument
+     * select
+     * input
+     * row
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+       * compound
+         * field
+         * combobox
+           * argument
+         * select
+         * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * row
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
  * [set](#forms-action-set)
 
 
@@ -530,9 +780,9 @@ Configure the appearance forms forms for specific action(s).
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#forms-action-class){: #forms-action-class } | `nil \| String.t \| (map -> String.t)` |  | Customize form classes. |
 | [`description`](#forms-action-description){: #forms-action-description } | `String.t` |  | The description for this form (defaults to action's description). |
 | [`label`](#forms-action-label){: #forms-action-label } | `String.t` |  | The label for this form (defaults to capitalized name). |
+| [`max_columns`](#forms-action-max_columns){: #forms-action-max_columns } | `pos_integer` |  | The maximum number of columns of the form. |
 | [`resource`](#forms-action-resource){: #forms-action-resource } | `module` |  | Target a different resource for this form. Enables cross-resource actions (e.g., creating a child record from a parent data table). |
 | [`delegate_to`](#forms-action-delegate_to){: #forms-action-delegate_to } | `module` |  | Resolve fields from a matching action in another pyro_maniac module. Mutually exclusive with inline field definitions. |
 
@@ -543,7 +793,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac` extension.
+A form input for an attribute or an argument of the action.
 
 
 
@@ -553,29 +803,18 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`name`](#forms-action-field-name){: #forms-action-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+| [`name`](#forms-action-field-name){: #forms-action-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`combobox_option_label_key`](#forms-action-field-combobox_option_label_key){: #forms-action-field-combobox_option_label_key } | `atom` |  | Combobox label key. Auto-populated for `belongs_to` fields from the destination resource's `default_label`; falls back to `:label` if neither is set. |
-| [`combobox_option_value_key`](#forms-action-field-combobox_option_value_key){: #forms-action-field-combobox_option_value_key } | `atom` |  | Combobox value key. Auto-populated for `belongs_to` fields from the destination resource's primary key; falls back to `:id`. |
-| [`combobox_search_action`](#forms-action-field-combobox_search_action){: #forms-action-field-combobox_search_action } | `atom` |  | Combobox search action name. Auto-populated for `belongs_to` fields to the destination resource's primary `:read` action. |
-| [`combobox_search_arg`](#forms-action-field-combobox_search_arg){: #forms-action-field-combobox_search_arg } | `atom` |  | Argument name on `combobox_search_action` that receives the typed search string. |
-| [`autofocus`](#forms-action-field-autofocus){: #forms-action-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`class`](#forms-action-field-class){: #forms-action-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`description`](#forms-action-field-description){: #forms-action-field-description } | `String.t` |  | Override the default extracted description. |
-| [`form_only?`](#forms-action-field-form_only?){: #forms-action-field-form_only? } | `boolean` | `false` | When true, this field exists only in the form UI and is not submitted to the action. |
-| [`input_class`](#forms-action-field-input_class){: #forms-action-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`label`](#forms-action-field-label){: #forms-action-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`options`](#forms-action-field-options){: #forms-action-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`path`](#forms-action-field-path){: #forms-action-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`prompt`](#forms-action-field-prompt){: #forms-action-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`type`](#forms-action-field-type){: #forms-action-field-type } | `atom` | `:default` | The type of the value in the form. Extensible via `extra_form_types` on the forms section. |
-| [`allow_nil?`](#forms-action-field-allow_nil?){: #forms-action-field-allow_nil? } | `boolean` | `true` | Whether nil is allowed. Auto-populated by the transformer from the Ash attribute. |
-| [`enum_options`](#forms-action-field-enum_options){: #forms-action-field-enum_options } | `list(any)` | `[]` | Options from Ash enum types or one_of constraints. Auto-populated by the transformer. |
-| [`multiple?`](#forms-action-field-multiple?){: #forms-action-field-multiple? } | `boolean` | `false` | Whether the field accepts multiple values (e.g. an array enum). Auto-populated by the transformer; the renderer reads this to choose between single and multi-valued chrome on the same atom. |
-| [`when`](#forms-action-field-when){: #forms-action-field-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), field is always visible. |
+| [`label`](#forms-action-field-label){: #forms-action-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-field-description){: #forms-action-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-field-autofocus){: #forms-action-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-field-path){: #forms-action-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-field-size){: #forms-action-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-field-visible?){: #forms-action-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-field-type){: #forms-action-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
 
 
 
@@ -585,16 +824,16 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 Target: `PyroManiac.Form.Field`
 
-### forms.action.field_group
+### forms.action.combobox
 ```elixir
-field_group label
+combobox name
 ```
 
 
-Configure the appearance of form field groups in the `PyroManiac` extension.
+A form input that searches for its value.
 
 ### Nested DSLs
- * [field](#forms-action-field_group-field)
+ * [argument](#forms-action-combobox-argument)
 
 
 
@@ -603,23 +842,197 @@ Configure the appearance of form field groups in the `PyroManiac` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#forms-action-field_group-label){: #forms-action-field_group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
+| [`name`](#forms-action-combobox-name){: #forms-action-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#forms-action-field_group-class){: #forms-action-field_group-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`path`](#forms-action-field_group-path){: #forms-action-field_group-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`when`](#forms-action-field_group-when){: #forms-action-field_group-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), group is always visible. |
+| [`label`](#forms-action-combobox-label){: #forms-action-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-combobox-description){: #forms-action-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-combobox-autofocus){: #forms-action-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-combobox-path){: #forms-action-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-combobox-size){: #forms-action-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-combobox-visible?){: #forms-action-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-combobox-read_action){: #forms-action-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-combobox-search){: #forms-action-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-combobox-filter){: #forms-action-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-combobox-sort){: #forms-action-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-combobox-limit){: #forms-action-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-combobox-label_key){: #forms-action-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-combobox-value_key){: #forms-action-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
 
 
-### forms.action.field_group.field
+### forms.action.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-combobox-argument-name){: #forms-action-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-combobox-argument-value){: #forms-action-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-select-name){: #forms-action-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-select-label){: #forms-action-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-select-description){: #forms-action-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-select-autofocus){: #forms-action-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-select-path){: #forms-action-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-select-size){: #forms-action-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-select-visible?){: #forms-action-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-select-prompt){: #forms-action-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-select-options){: #forms-action-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-input-name){: #forms-action-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-input-type){: #forms-action-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-input-label){: #forms-action-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-input-description){: #forms-action-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-input-autofocus){: #forms-action-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-input-path){: #forms-action-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-input-size){: #forms-action-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-input-visible?){: #forms-action-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.action.group
+```elixir
+group label
+```
+
+
+A group of form inputs.
+
+### Nested DSLs
+ * [field](#forms-action-group-field)
+ * [combobox](#forms-action-group-combobox)
+   * argument
+ * [select](#forms-action-group-select)
+ * [input](#forms-action-group-input)
+ * [row](#forms-action-group-row)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [compound](#forms-action-group-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-label){: #forms-action-group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-action-group-description){: #forms-action-group-description } | `String.t` |  | Text below the label. |
+| [`path`](#forms-action-group-path){: #forms-action-group-path } | `list(atom)` | `[]` | A relative path of relationships. The inputs are in the nested form of that path. |
+| [`density`](#forms-action-group-density){: #forms-action-group-density } | `:normal \| :dense` | `:normal` | `:dense` uses narrower tracks. Use it for lists of short inputs. |
+| [`max_columns`](#forms-action-group-max_columns){: #forms-action-group-max_columns } | `pos_integer` |  | The maximum number of columns. `nil`: no limit from the DSL. |
+| [`collapsible?`](#forms-action-group-collapsible?){: #forms-action-group-collapsible? } | `boolean` | `false` | The user can close and open the group. |
+| [`collapsed?`](#forms-action-group-collapsed?){: #forms-action-group-collapsed? } | `boolean` | `false` | The group starts closed. Requires `collapsible? true`. |
+| [`visible?`](#forms-action-group-visible?){: #forms-action-group-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.group.field
 ```elixir
 field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac` extension.
+A form input for an attribute or an argument of the action.
 
 
 
@@ -629,29 +1042,18 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`name`](#forms-action-field_group-field-name){: #forms-action-field_group-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+| [`name`](#forms-action-group-field-name){: #forms-action-group-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`combobox_option_label_key`](#forms-action-field_group-field-combobox_option_label_key){: #forms-action-field_group-field-combobox_option_label_key } | `atom` |  | Combobox label key. Auto-populated for `belongs_to` fields from the destination resource's `default_label`; falls back to `:label` if neither is set. |
-| [`combobox_option_value_key`](#forms-action-field_group-field-combobox_option_value_key){: #forms-action-field_group-field-combobox_option_value_key } | `atom` |  | Combobox value key. Auto-populated for `belongs_to` fields from the destination resource's primary key; falls back to `:id`. |
-| [`combobox_search_action`](#forms-action-field_group-field-combobox_search_action){: #forms-action-field_group-field-combobox_search_action } | `atom` |  | Combobox search action name. Auto-populated for `belongs_to` fields to the destination resource's primary `:read` action. |
-| [`combobox_search_arg`](#forms-action-field_group-field-combobox_search_arg){: #forms-action-field_group-field-combobox_search_arg } | `atom` |  | Argument name on `combobox_search_action` that receives the typed search string. |
-| [`autofocus`](#forms-action-field_group-field-autofocus){: #forms-action-field_group-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`class`](#forms-action-field_group-field-class){: #forms-action-field_group-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`description`](#forms-action-field_group-field-description){: #forms-action-field_group-field-description } | `String.t` |  | Override the default extracted description. |
-| [`form_only?`](#forms-action-field_group-field-form_only?){: #forms-action-field_group-field-form_only? } | `boolean` | `false` | When true, this field exists only in the form UI and is not submitted to the action. |
-| [`input_class`](#forms-action-field_group-field-input_class){: #forms-action-field_group-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`label`](#forms-action-field_group-field-label){: #forms-action-field_group-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`options`](#forms-action-field_group-field-options){: #forms-action-field_group-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`path`](#forms-action-field_group-field-path){: #forms-action-field_group-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`prompt`](#forms-action-field_group-field-prompt){: #forms-action-field_group-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`type`](#forms-action-field_group-field-type){: #forms-action-field_group-field-type } | `atom` | `:default` | The type of the value in the form. Extensible via `extra_form_types` on the forms section. |
-| [`allow_nil?`](#forms-action-field_group-field-allow_nil?){: #forms-action-field_group-field-allow_nil? } | `boolean` | `true` | Whether nil is allowed. Auto-populated by the transformer from the Ash attribute. |
-| [`enum_options`](#forms-action-field_group-field-enum_options){: #forms-action-field_group-field-enum_options } | `list(any)` | `[]` | Options from Ash enum types or one_of constraints. Auto-populated by the transformer. |
-| [`multiple?`](#forms-action-field_group-field-multiple?){: #forms-action-field_group-field-multiple? } | `boolean` | `false` | Whether the field accepts multiple values (e.g. an array enum). Auto-populated by the transformer; the renderer reads this to choose between single and multi-valued chrome on the same atom. |
-| [`when`](#forms-action-field_group-field-when){: #forms-action-field_group-field-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), field is always visible. |
+| [`label`](#forms-action-group-field-label){: #forms-action-group-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-field-description){: #forms-action-group-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-field-autofocus){: #forms-action-group-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-field-path){: #forms-action-group-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-field-size){: #forms-action-group-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-field-visible?){: #forms-action-group-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-group-field-type){: #forms-action-group-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
 
 
 
@@ -661,12 +1063,1498 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 Target: `PyroManiac.Form.Field`
 
+### forms.action.group.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-group-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-combobox-name){: #forms-action-group-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-combobox-label){: #forms-action-group-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-combobox-description){: #forms-action-group-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-combobox-autofocus){: #forms-action-group-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-combobox-path){: #forms-action-group-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-combobox-size){: #forms-action-group-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-combobox-visible?){: #forms-action-group-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-group-combobox-read_action){: #forms-action-group-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-group-combobox-search){: #forms-action-group-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-group-combobox-filter){: #forms-action-group-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-group-combobox-sort){: #forms-action-group-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-group-combobox-limit){: #forms-action-group-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-group-combobox-label_key){: #forms-action-group-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-group-combobox-value_key){: #forms-action-group-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.group.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-combobox-argument-name){: #forms-action-group-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-group-combobox-argument-value){: #forms-action-group-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
 
 
 
 ### Introspection
 
-Target: `PyroManiac.Form.FieldGroup`
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.group.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-select-name){: #forms-action-group-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-select-label){: #forms-action-group-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-select-description){: #forms-action-group-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-select-autofocus){: #forms-action-group-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-select-path){: #forms-action-group-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-select-size){: #forms-action-group-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-select-visible?){: #forms-action-group-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-group-select-prompt){: #forms-action-group-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-group-select-options){: #forms-action-group-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.group.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-input-name){: #forms-action-group-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-group-input-type){: #forms-action-group-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-input-label){: #forms-action-group-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-input-description){: #forms-action-group-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-input-autofocus){: #forms-action-group-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-input-path){: #forms-action-group-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-input-size){: #forms-action-group-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-input-visible?){: #forms-action-group-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.action.group.row
+
+
+Inputs that stay on one line when there is space.
+
+### Nested DSLs
+ * [field](#forms-action-group-row-field)
+ * [combobox](#forms-action-group-row-combobox)
+   * argument
+ * [select](#forms-action-group-row-select)
+ * [input](#forms-action-group-row-input)
+ * [compound](#forms-action-group-row-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`visible?`](#forms-action-group-row-visible?){: #forms-action-group-row-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.group.row.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-row-field-name){: #forms-action-group-row-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-row-field-label){: #forms-action-group-row-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-row-field-description){: #forms-action-group-row-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-row-field-autofocus){: #forms-action-group-row-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-row-field-path){: #forms-action-group-row-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-row-field-size){: #forms-action-group-row-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-row-field-visible?){: #forms-action-group-row-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-group-row-field-type){: #forms-action-group-row-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.group.row.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-group-row-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-row-combobox-name){: #forms-action-group-row-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-row-combobox-label){: #forms-action-group-row-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-row-combobox-description){: #forms-action-group-row-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-row-combobox-autofocus){: #forms-action-group-row-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-row-combobox-path){: #forms-action-group-row-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-row-combobox-size){: #forms-action-group-row-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-row-combobox-visible?){: #forms-action-group-row-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-group-row-combobox-read_action){: #forms-action-group-row-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-group-row-combobox-search){: #forms-action-group-row-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-group-row-combobox-filter){: #forms-action-group-row-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-group-row-combobox-sort){: #forms-action-group-row-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-group-row-combobox-limit){: #forms-action-group-row-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-group-row-combobox-label_key){: #forms-action-group-row-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-group-row-combobox-value_key){: #forms-action-group-row-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.group.row.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-row-combobox-argument-name){: #forms-action-group-row-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-group-row-combobox-argument-value){: #forms-action-group-row-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.group.row.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-row-select-name){: #forms-action-group-row-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-row-select-label){: #forms-action-group-row-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-row-select-description){: #forms-action-group-row-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-row-select-autofocus){: #forms-action-group-row-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-row-select-path){: #forms-action-group-row-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-row-select-size){: #forms-action-group-row-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-row-select-visible?){: #forms-action-group-row-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-group-row-select-prompt){: #forms-action-group-row-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-group-row-select-options){: #forms-action-group-row-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.group.row.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-row-input-name){: #forms-action-group-row-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-group-row-input-type){: #forms-action-group-row-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-row-input-label){: #forms-action-group-row-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-row-input-description){: #forms-action-group-row-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-row-input-autofocus){: #forms-action-group-row-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-row-input-path){: #forms-action-group-row-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-row-input-size){: #forms-action-group-row-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-row-input-visible?){: #forms-action-group-row-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.action.group.row.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-action-group-row-compound-field)
+ * [combobox](#forms-action-group-row-compound-combobox)
+   * argument
+ * [select](#forms-action-group-row-compound-select)
+ * [input](#forms-action-group-row-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-row-compound-label){: #forms-action-group-row-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-action-group-row-compound-description){: #forms-action-group-row-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-action-group-row-compound-show_labels?){: #forms-action-group-row-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-action-group-row-compound-visible?){: #forms-action-group-row-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.group.row.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-row-compound-field-name){: #forms-action-group-row-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-row-compound-field-label){: #forms-action-group-row-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-row-compound-field-description){: #forms-action-group-row-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-row-compound-field-autofocus){: #forms-action-group-row-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-row-compound-field-path){: #forms-action-group-row-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-row-compound-field-size){: #forms-action-group-row-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-row-compound-field-visible?){: #forms-action-group-row-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-group-row-compound-field-type){: #forms-action-group-row-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.group.row.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-group-row-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-row-compound-combobox-name){: #forms-action-group-row-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-row-compound-combobox-label){: #forms-action-group-row-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-row-compound-combobox-description){: #forms-action-group-row-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-row-compound-combobox-autofocus){: #forms-action-group-row-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-row-compound-combobox-path){: #forms-action-group-row-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-row-compound-combobox-size){: #forms-action-group-row-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-row-compound-combobox-visible?){: #forms-action-group-row-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-group-row-compound-combobox-read_action){: #forms-action-group-row-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-group-row-compound-combobox-search){: #forms-action-group-row-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-group-row-compound-combobox-filter){: #forms-action-group-row-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-group-row-compound-combobox-sort){: #forms-action-group-row-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-group-row-compound-combobox-limit){: #forms-action-group-row-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-group-row-compound-combobox-label_key){: #forms-action-group-row-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-group-row-compound-combobox-value_key){: #forms-action-group-row-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.group.row.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-row-compound-combobox-argument-name){: #forms-action-group-row-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-group-row-compound-combobox-argument-value){: #forms-action-group-row-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.group.row.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-row-compound-select-name){: #forms-action-group-row-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-row-compound-select-label){: #forms-action-group-row-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-row-compound-select-description){: #forms-action-group-row-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-row-compound-select-autofocus){: #forms-action-group-row-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-row-compound-select-path){: #forms-action-group-row-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-row-compound-select-size){: #forms-action-group-row-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-row-compound-select-visible?){: #forms-action-group-row-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-group-row-compound-select-prompt){: #forms-action-group-row-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-group-row-compound-select-options){: #forms-action-group-row-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.group.row.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-row-compound-input-name){: #forms-action-group-row-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-group-row-compound-input-type){: #forms-action-group-row-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-row-compound-input-label){: #forms-action-group-row-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-row-compound-input-description){: #forms-action-group-row-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-row-compound-input-autofocus){: #forms-action-group-row-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-row-compound-input-path){: #forms-action-group-row-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-row-compound-input-size){: #forms-action-group-row-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-row-compound-input-visible?){: #forms-action-group-row-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Row`
+
+### forms.action.group.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-action-group-compound-field)
+ * [combobox](#forms-action-group-compound-combobox)
+   * argument
+ * [select](#forms-action-group-compound-select)
+ * [input](#forms-action-group-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-compound-label){: #forms-action-group-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-action-group-compound-description){: #forms-action-group-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-action-group-compound-show_labels?){: #forms-action-group-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-action-group-compound-visible?){: #forms-action-group-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.group.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-compound-field-name){: #forms-action-group-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-compound-field-label){: #forms-action-group-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-compound-field-description){: #forms-action-group-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-compound-field-autofocus){: #forms-action-group-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-compound-field-path){: #forms-action-group-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-compound-field-size){: #forms-action-group-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-compound-field-visible?){: #forms-action-group-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-group-compound-field-type){: #forms-action-group-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.group.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-group-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-compound-combobox-name){: #forms-action-group-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-compound-combobox-label){: #forms-action-group-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-compound-combobox-description){: #forms-action-group-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-compound-combobox-autofocus){: #forms-action-group-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-compound-combobox-path){: #forms-action-group-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-compound-combobox-size){: #forms-action-group-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-compound-combobox-visible?){: #forms-action-group-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-group-compound-combobox-read_action){: #forms-action-group-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-group-compound-combobox-search){: #forms-action-group-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-group-compound-combobox-filter){: #forms-action-group-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-group-compound-combobox-sort){: #forms-action-group-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-group-compound-combobox-limit){: #forms-action-group-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-group-compound-combobox-label_key){: #forms-action-group-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-group-compound-combobox-value_key){: #forms-action-group-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.group.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-compound-combobox-argument-name){: #forms-action-group-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-group-compound-combobox-argument-value){: #forms-action-group-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.group.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-compound-select-name){: #forms-action-group-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-compound-select-label){: #forms-action-group-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-compound-select-description){: #forms-action-group-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-compound-select-autofocus){: #forms-action-group-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-compound-select-path){: #forms-action-group-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-compound-select-size){: #forms-action-group-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-compound-select-visible?){: #forms-action-group-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-group-compound-select-prompt){: #forms-action-group-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-group-compound-select-options){: #forms-action-group-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.group.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-group-compound-input-name){: #forms-action-group-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-group-compound-input-type){: #forms-action-group-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-group-compound-input-label){: #forms-action-group-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-group-compound-input-description){: #forms-action-group-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-group-compound-input-autofocus){: #forms-action-group-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-group-compound-input-path){: #forms-action-group-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-group-compound-input-size){: #forms-action-group-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-group-compound-input-visible?){: #forms-action-group-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Group`
+
+### forms.action.row
+
+
+Inputs that stay on one line when there is space.
+
+### Nested DSLs
+ * [field](#forms-action-row-field)
+ * [combobox](#forms-action-row-combobox)
+   * argument
+ * [select](#forms-action-row-select)
+ * [input](#forms-action-row-input)
+ * [compound](#forms-action-row-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`visible?`](#forms-action-row-visible?){: #forms-action-row-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.row.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-row-field-name){: #forms-action-row-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-row-field-label){: #forms-action-row-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-row-field-description){: #forms-action-row-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-row-field-autofocus){: #forms-action-row-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-row-field-path){: #forms-action-row-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-row-field-size){: #forms-action-row-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-row-field-visible?){: #forms-action-row-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-row-field-type){: #forms-action-row-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.row.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-row-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-row-combobox-name){: #forms-action-row-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-row-combobox-label){: #forms-action-row-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-row-combobox-description){: #forms-action-row-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-row-combobox-autofocus){: #forms-action-row-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-row-combobox-path){: #forms-action-row-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-row-combobox-size){: #forms-action-row-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-row-combobox-visible?){: #forms-action-row-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-row-combobox-read_action){: #forms-action-row-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-row-combobox-search){: #forms-action-row-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-row-combobox-filter){: #forms-action-row-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-row-combobox-sort){: #forms-action-row-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-row-combobox-limit){: #forms-action-row-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-row-combobox-label_key){: #forms-action-row-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-row-combobox-value_key){: #forms-action-row-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.row.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-row-combobox-argument-name){: #forms-action-row-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-row-combobox-argument-value){: #forms-action-row-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.row.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-row-select-name){: #forms-action-row-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-row-select-label){: #forms-action-row-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-row-select-description){: #forms-action-row-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-row-select-autofocus){: #forms-action-row-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-row-select-path){: #forms-action-row-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-row-select-size){: #forms-action-row-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-row-select-visible?){: #forms-action-row-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-row-select-prompt){: #forms-action-row-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-row-select-options){: #forms-action-row-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.row.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-row-input-name){: #forms-action-row-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-row-input-type){: #forms-action-row-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-row-input-label){: #forms-action-row-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-row-input-description){: #forms-action-row-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-row-input-autofocus){: #forms-action-row-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-row-input-path){: #forms-action-row-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-row-input-size){: #forms-action-row-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-row-input-visible?){: #forms-action-row-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.action.row.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-action-row-compound-field)
+ * [combobox](#forms-action-row-compound-combobox)
+   * argument
+ * [select](#forms-action-row-compound-select)
+ * [input](#forms-action-row-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-row-compound-label){: #forms-action-row-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-action-row-compound-description){: #forms-action-row-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-action-row-compound-show_labels?){: #forms-action-row-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-action-row-compound-visible?){: #forms-action-row-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.row.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-row-compound-field-name){: #forms-action-row-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-row-compound-field-label){: #forms-action-row-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-row-compound-field-description){: #forms-action-row-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-row-compound-field-autofocus){: #forms-action-row-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-row-compound-field-path){: #forms-action-row-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-row-compound-field-size){: #forms-action-row-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-row-compound-field-visible?){: #forms-action-row-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-row-compound-field-type){: #forms-action-row-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.row.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-row-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-row-compound-combobox-name){: #forms-action-row-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-row-compound-combobox-label){: #forms-action-row-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-row-compound-combobox-description){: #forms-action-row-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-row-compound-combobox-autofocus){: #forms-action-row-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-row-compound-combobox-path){: #forms-action-row-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-row-compound-combobox-size){: #forms-action-row-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-row-compound-combobox-visible?){: #forms-action-row-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-row-compound-combobox-read_action){: #forms-action-row-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-row-compound-combobox-search){: #forms-action-row-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-row-compound-combobox-filter){: #forms-action-row-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-row-compound-combobox-sort){: #forms-action-row-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-row-compound-combobox-limit){: #forms-action-row-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-row-compound-combobox-label_key){: #forms-action-row-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-row-compound-combobox-value_key){: #forms-action-row-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.row.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-row-compound-combobox-argument-name){: #forms-action-row-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-row-compound-combobox-argument-value){: #forms-action-row-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.row.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-row-compound-select-name){: #forms-action-row-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-row-compound-select-label){: #forms-action-row-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-row-compound-select-description){: #forms-action-row-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-row-compound-select-autofocus){: #forms-action-row-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-row-compound-select-path){: #forms-action-row-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-row-compound-select-size){: #forms-action-row-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-row-compound-select-visible?){: #forms-action-row-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-row-compound-select-prompt){: #forms-action-row-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-row-compound-select-options){: #forms-action-row-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.row.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-row-compound-input-name){: #forms-action-row-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-row-compound-input-type){: #forms-action-row-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-row-compound-input-label){: #forms-action-row-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-row-compound-input-description){: #forms-action-row-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-row-compound-input-autofocus){: #forms-action-row-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-row-compound-input-path){: #forms-action-row-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-row-compound-input-size){: #forms-action-row-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-row-compound-input-visible?){: #forms-action-row-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Row`
+
+### forms.action.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-action-compound-field)
+ * [combobox](#forms-action-compound-combobox)
+   * argument
+ * [select](#forms-action-compound-select)
+ * [input](#forms-action-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-compound-label){: #forms-action-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-action-compound-description){: #forms-action-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-action-compound-show_labels?){: #forms-action-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-action-compound-visible?){: #forms-action-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-compound-field-name){: #forms-action-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-compound-field-label){: #forms-action-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-compound-field-description){: #forms-action-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-compound-field-autofocus){: #forms-action-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-compound-field-path){: #forms-action-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-compound-field-size){: #forms-action-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-compound-field-visible?){: #forms-action-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-compound-field-type){: #forms-action-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-compound-combobox-name){: #forms-action-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-compound-combobox-label){: #forms-action-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-compound-combobox-description){: #forms-action-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-compound-combobox-autofocus){: #forms-action-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-compound-combobox-path){: #forms-action-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-compound-combobox-size){: #forms-action-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-compound-combobox-visible?){: #forms-action-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-compound-combobox-read_action){: #forms-action-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-compound-combobox-search){: #forms-action-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-compound-combobox-filter){: #forms-action-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-compound-combobox-sort){: #forms-action-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-compound-combobox-limit){: #forms-action-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-compound-combobox-label_key){: #forms-action-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-compound-combobox-value_key){: #forms-action-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-compound-combobox-argument-name){: #forms-action-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-compound-combobox-argument-value){: #forms-action-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-compound-select-name){: #forms-action-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-compound-select-label){: #forms-action-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-compound-select-description){: #forms-action-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-compound-select-autofocus){: #forms-action-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-compound-select-path){: #forms-action-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-compound-select-size){: #forms-action-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-compound-select-visible?){: #forms-action-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-compound-select-prompt){: #forms-action-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-compound-select-options){: #forms-action-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-compound-input-name){: #forms-action-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-compound-input-type){: #forms-action-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-compound-input-label){: #forms-action-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-compound-input-description){: #forms-action-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-compound-input-autofocus){: #forms-action-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-compound-input-path){: #forms-action-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-compound-input-size){: #forms-action-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-compound-input-visible?){: #forms-action-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
 
 ### forms.action.step
 ```elixir
@@ -678,8 +2566,52 @@ Configure a form step in the `PyroManiac` extension.
 
 ### Nested DSLs
  * [field](#forms-action-step-field)
- * [field_group](#forms-action-step-field_group)
+ * [combobox](#forms-action-step-combobox)
+   * argument
+ * [select](#forms-action-step-select)
+ * [input](#forms-action-step-input)
+ * [group](#forms-action-step-group)
    * field
+   * combobox
+     * argument
+   * select
+   * input
+   * row
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [row](#forms-action-step-row)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [compound](#forms-action-step-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
 
 
 
@@ -693,12 +2625,13 @@ Configure a form step in the `PyroManiac` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#forms-action-step-class){: #forms-action-step-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
 | [`label`](#forms-action-step-label){: #forms-action-step-label } | `String.t` |  | The label of this step (defaults to capitalized name). |
-| [`path`](#forms-action-step-path){: #forms-action-step-path } | `list(atom)` | `[]` | Base path for all fields in this step. When set, fields are rendered within inputs_for for this path. |
-| [`render_fn`](#forms-action-step-render_fn){: #forms-action-step-render_fn } | `(map -> any)` |  | Custom render override function. Receives assigns map, returns HEEx. |
+| [`path`](#forms-action-step-path){: #forms-action-step-path } | `list(atom)` | `[]` | Base path for all inputs in this step. When set, inputs are rendered within the nested form of this path. |
+| [`render`](#forms-action-step-render){: #forms-action-step-render } | `atom` |  | A render module that replaces the rendering of the step. The renderer requires its render behaviour. |
 | [`review?`](#forms-action-step-review?){: #forms-action-step-review? } | `boolean` | `false` | When true, auto-generates a read-only summary of previous steps. |
-| [`when`](#forms-action-step-when){: #forms-action-step-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), step is always visible. |
+| [`density`](#forms-action-step-density){: #forms-action-step-density } | `:normal \| :dense` | `:normal` | `:dense` uses narrower tracks. |
+| [`max_columns`](#forms-action-step-max_columns){: #forms-action-step-max_columns } | `pos_integer` |  | The maximum number of columns. |
+| [`visible?`](#forms-action-step-visible?){: #forms-action-step-visible? } | `any` |  | Conditional visibility: an Ash expression. |
 
 
 ### forms.action.step.field
@@ -707,7 +2640,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac` extension.
+A form input for an attribute or an argument of the action.
 
 
 
@@ -717,29 +2650,18 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`name`](#forms-action-step-field-name){: #forms-action-step-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+| [`name`](#forms-action-step-field-name){: #forms-action-step-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`combobox_option_label_key`](#forms-action-step-field-combobox_option_label_key){: #forms-action-step-field-combobox_option_label_key } | `atom` |  | Combobox label key. Auto-populated for `belongs_to` fields from the destination resource's `default_label`; falls back to `:label` if neither is set. |
-| [`combobox_option_value_key`](#forms-action-step-field-combobox_option_value_key){: #forms-action-step-field-combobox_option_value_key } | `atom` |  | Combobox value key. Auto-populated for `belongs_to` fields from the destination resource's primary key; falls back to `:id`. |
-| [`combobox_search_action`](#forms-action-step-field-combobox_search_action){: #forms-action-step-field-combobox_search_action } | `atom` |  | Combobox search action name. Auto-populated for `belongs_to` fields to the destination resource's primary `:read` action. |
-| [`combobox_search_arg`](#forms-action-step-field-combobox_search_arg){: #forms-action-step-field-combobox_search_arg } | `atom` |  | Argument name on `combobox_search_action` that receives the typed search string. |
-| [`autofocus`](#forms-action-step-field-autofocus){: #forms-action-step-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`class`](#forms-action-step-field-class){: #forms-action-step-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`description`](#forms-action-step-field-description){: #forms-action-step-field-description } | `String.t` |  | Override the default extracted description. |
-| [`form_only?`](#forms-action-step-field-form_only?){: #forms-action-step-field-form_only? } | `boolean` | `false` | When true, this field exists only in the form UI and is not submitted to the action. |
-| [`input_class`](#forms-action-step-field-input_class){: #forms-action-step-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`label`](#forms-action-step-field-label){: #forms-action-step-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`options`](#forms-action-step-field-options){: #forms-action-step-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`path`](#forms-action-step-field-path){: #forms-action-step-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`prompt`](#forms-action-step-field-prompt){: #forms-action-step-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`type`](#forms-action-step-field-type){: #forms-action-step-field-type } | `atom` | `:default` | The type of the value in the form. Extensible via `extra_form_types` on the forms section. |
-| [`allow_nil?`](#forms-action-step-field-allow_nil?){: #forms-action-step-field-allow_nil? } | `boolean` | `true` | Whether nil is allowed. Auto-populated by the transformer from the Ash attribute. |
-| [`enum_options`](#forms-action-step-field-enum_options){: #forms-action-step-field-enum_options } | `list(any)` | `[]` | Options from Ash enum types or one_of constraints. Auto-populated by the transformer. |
-| [`multiple?`](#forms-action-step-field-multiple?){: #forms-action-step-field-multiple? } | `boolean` | `false` | Whether the field accepts multiple values (e.g. an array enum). Auto-populated by the transformer; the renderer reads this to choose between single and multi-valued chrome on the same atom. |
-| [`when`](#forms-action-step-field-when){: #forms-action-step-field-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), field is always visible. |
+| [`label`](#forms-action-step-field-label){: #forms-action-step-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-field-description){: #forms-action-step-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-field-autofocus){: #forms-action-step-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-field-path){: #forms-action-step-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-field-size){: #forms-action-step-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-field-visible?){: #forms-action-step-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-step-field-type){: #forms-action-step-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
 
 
 
@@ -749,16 +2671,16 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 Target: `PyroManiac.Form.Field`
 
-### forms.action.step.field_group
+### forms.action.step.combobox
 ```elixir
-field_group label
+combobox name
 ```
 
 
-Configure the appearance of form field groups in the `PyroManiac` extension.
+A form input that searches for its value.
 
 ### Nested DSLs
- * [field](#forms-action-step-field_group-field)
+ * [argument](#forms-action-step-combobox-argument)
 
 
 
@@ -767,23 +2689,197 @@ Configure the appearance of form field groups in the `PyroManiac` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#forms-action-step-field_group-label){: #forms-action-step-field_group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
+| [`name`](#forms-action-step-combobox-name){: #forms-action-step-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#forms-action-step-field_group-class){: #forms-action-step-field_group-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`path`](#forms-action-step-field_group-path){: #forms-action-step-field_group-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`when`](#forms-action-step-field_group-when){: #forms-action-step-field_group-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), group is always visible. |
+| [`label`](#forms-action-step-combobox-label){: #forms-action-step-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-combobox-description){: #forms-action-step-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-combobox-autofocus){: #forms-action-step-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-combobox-path){: #forms-action-step-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-combobox-size){: #forms-action-step-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-combobox-visible?){: #forms-action-step-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-step-combobox-read_action){: #forms-action-step-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-step-combobox-search){: #forms-action-step-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-step-combobox-filter){: #forms-action-step-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-step-combobox-sort){: #forms-action-step-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-step-combobox-limit){: #forms-action-step-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-step-combobox-label_key){: #forms-action-step-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-step-combobox-value_key){: #forms-action-step-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
 
 
-### forms.action.step.field_group.field
+### forms.action.step.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-combobox-argument-name){: #forms-action-step-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-step-combobox-argument-value){: #forms-action-step-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.step.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-select-name){: #forms-action-step-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-select-label){: #forms-action-step-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-select-description){: #forms-action-step-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-select-autofocus){: #forms-action-step-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-select-path){: #forms-action-step-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-select-size){: #forms-action-step-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-select-visible?){: #forms-action-step-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-step-select-prompt){: #forms-action-step-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-step-select-options){: #forms-action-step-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.step.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-input-name){: #forms-action-step-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-step-input-type){: #forms-action-step-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-input-label){: #forms-action-step-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-input-description){: #forms-action-step-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-input-autofocus){: #forms-action-step-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-input-path){: #forms-action-step-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-input-size){: #forms-action-step-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-input-visible?){: #forms-action-step-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.action.step.group
+```elixir
+group label
+```
+
+
+A group of form inputs.
+
+### Nested DSLs
+ * [field](#forms-action-step-group-field)
+ * [combobox](#forms-action-step-group-combobox)
+   * argument
+ * [select](#forms-action-step-group-select)
+ * [input](#forms-action-step-group-input)
+ * [row](#forms-action-step-group-row)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [compound](#forms-action-step-group-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-label){: #forms-action-step-group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-action-step-group-description){: #forms-action-step-group-description } | `String.t` |  | Text below the label. |
+| [`path`](#forms-action-step-group-path){: #forms-action-step-group-path } | `list(atom)` | `[]` | A relative path of relationships. The inputs are in the nested form of that path. |
+| [`density`](#forms-action-step-group-density){: #forms-action-step-group-density } | `:normal \| :dense` | `:normal` | `:dense` uses narrower tracks. Use it for lists of short inputs. |
+| [`max_columns`](#forms-action-step-group-max_columns){: #forms-action-step-group-max_columns } | `pos_integer` |  | The maximum number of columns. `nil`: no limit from the DSL. |
+| [`collapsible?`](#forms-action-step-group-collapsible?){: #forms-action-step-group-collapsible? } | `boolean` | `false` | The user can close and open the group. |
+| [`collapsed?`](#forms-action-step-group-collapsed?){: #forms-action-step-group-collapsed? } | `boolean` | `false` | The group starts closed. Requires `collapsible? true`. |
+| [`visible?`](#forms-action-step-group-visible?){: #forms-action-step-group-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.step.group.field
 ```elixir
 field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac` extension.
+A form input for an attribute or an argument of the action.
 
 
 
@@ -793,29 +2889,18 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`name`](#forms-action-step-field_group-field-name){: #forms-action-step-field_group-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+| [`name`](#forms-action-step-group-field-name){: #forms-action-step-group-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`combobox_option_label_key`](#forms-action-step-field_group-field-combobox_option_label_key){: #forms-action-step-field_group-field-combobox_option_label_key } | `atom` |  | Combobox label key. Auto-populated for `belongs_to` fields from the destination resource's `default_label`; falls back to `:label` if neither is set. |
-| [`combobox_option_value_key`](#forms-action-step-field_group-field-combobox_option_value_key){: #forms-action-step-field_group-field-combobox_option_value_key } | `atom` |  | Combobox value key. Auto-populated for `belongs_to` fields from the destination resource's primary key; falls back to `:id`. |
-| [`combobox_search_action`](#forms-action-step-field_group-field-combobox_search_action){: #forms-action-step-field_group-field-combobox_search_action } | `atom` |  | Combobox search action name. Auto-populated for `belongs_to` fields to the destination resource's primary `:read` action. |
-| [`combobox_search_arg`](#forms-action-step-field_group-field-combobox_search_arg){: #forms-action-step-field_group-field-combobox_search_arg } | `atom` |  | Argument name on `combobox_search_action` that receives the typed search string. |
-| [`autofocus`](#forms-action-step-field_group-field-autofocus){: #forms-action-step-field_group-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`class`](#forms-action-step-field_group-field-class){: #forms-action-step-field_group-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`description`](#forms-action-step-field_group-field-description){: #forms-action-step-field_group-field-description } | `String.t` |  | Override the default extracted description. |
-| [`form_only?`](#forms-action-step-field_group-field-form_only?){: #forms-action-step-field_group-field-form_only? } | `boolean` | `false` | When true, this field exists only in the form UI and is not submitted to the action. |
-| [`input_class`](#forms-action-step-field_group-field-input_class){: #forms-action-step-field_group-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`label`](#forms-action-step-field_group-field-label){: #forms-action-step-field_group-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`options`](#forms-action-step-field_group-field-options){: #forms-action-step-field_group-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`path`](#forms-action-step-field_group-field-path){: #forms-action-step-field_group-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`prompt`](#forms-action-step-field_group-field-prompt){: #forms-action-step-field_group-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`type`](#forms-action-step-field_group-field-type){: #forms-action-step-field_group-field-type } | `atom` | `:default` | The type of the value in the form. Extensible via `extra_form_types` on the forms section. |
-| [`allow_nil?`](#forms-action-step-field_group-field-allow_nil?){: #forms-action-step-field_group-field-allow_nil? } | `boolean` | `true` | Whether nil is allowed. Auto-populated by the transformer from the Ash attribute. |
-| [`enum_options`](#forms-action-step-field_group-field-enum_options){: #forms-action-step-field_group-field-enum_options } | `list(any)` | `[]` | Options from Ash enum types or one_of constraints. Auto-populated by the transformer. |
-| [`multiple?`](#forms-action-step-field_group-field-multiple?){: #forms-action-step-field_group-field-multiple? } | `boolean` | `false` | Whether the field accepts multiple values (e.g. an array enum). Auto-populated by the transformer; the renderer reads this to choose between single and multi-valued chrome on the same atom. |
-| [`when`](#forms-action-step-field_group-field-when){: #forms-action-step-field_group-field-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), field is always visible. |
+| [`label`](#forms-action-step-group-field-label){: #forms-action-step-group-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-field-description){: #forms-action-step-group-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-field-autofocus){: #forms-action-step-group-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-field-path){: #forms-action-step-group-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-field-size){: #forms-action-step-group-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-field-visible?){: #forms-action-step-group-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-step-group-field-type){: #forms-action-step-group-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
 
 
 
@@ -825,12 +2910,1498 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 Target: `PyroManiac.Form.Field`
 
+### forms.action.step.group.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-step-group-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-combobox-name){: #forms-action-step-group-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-combobox-label){: #forms-action-step-group-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-combobox-description){: #forms-action-step-group-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-combobox-autofocus){: #forms-action-step-group-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-combobox-path){: #forms-action-step-group-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-combobox-size){: #forms-action-step-group-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-combobox-visible?){: #forms-action-step-group-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-step-group-combobox-read_action){: #forms-action-step-group-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-step-group-combobox-search){: #forms-action-step-group-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-step-group-combobox-filter){: #forms-action-step-group-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-step-group-combobox-sort){: #forms-action-step-group-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-step-group-combobox-limit){: #forms-action-step-group-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-step-group-combobox-label_key){: #forms-action-step-group-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-step-group-combobox-value_key){: #forms-action-step-group-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.step.group.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-combobox-argument-name){: #forms-action-step-group-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-step-group-combobox-argument-value){: #forms-action-step-group-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
 
 
 
 ### Introspection
 
-Target: `PyroManiac.Form.FieldGroup`
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.step.group.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-select-name){: #forms-action-step-group-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-select-label){: #forms-action-step-group-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-select-description){: #forms-action-step-group-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-select-autofocus){: #forms-action-step-group-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-select-path){: #forms-action-step-group-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-select-size){: #forms-action-step-group-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-select-visible?){: #forms-action-step-group-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-step-group-select-prompt){: #forms-action-step-group-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-step-group-select-options){: #forms-action-step-group-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.step.group.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-input-name){: #forms-action-step-group-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-step-group-input-type){: #forms-action-step-group-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-input-label){: #forms-action-step-group-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-input-description){: #forms-action-step-group-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-input-autofocus){: #forms-action-step-group-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-input-path){: #forms-action-step-group-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-input-size){: #forms-action-step-group-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-input-visible?){: #forms-action-step-group-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.action.step.group.row
+
+
+Inputs that stay on one line when there is space.
+
+### Nested DSLs
+ * [field](#forms-action-step-group-row-field)
+ * [combobox](#forms-action-step-group-row-combobox)
+   * argument
+ * [select](#forms-action-step-group-row-select)
+ * [input](#forms-action-step-group-row-input)
+ * [compound](#forms-action-step-group-row-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`visible?`](#forms-action-step-group-row-visible?){: #forms-action-step-group-row-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.step.group.row.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-row-field-name){: #forms-action-step-group-row-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-row-field-label){: #forms-action-step-group-row-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-row-field-description){: #forms-action-step-group-row-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-row-field-autofocus){: #forms-action-step-group-row-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-row-field-path){: #forms-action-step-group-row-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-row-field-size){: #forms-action-step-group-row-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-row-field-visible?){: #forms-action-step-group-row-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-step-group-row-field-type){: #forms-action-step-group-row-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.step.group.row.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-step-group-row-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-row-combobox-name){: #forms-action-step-group-row-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-row-combobox-label){: #forms-action-step-group-row-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-row-combobox-description){: #forms-action-step-group-row-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-row-combobox-autofocus){: #forms-action-step-group-row-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-row-combobox-path){: #forms-action-step-group-row-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-row-combobox-size){: #forms-action-step-group-row-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-row-combobox-visible?){: #forms-action-step-group-row-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-step-group-row-combobox-read_action){: #forms-action-step-group-row-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-step-group-row-combobox-search){: #forms-action-step-group-row-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-step-group-row-combobox-filter){: #forms-action-step-group-row-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-step-group-row-combobox-sort){: #forms-action-step-group-row-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-step-group-row-combobox-limit){: #forms-action-step-group-row-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-step-group-row-combobox-label_key){: #forms-action-step-group-row-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-step-group-row-combobox-value_key){: #forms-action-step-group-row-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.step.group.row.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-row-combobox-argument-name){: #forms-action-step-group-row-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-step-group-row-combobox-argument-value){: #forms-action-step-group-row-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.step.group.row.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-row-select-name){: #forms-action-step-group-row-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-row-select-label){: #forms-action-step-group-row-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-row-select-description){: #forms-action-step-group-row-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-row-select-autofocus){: #forms-action-step-group-row-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-row-select-path){: #forms-action-step-group-row-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-row-select-size){: #forms-action-step-group-row-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-row-select-visible?){: #forms-action-step-group-row-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-step-group-row-select-prompt){: #forms-action-step-group-row-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-step-group-row-select-options){: #forms-action-step-group-row-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.step.group.row.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-row-input-name){: #forms-action-step-group-row-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-step-group-row-input-type){: #forms-action-step-group-row-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-row-input-label){: #forms-action-step-group-row-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-row-input-description){: #forms-action-step-group-row-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-row-input-autofocus){: #forms-action-step-group-row-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-row-input-path){: #forms-action-step-group-row-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-row-input-size){: #forms-action-step-group-row-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-row-input-visible?){: #forms-action-step-group-row-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.action.step.group.row.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-action-step-group-row-compound-field)
+ * [combobox](#forms-action-step-group-row-compound-combobox)
+   * argument
+ * [select](#forms-action-step-group-row-compound-select)
+ * [input](#forms-action-step-group-row-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-row-compound-label){: #forms-action-step-group-row-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-action-step-group-row-compound-description){: #forms-action-step-group-row-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-action-step-group-row-compound-show_labels?){: #forms-action-step-group-row-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-action-step-group-row-compound-visible?){: #forms-action-step-group-row-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.step.group.row.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-row-compound-field-name){: #forms-action-step-group-row-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-row-compound-field-label){: #forms-action-step-group-row-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-row-compound-field-description){: #forms-action-step-group-row-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-row-compound-field-autofocus){: #forms-action-step-group-row-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-row-compound-field-path){: #forms-action-step-group-row-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-row-compound-field-size){: #forms-action-step-group-row-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-row-compound-field-visible?){: #forms-action-step-group-row-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-step-group-row-compound-field-type){: #forms-action-step-group-row-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.step.group.row.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-step-group-row-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-row-compound-combobox-name){: #forms-action-step-group-row-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-row-compound-combobox-label){: #forms-action-step-group-row-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-row-compound-combobox-description){: #forms-action-step-group-row-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-row-compound-combobox-autofocus){: #forms-action-step-group-row-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-row-compound-combobox-path){: #forms-action-step-group-row-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-row-compound-combobox-size){: #forms-action-step-group-row-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-row-compound-combobox-visible?){: #forms-action-step-group-row-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-step-group-row-compound-combobox-read_action){: #forms-action-step-group-row-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-step-group-row-compound-combobox-search){: #forms-action-step-group-row-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-step-group-row-compound-combobox-filter){: #forms-action-step-group-row-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-step-group-row-compound-combobox-sort){: #forms-action-step-group-row-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-step-group-row-compound-combobox-limit){: #forms-action-step-group-row-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-step-group-row-compound-combobox-label_key){: #forms-action-step-group-row-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-step-group-row-compound-combobox-value_key){: #forms-action-step-group-row-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.step.group.row.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-row-compound-combobox-argument-name){: #forms-action-step-group-row-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-step-group-row-compound-combobox-argument-value){: #forms-action-step-group-row-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.step.group.row.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-row-compound-select-name){: #forms-action-step-group-row-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-row-compound-select-label){: #forms-action-step-group-row-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-row-compound-select-description){: #forms-action-step-group-row-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-row-compound-select-autofocus){: #forms-action-step-group-row-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-row-compound-select-path){: #forms-action-step-group-row-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-row-compound-select-size){: #forms-action-step-group-row-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-row-compound-select-visible?){: #forms-action-step-group-row-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-step-group-row-compound-select-prompt){: #forms-action-step-group-row-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-step-group-row-compound-select-options){: #forms-action-step-group-row-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.step.group.row.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-row-compound-input-name){: #forms-action-step-group-row-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-step-group-row-compound-input-type){: #forms-action-step-group-row-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-row-compound-input-label){: #forms-action-step-group-row-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-row-compound-input-description){: #forms-action-step-group-row-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-row-compound-input-autofocus){: #forms-action-step-group-row-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-row-compound-input-path){: #forms-action-step-group-row-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-row-compound-input-size){: #forms-action-step-group-row-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-row-compound-input-visible?){: #forms-action-step-group-row-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Row`
+
+### forms.action.step.group.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-action-step-group-compound-field)
+ * [combobox](#forms-action-step-group-compound-combobox)
+   * argument
+ * [select](#forms-action-step-group-compound-select)
+ * [input](#forms-action-step-group-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-compound-label){: #forms-action-step-group-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-action-step-group-compound-description){: #forms-action-step-group-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-action-step-group-compound-show_labels?){: #forms-action-step-group-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-action-step-group-compound-visible?){: #forms-action-step-group-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.step.group.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-compound-field-name){: #forms-action-step-group-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-compound-field-label){: #forms-action-step-group-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-compound-field-description){: #forms-action-step-group-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-compound-field-autofocus){: #forms-action-step-group-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-compound-field-path){: #forms-action-step-group-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-compound-field-size){: #forms-action-step-group-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-compound-field-visible?){: #forms-action-step-group-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-step-group-compound-field-type){: #forms-action-step-group-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.step.group.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-step-group-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-compound-combobox-name){: #forms-action-step-group-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-compound-combobox-label){: #forms-action-step-group-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-compound-combobox-description){: #forms-action-step-group-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-compound-combobox-autofocus){: #forms-action-step-group-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-compound-combobox-path){: #forms-action-step-group-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-compound-combobox-size){: #forms-action-step-group-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-compound-combobox-visible?){: #forms-action-step-group-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-step-group-compound-combobox-read_action){: #forms-action-step-group-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-step-group-compound-combobox-search){: #forms-action-step-group-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-step-group-compound-combobox-filter){: #forms-action-step-group-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-step-group-compound-combobox-sort){: #forms-action-step-group-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-step-group-compound-combobox-limit){: #forms-action-step-group-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-step-group-compound-combobox-label_key){: #forms-action-step-group-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-step-group-compound-combobox-value_key){: #forms-action-step-group-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.step.group.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-compound-combobox-argument-name){: #forms-action-step-group-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-step-group-compound-combobox-argument-value){: #forms-action-step-group-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.step.group.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-compound-select-name){: #forms-action-step-group-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-compound-select-label){: #forms-action-step-group-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-compound-select-description){: #forms-action-step-group-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-compound-select-autofocus){: #forms-action-step-group-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-compound-select-path){: #forms-action-step-group-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-compound-select-size){: #forms-action-step-group-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-compound-select-visible?){: #forms-action-step-group-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-step-group-compound-select-prompt){: #forms-action-step-group-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-step-group-compound-select-options){: #forms-action-step-group-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.step.group.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-group-compound-input-name){: #forms-action-step-group-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-step-group-compound-input-type){: #forms-action-step-group-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-group-compound-input-label){: #forms-action-step-group-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-group-compound-input-description){: #forms-action-step-group-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-group-compound-input-autofocus){: #forms-action-step-group-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-group-compound-input-path){: #forms-action-step-group-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-group-compound-input-size){: #forms-action-step-group-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-group-compound-input-visible?){: #forms-action-step-group-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Group`
+
+### forms.action.step.row
+
+
+Inputs that stay on one line when there is space.
+
+### Nested DSLs
+ * [field](#forms-action-step-row-field)
+ * [combobox](#forms-action-step-row-combobox)
+   * argument
+ * [select](#forms-action-step-row-select)
+ * [input](#forms-action-step-row-input)
+ * [compound](#forms-action-step-row-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`visible?`](#forms-action-step-row-visible?){: #forms-action-step-row-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.step.row.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-row-field-name){: #forms-action-step-row-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-row-field-label){: #forms-action-step-row-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-row-field-description){: #forms-action-step-row-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-row-field-autofocus){: #forms-action-step-row-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-row-field-path){: #forms-action-step-row-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-row-field-size){: #forms-action-step-row-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-row-field-visible?){: #forms-action-step-row-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-step-row-field-type){: #forms-action-step-row-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.step.row.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-step-row-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-row-combobox-name){: #forms-action-step-row-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-row-combobox-label){: #forms-action-step-row-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-row-combobox-description){: #forms-action-step-row-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-row-combobox-autofocus){: #forms-action-step-row-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-row-combobox-path){: #forms-action-step-row-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-row-combobox-size){: #forms-action-step-row-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-row-combobox-visible?){: #forms-action-step-row-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-step-row-combobox-read_action){: #forms-action-step-row-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-step-row-combobox-search){: #forms-action-step-row-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-step-row-combobox-filter){: #forms-action-step-row-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-step-row-combobox-sort){: #forms-action-step-row-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-step-row-combobox-limit){: #forms-action-step-row-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-step-row-combobox-label_key){: #forms-action-step-row-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-step-row-combobox-value_key){: #forms-action-step-row-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.step.row.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-row-combobox-argument-name){: #forms-action-step-row-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-step-row-combobox-argument-value){: #forms-action-step-row-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.step.row.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-row-select-name){: #forms-action-step-row-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-row-select-label){: #forms-action-step-row-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-row-select-description){: #forms-action-step-row-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-row-select-autofocus){: #forms-action-step-row-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-row-select-path){: #forms-action-step-row-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-row-select-size){: #forms-action-step-row-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-row-select-visible?){: #forms-action-step-row-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-step-row-select-prompt){: #forms-action-step-row-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-step-row-select-options){: #forms-action-step-row-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.step.row.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-row-input-name){: #forms-action-step-row-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-step-row-input-type){: #forms-action-step-row-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-row-input-label){: #forms-action-step-row-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-row-input-description){: #forms-action-step-row-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-row-input-autofocus){: #forms-action-step-row-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-row-input-path){: #forms-action-step-row-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-row-input-size){: #forms-action-step-row-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-row-input-visible?){: #forms-action-step-row-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.action.step.row.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-action-step-row-compound-field)
+ * [combobox](#forms-action-step-row-compound-combobox)
+   * argument
+ * [select](#forms-action-step-row-compound-select)
+ * [input](#forms-action-step-row-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-row-compound-label){: #forms-action-step-row-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-action-step-row-compound-description){: #forms-action-step-row-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-action-step-row-compound-show_labels?){: #forms-action-step-row-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-action-step-row-compound-visible?){: #forms-action-step-row-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.step.row.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-row-compound-field-name){: #forms-action-step-row-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-row-compound-field-label){: #forms-action-step-row-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-row-compound-field-description){: #forms-action-step-row-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-row-compound-field-autofocus){: #forms-action-step-row-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-row-compound-field-path){: #forms-action-step-row-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-row-compound-field-size){: #forms-action-step-row-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-row-compound-field-visible?){: #forms-action-step-row-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-step-row-compound-field-type){: #forms-action-step-row-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.step.row.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-step-row-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-row-compound-combobox-name){: #forms-action-step-row-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-row-compound-combobox-label){: #forms-action-step-row-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-row-compound-combobox-description){: #forms-action-step-row-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-row-compound-combobox-autofocus){: #forms-action-step-row-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-row-compound-combobox-path){: #forms-action-step-row-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-row-compound-combobox-size){: #forms-action-step-row-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-row-compound-combobox-visible?){: #forms-action-step-row-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-step-row-compound-combobox-read_action){: #forms-action-step-row-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-step-row-compound-combobox-search){: #forms-action-step-row-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-step-row-compound-combobox-filter){: #forms-action-step-row-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-step-row-compound-combobox-sort){: #forms-action-step-row-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-step-row-compound-combobox-limit){: #forms-action-step-row-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-step-row-compound-combobox-label_key){: #forms-action-step-row-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-step-row-compound-combobox-value_key){: #forms-action-step-row-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.step.row.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-row-compound-combobox-argument-name){: #forms-action-step-row-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-step-row-compound-combobox-argument-value){: #forms-action-step-row-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.step.row.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-row-compound-select-name){: #forms-action-step-row-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-row-compound-select-label){: #forms-action-step-row-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-row-compound-select-description){: #forms-action-step-row-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-row-compound-select-autofocus){: #forms-action-step-row-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-row-compound-select-path){: #forms-action-step-row-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-row-compound-select-size){: #forms-action-step-row-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-row-compound-select-visible?){: #forms-action-step-row-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-step-row-compound-select-prompt){: #forms-action-step-row-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-step-row-compound-select-options){: #forms-action-step-row-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.step.row.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-row-compound-input-name){: #forms-action-step-row-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-step-row-compound-input-type){: #forms-action-step-row-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-row-compound-input-label){: #forms-action-step-row-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-row-compound-input-description){: #forms-action-step-row-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-row-compound-input-autofocus){: #forms-action-step-row-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-row-compound-input-path){: #forms-action-step-row-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-row-compound-input-size){: #forms-action-step-row-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-row-compound-input-visible?){: #forms-action-step-row-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Row`
+
+### forms.action.step.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-action-step-compound-field)
+ * [combobox](#forms-action-step-compound-combobox)
+   * argument
+ * [select](#forms-action-step-compound-select)
+ * [input](#forms-action-step-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-compound-label){: #forms-action-step-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-action-step-compound-description){: #forms-action-step-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-action-step-compound-show_labels?){: #forms-action-step-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-action-step-compound-visible?){: #forms-action-step-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.action.step.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-compound-field-name){: #forms-action-step-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-compound-field-label){: #forms-action-step-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-compound-field-description){: #forms-action-step-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-compound-field-autofocus){: #forms-action-step-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-compound-field-path){: #forms-action-step-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-compound-field-size){: #forms-action-step-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-compound-field-visible?){: #forms-action-step-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-action-step-compound-field-type){: #forms-action-step-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.action.step.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-action-step-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-compound-combobox-name){: #forms-action-step-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-compound-combobox-label){: #forms-action-step-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-compound-combobox-description){: #forms-action-step-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-compound-combobox-autofocus){: #forms-action-step-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-compound-combobox-path){: #forms-action-step-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-compound-combobox-size){: #forms-action-step-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-compound-combobox-visible?){: #forms-action-step-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-action-step-compound-combobox-read_action){: #forms-action-step-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-action-step-compound-combobox-search){: #forms-action-step-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-action-step-compound-combobox-filter){: #forms-action-step-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-action-step-compound-combobox-sort){: #forms-action-step-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-action-step-compound-combobox-limit){: #forms-action-step-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-action-step-compound-combobox-label_key){: #forms-action-step-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-action-step-compound-combobox-value_key){: #forms-action-step-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.action.step.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-compound-combobox-argument-name){: #forms-action-step-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-action-step-compound-combobox-argument-value){: #forms-action-step-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.action.step.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-compound-select-name){: #forms-action-step-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-compound-select-label){: #forms-action-step-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-compound-select-description){: #forms-action-step-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-compound-select-autofocus){: #forms-action-step-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-compound-select-path){: #forms-action-step-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-compound-select-size){: #forms-action-step-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-compound-select-visible?){: #forms-action-step-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-action-step-compound-select-prompt){: #forms-action-step-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-action-step-compound-select-options){: #forms-action-step-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.action.step.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-action-step-compound-input-name){: #forms-action-step-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-action-step-compound-input-type){: #forms-action-step-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-action-step-compound-input-label){: #forms-action-step-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-action-step-compound-input-description){: #forms-action-step-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-action-step-compound-input-autofocus){: #forms-action-step-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-action-step-compound-input-path){: #forms-action-step-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-action-step-compound-input-size){: #forms-action-step-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-action-step-compound-input-visible?){: #forms-action-step-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
 
 
 
@@ -884,12 +4455,100 @@ Configure a bulk action form. References an update or destroy action on the reso
 
 ### Nested DSLs
  * [field](#forms-bulk_action-field)
- * [field_group](#forms-bulk_action-field_group)
+ * [combobox](#forms-bulk_action-combobox)
+   * argument
+ * [select](#forms-bulk_action-select)
+ * [input](#forms-bulk_action-input)
+ * [group](#forms-bulk_action-group)
    * field
+   * combobox
+     * argument
+   * select
+   * input
+   * row
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [row](#forms-bulk_action-row)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [compound](#forms-bulk_action-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
  * [step](#forms-bulk_action-step)
    * field
-   * field_group
+   * combobox
+     * argument
+   * select
+   * input
+   * group
      * field
+     * combobox
+       * argument
+     * select
+     * input
+     * row
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+       * compound
+         * field
+         * combobox
+           * argument
+         * select
+         * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * row
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
 
 
 
@@ -903,9 +4562,9 @@ Configure a bulk action form. References an update or destroy action on the reso
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#forms-bulk_action-class){: #forms-bulk_action-class } | `nil \| String.t \| (map -> String.t)` |  | Customize CSS classes for the bulk action button. |
 | [`description`](#forms-bulk_action-description){: #forms-bulk_action-description } | `String.t` |  | The description for this bulk action (defaults to action's description). |
 | [`label`](#forms-bulk_action-label){: #forms-bulk_action-label } | `String.t` |  | The label for this bulk action button (defaults to capitalized name). |
+| [`max_columns`](#forms-bulk_action-max_columns){: #forms-bulk_action-max_columns } | `pos_integer` |  | The maximum number of columns of the form. |
 | [`set_all_fields?`](#forms-bulk_action-set_all_fields?){: #forms-bulk_action-set_all_fields? } | `boolean` | `false` | When true, all fields are submitted including empty/nil values (like a normal form). When false (default), empty fields are filtered out for partial updates. |
 | [`delegate_to`](#forms-bulk_action-delegate_to){: #forms-bulk_action-delegate_to } | `module` |  | Resolve fields from a matching bulk action in another pyro_maniac module. Mutually exclusive with inline field definitions. |
 
@@ -916,7 +4575,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac` extension.
+A form input for an attribute or an argument of the action.
 
 
 
@@ -926,29 +4585,18 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`name`](#forms-bulk_action-field-name){: #forms-bulk_action-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+| [`name`](#forms-bulk_action-field-name){: #forms-bulk_action-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`combobox_option_label_key`](#forms-bulk_action-field-combobox_option_label_key){: #forms-bulk_action-field-combobox_option_label_key } | `atom` |  | Combobox label key. Auto-populated for `belongs_to` fields from the destination resource's `default_label`; falls back to `:label` if neither is set. |
-| [`combobox_option_value_key`](#forms-bulk_action-field-combobox_option_value_key){: #forms-bulk_action-field-combobox_option_value_key } | `atom` |  | Combobox value key. Auto-populated for `belongs_to` fields from the destination resource's primary key; falls back to `:id`. |
-| [`combobox_search_action`](#forms-bulk_action-field-combobox_search_action){: #forms-bulk_action-field-combobox_search_action } | `atom` |  | Combobox search action name. Auto-populated for `belongs_to` fields to the destination resource's primary `:read` action. |
-| [`combobox_search_arg`](#forms-bulk_action-field-combobox_search_arg){: #forms-bulk_action-field-combobox_search_arg } | `atom` |  | Argument name on `combobox_search_action` that receives the typed search string. |
-| [`autofocus`](#forms-bulk_action-field-autofocus){: #forms-bulk_action-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`class`](#forms-bulk_action-field-class){: #forms-bulk_action-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`description`](#forms-bulk_action-field-description){: #forms-bulk_action-field-description } | `String.t` |  | Override the default extracted description. |
-| [`form_only?`](#forms-bulk_action-field-form_only?){: #forms-bulk_action-field-form_only? } | `boolean` | `false` | When true, this field exists only in the form UI and is not submitted to the action. |
-| [`input_class`](#forms-bulk_action-field-input_class){: #forms-bulk_action-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`label`](#forms-bulk_action-field-label){: #forms-bulk_action-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`options`](#forms-bulk_action-field-options){: #forms-bulk_action-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`path`](#forms-bulk_action-field-path){: #forms-bulk_action-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`prompt`](#forms-bulk_action-field-prompt){: #forms-bulk_action-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`type`](#forms-bulk_action-field-type){: #forms-bulk_action-field-type } | `atom` | `:default` | The type of the value in the form. Extensible via `extra_form_types` on the forms section. |
-| [`allow_nil?`](#forms-bulk_action-field-allow_nil?){: #forms-bulk_action-field-allow_nil? } | `boolean` | `true` | Whether nil is allowed. Auto-populated by the transformer from the Ash attribute. |
-| [`enum_options`](#forms-bulk_action-field-enum_options){: #forms-bulk_action-field-enum_options } | `list(any)` | `[]` | Options from Ash enum types or one_of constraints. Auto-populated by the transformer. |
-| [`multiple?`](#forms-bulk_action-field-multiple?){: #forms-bulk_action-field-multiple? } | `boolean` | `false` | Whether the field accepts multiple values (e.g. an array enum). Auto-populated by the transformer; the renderer reads this to choose between single and multi-valued chrome on the same atom. |
-| [`when`](#forms-bulk_action-field-when){: #forms-bulk_action-field-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), field is always visible. |
+| [`label`](#forms-bulk_action-field-label){: #forms-bulk_action-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-field-description){: #forms-bulk_action-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-field-autofocus){: #forms-bulk_action-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-field-path){: #forms-bulk_action-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-field-size){: #forms-bulk_action-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-field-visible?){: #forms-bulk_action-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-field-type){: #forms-bulk_action-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
 
 
 
@@ -958,16 +4606,16 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 Target: `PyroManiac.Form.Field`
 
-### forms.bulk_action.field_group
+### forms.bulk_action.combobox
 ```elixir
-field_group label
+combobox name
 ```
 
 
-Configure the appearance of form field groups in the `PyroManiac` extension.
+A form input that searches for its value.
 
 ### Nested DSLs
- * [field](#forms-bulk_action-field_group-field)
+ * [argument](#forms-bulk_action-combobox-argument)
 
 
 
@@ -976,23 +4624,197 @@ Configure the appearance of form field groups in the `PyroManiac` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#forms-bulk_action-field_group-label){: #forms-bulk_action-field_group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
+| [`name`](#forms-bulk_action-combobox-name){: #forms-bulk_action-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#forms-bulk_action-field_group-class){: #forms-bulk_action-field_group-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`path`](#forms-bulk_action-field_group-path){: #forms-bulk_action-field_group-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`when`](#forms-bulk_action-field_group-when){: #forms-bulk_action-field_group-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), group is always visible. |
+| [`label`](#forms-bulk_action-combobox-label){: #forms-bulk_action-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-combobox-description){: #forms-bulk_action-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-combobox-autofocus){: #forms-bulk_action-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-combobox-path){: #forms-bulk_action-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-combobox-size){: #forms-bulk_action-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-combobox-visible?){: #forms-bulk_action-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-combobox-read_action){: #forms-bulk_action-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-combobox-search){: #forms-bulk_action-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-combobox-filter){: #forms-bulk_action-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-combobox-sort){: #forms-bulk_action-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-combobox-limit){: #forms-bulk_action-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-combobox-label_key){: #forms-bulk_action-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-combobox-value_key){: #forms-bulk_action-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
 
 
-### forms.bulk_action.field_group.field
+### forms.bulk_action.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-combobox-argument-name){: #forms-bulk_action-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-combobox-argument-value){: #forms-bulk_action-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-select-name){: #forms-bulk_action-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-select-label){: #forms-bulk_action-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-select-description){: #forms-bulk_action-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-select-autofocus){: #forms-bulk_action-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-select-path){: #forms-bulk_action-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-select-size){: #forms-bulk_action-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-select-visible?){: #forms-bulk_action-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-select-prompt){: #forms-bulk_action-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-select-options){: #forms-bulk_action-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-input-name){: #forms-bulk_action-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-input-type){: #forms-bulk_action-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-input-label){: #forms-bulk_action-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-input-description){: #forms-bulk_action-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-input-autofocus){: #forms-bulk_action-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-input-path){: #forms-bulk_action-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-input-size){: #forms-bulk_action-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-input-visible?){: #forms-bulk_action-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.bulk_action.group
+```elixir
+group label
+```
+
+
+A group of form inputs.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-group-field)
+ * [combobox](#forms-bulk_action-group-combobox)
+   * argument
+ * [select](#forms-bulk_action-group-select)
+ * [input](#forms-bulk_action-group-input)
+ * [row](#forms-bulk_action-group-row)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [compound](#forms-bulk_action-group-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-label){: #forms-bulk_action-group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-bulk_action-group-description){: #forms-bulk_action-group-description } | `String.t` |  | Text below the label. |
+| [`path`](#forms-bulk_action-group-path){: #forms-bulk_action-group-path } | `list(atom)` | `[]` | A relative path of relationships. The inputs are in the nested form of that path. |
+| [`density`](#forms-bulk_action-group-density){: #forms-bulk_action-group-density } | `:normal \| :dense` | `:normal` | `:dense` uses narrower tracks. Use it for lists of short inputs. |
+| [`max_columns`](#forms-bulk_action-group-max_columns){: #forms-bulk_action-group-max_columns } | `pos_integer` |  | The maximum number of columns. `nil`: no limit from the DSL. |
+| [`collapsible?`](#forms-bulk_action-group-collapsible?){: #forms-bulk_action-group-collapsible? } | `boolean` | `false` | The user can close and open the group. |
+| [`collapsed?`](#forms-bulk_action-group-collapsed?){: #forms-bulk_action-group-collapsed? } | `boolean` | `false` | The group starts closed. Requires `collapsible? true`. |
+| [`visible?`](#forms-bulk_action-group-visible?){: #forms-bulk_action-group-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.group.field
 ```elixir
 field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac` extension.
+A form input for an attribute or an argument of the action.
 
 
 
@@ -1002,29 +4824,18 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`name`](#forms-bulk_action-field_group-field-name){: #forms-bulk_action-field_group-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+| [`name`](#forms-bulk_action-group-field-name){: #forms-bulk_action-group-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`combobox_option_label_key`](#forms-bulk_action-field_group-field-combobox_option_label_key){: #forms-bulk_action-field_group-field-combobox_option_label_key } | `atom` |  | Combobox label key. Auto-populated for `belongs_to` fields from the destination resource's `default_label`; falls back to `:label` if neither is set. |
-| [`combobox_option_value_key`](#forms-bulk_action-field_group-field-combobox_option_value_key){: #forms-bulk_action-field_group-field-combobox_option_value_key } | `atom` |  | Combobox value key. Auto-populated for `belongs_to` fields from the destination resource's primary key; falls back to `:id`. |
-| [`combobox_search_action`](#forms-bulk_action-field_group-field-combobox_search_action){: #forms-bulk_action-field_group-field-combobox_search_action } | `atom` |  | Combobox search action name. Auto-populated for `belongs_to` fields to the destination resource's primary `:read` action. |
-| [`combobox_search_arg`](#forms-bulk_action-field_group-field-combobox_search_arg){: #forms-bulk_action-field_group-field-combobox_search_arg } | `atom` |  | Argument name on `combobox_search_action` that receives the typed search string. |
-| [`autofocus`](#forms-bulk_action-field_group-field-autofocus){: #forms-bulk_action-field_group-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`class`](#forms-bulk_action-field_group-field-class){: #forms-bulk_action-field_group-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`description`](#forms-bulk_action-field_group-field-description){: #forms-bulk_action-field_group-field-description } | `String.t` |  | Override the default extracted description. |
-| [`form_only?`](#forms-bulk_action-field_group-field-form_only?){: #forms-bulk_action-field_group-field-form_only? } | `boolean` | `false` | When true, this field exists only in the form UI and is not submitted to the action. |
-| [`input_class`](#forms-bulk_action-field_group-field-input_class){: #forms-bulk_action-field_group-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`label`](#forms-bulk_action-field_group-field-label){: #forms-bulk_action-field_group-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`options`](#forms-bulk_action-field_group-field-options){: #forms-bulk_action-field_group-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`path`](#forms-bulk_action-field_group-field-path){: #forms-bulk_action-field_group-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`prompt`](#forms-bulk_action-field_group-field-prompt){: #forms-bulk_action-field_group-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`type`](#forms-bulk_action-field_group-field-type){: #forms-bulk_action-field_group-field-type } | `atom` | `:default` | The type of the value in the form. Extensible via `extra_form_types` on the forms section. |
-| [`allow_nil?`](#forms-bulk_action-field_group-field-allow_nil?){: #forms-bulk_action-field_group-field-allow_nil? } | `boolean` | `true` | Whether nil is allowed. Auto-populated by the transformer from the Ash attribute. |
-| [`enum_options`](#forms-bulk_action-field_group-field-enum_options){: #forms-bulk_action-field_group-field-enum_options } | `list(any)` | `[]` | Options from Ash enum types or one_of constraints. Auto-populated by the transformer. |
-| [`multiple?`](#forms-bulk_action-field_group-field-multiple?){: #forms-bulk_action-field_group-field-multiple? } | `boolean` | `false` | Whether the field accepts multiple values (e.g. an array enum). Auto-populated by the transformer; the renderer reads this to choose between single and multi-valued chrome on the same atom. |
-| [`when`](#forms-bulk_action-field_group-field-when){: #forms-bulk_action-field_group-field-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), field is always visible. |
+| [`label`](#forms-bulk_action-group-field-label){: #forms-bulk_action-group-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-field-description){: #forms-bulk_action-group-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-field-autofocus){: #forms-bulk_action-group-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-field-path){: #forms-bulk_action-group-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-field-size){: #forms-bulk_action-group-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-field-visible?){: #forms-bulk_action-group-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-group-field-type){: #forms-bulk_action-group-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
 
 
 
@@ -1034,12 +4845,1498 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 Target: `PyroManiac.Form.Field`
 
+### forms.bulk_action.group.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-group-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-combobox-name){: #forms-bulk_action-group-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-combobox-label){: #forms-bulk_action-group-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-combobox-description){: #forms-bulk_action-group-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-combobox-autofocus){: #forms-bulk_action-group-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-combobox-path){: #forms-bulk_action-group-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-combobox-size){: #forms-bulk_action-group-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-combobox-visible?){: #forms-bulk_action-group-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-group-combobox-read_action){: #forms-bulk_action-group-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-group-combobox-search){: #forms-bulk_action-group-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-group-combobox-filter){: #forms-bulk_action-group-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-group-combobox-sort){: #forms-bulk_action-group-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-group-combobox-limit){: #forms-bulk_action-group-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-group-combobox-label_key){: #forms-bulk_action-group-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-group-combobox-value_key){: #forms-bulk_action-group-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.group.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-combobox-argument-name){: #forms-bulk_action-group-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-group-combobox-argument-value){: #forms-bulk_action-group-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
 
 
 
 ### Introspection
 
-Target: `PyroManiac.Form.FieldGroup`
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.group.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-select-name){: #forms-bulk_action-group-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-select-label){: #forms-bulk_action-group-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-select-description){: #forms-bulk_action-group-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-select-autofocus){: #forms-bulk_action-group-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-select-path){: #forms-bulk_action-group-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-select-size){: #forms-bulk_action-group-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-select-visible?){: #forms-bulk_action-group-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-group-select-prompt){: #forms-bulk_action-group-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-group-select-options){: #forms-bulk_action-group-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.group.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-input-name){: #forms-bulk_action-group-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-group-input-type){: #forms-bulk_action-group-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-input-label){: #forms-bulk_action-group-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-input-description){: #forms-bulk_action-group-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-input-autofocus){: #forms-bulk_action-group-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-input-path){: #forms-bulk_action-group-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-input-size){: #forms-bulk_action-group-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-input-visible?){: #forms-bulk_action-group-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.bulk_action.group.row
+
+
+Inputs that stay on one line when there is space.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-group-row-field)
+ * [combobox](#forms-bulk_action-group-row-combobox)
+   * argument
+ * [select](#forms-bulk_action-group-row-select)
+ * [input](#forms-bulk_action-group-row-input)
+ * [compound](#forms-bulk_action-group-row-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`visible?`](#forms-bulk_action-group-row-visible?){: #forms-bulk_action-group-row-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.group.row.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-row-field-name){: #forms-bulk_action-group-row-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-row-field-label){: #forms-bulk_action-group-row-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-row-field-description){: #forms-bulk_action-group-row-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-row-field-autofocus){: #forms-bulk_action-group-row-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-row-field-path){: #forms-bulk_action-group-row-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-row-field-size){: #forms-bulk_action-group-row-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-row-field-visible?){: #forms-bulk_action-group-row-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-group-row-field-type){: #forms-bulk_action-group-row-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.group.row.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-group-row-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-row-combobox-name){: #forms-bulk_action-group-row-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-row-combobox-label){: #forms-bulk_action-group-row-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-row-combobox-description){: #forms-bulk_action-group-row-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-row-combobox-autofocus){: #forms-bulk_action-group-row-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-row-combobox-path){: #forms-bulk_action-group-row-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-row-combobox-size){: #forms-bulk_action-group-row-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-row-combobox-visible?){: #forms-bulk_action-group-row-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-group-row-combobox-read_action){: #forms-bulk_action-group-row-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-group-row-combobox-search){: #forms-bulk_action-group-row-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-group-row-combobox-filter){: #forms-bulk_action-group-row-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-group-row-combobox-sort){: #forms-bulk_action-group-row-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-group-row-combobox-limit){: #forms-bulk_action-group-row-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-group-row-combobox-label_key){: #forms-bulk_action-group-row-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-group-row-combobox-value_key){: #forms-bulk_action-group-row-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.group.row.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-row-combobox-argument-name){: #forms-bulk_action-group-row-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-group-row-combobox-argument-value){: #forms-bulk_action-group-row-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.group.row.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-row-select-name){: #forms-bulk_action-group-row-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-row-select-label){: #forms-bulk_action-group-row-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-row-select-description){: #forms-bulk_action-group-row-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-row-select-autofocus){: #forms-bulk_action-group-row-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-row-select-path){: #forms-bulk_action-group-row-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-row-select-size){: #forms-bulk_action-group-row-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-row-select-visible?){: #forms-bulk_action-group-row-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-group-row-select-prompt){: #forms-bulk_action-group-row-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-group-row-select-options){: #forms-bulk_action-group-row-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.group.row.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-row-input-name){: #forms-bulk_action-group-row-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-group-row-input-type){: #forms-bulk_action-group-row-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-row-input-label){: #forms-bulk_action-group-row-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-row-input-description){: #forms-bulk_action-group-row-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-row-input-autofocus){: #forms-bulk_action-group-row-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-row-input-path){: #forms-bulk_action-group-row-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-row-input-size){: #forms-bulk_action-group-row-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-row-input-visible?){: #forms-bulk_action-group-row-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.bulk_action.group.row.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-group-row-compound-field)
+ * [combobox](#forms-bulk_action-group-row-compound-combobox)
+   * argument
+ * [select](#forms-bulk_action-group-row-compound-select)
+ * [input](#forms-bulk_action-group-row-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-row-compound-label){: #forms-bulk_action-group-row-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-bulk_action-group-row-compound-description){: #forms-bulk_action-group-row-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-bulk_action-group-row-compound-show_labels?){: #forms-bulk_action-group-row-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-bulk_action-group-row-compound-visible?){: #forms-bulk_action-group-row-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.group.row.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-row-compound-field-name){: #forms-bulk_action-group-row-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-row-compound-field-label){: #forms-bulk_action-group-row-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-row-compound-field-description){: #forms-bulk_action-group-row-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-row-compound-field-autofocus){: #forms-bulk_action-group-row-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-row-compound-field-path){: #forms-bulk_action-group-row-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-row-compound-field-size){: #forms-bulk_action-group-row-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-row-compound-field-visible?){: #forms-bulk_action-group-row-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-group-row-compound-field-type){: #forms-bulk_action-group-row-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.group.row.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-group-row-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-row-compound-combobox-name){: #forms-bulk_action-group-row-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-row-compound-combobox-label){: #forms-bulk_action-group-row-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-row-compound-combobox-description){: #forms-bulk_action-group-row-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-row-compound-combobox-autofocus){: #forms-bulk_action-group-row-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-row-compound-combobox-path){: #forms-bulk_action-group-row-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-row-compound-combobox-size){: #forms-bulk_action-group-row-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-row-compound-combobox-visible?){: #forms-bulk_action-group-row-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-group-row-compound-combobox-read_action){: #forms-bulk_action-group-row-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-group-row-compound-combobox-search){: #forms-bulk_action-group-row-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-group-row-compound-combobox-filter){: #forms-bulk_action-group-row-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-group-row-compound-combobox-sort){: #forms-bulk_action-group-row-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-group-row-compound-combobox-limit){: #forms-bulk_action-group-row-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-group-row-compound-combobox-label_key){: #forms-bulk_action-group-row-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-group-row-compound-combobox-value_key){: #forms-bulk_action-group-row-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.group.row.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-row-compound-combobox-argument-name){: #forms-bulk_action-group-row-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-group-row-compound-combobox-argument-value){: #forms-bulk_action-group-row-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.group.row.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-row-compound-select-name){: #forms-bulk_action-group-row-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-row-compound-select-label){: #forms-bulk_action-group-row-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-row-compound-select-description){: #forms-bulk_action-group-row-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-row-compound-select-autofocus){: #forms-bulk_action-group-row-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-row-compound-select-path){: #forms-bulk_action-group-row-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-row-compound-select-size){: #forms-bulk_action-group-row-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-row-compound-select-visible?){: #forms-bulk_action-group-row-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-group-row-compound-select-prompt){: #forms-bulk_action-group-row-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-group-row-compound-select-options){: #forms-bulk_action-group-row-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.group.row.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-row-compound-input-name){: #forms-bulk_action-group-row-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-group-row-compound-input-type){: #forms-bulk_action-group-row-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-row-compound-input-label){: #forms-bulk_action-group-row-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-row-compound-input-description){: #forms-bulk_action-group-row-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-row-compound-input-autofocus){: #forms-bulk_action-group-row-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-row-compound-input-path){: #forms-bulk_action-group-row-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-row-compound-input-size){: #forms-bulk_action-group-row-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-row-compound-input-visible?){: #forms-bulk_action-group-row-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Row`
+
+### forms.bulk_action.group.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-group-compound-field)
+ * [combobox](#forms-bulk_action-group-compound-combobox)
+   * argument
+ * [select](#forms-bulk_action-group-compound-select)
+ * [input](#forms-bulk_action-group-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-compound-label){: #forms-bulk_action-group-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-bulk_action-group-compound-description){: #forms-bulk_action-group-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-bulk_action-group-compound-show_labels?){: #forms-bulk_action-group-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-bulk_action-group-compound-visible?){: #forms-bulk_action-group-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.group.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-compound-field-name){: #forms-bulk_action-group-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-compound-field-label){: #forms-bulk_action-group-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-compound-field-description){: #forms-bulk_action-group-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-compound-field-autofocus){: #forms-bulk_action-group-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-compound-field-path){: #forms-bulk_action-group-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-compound-field-size){: #forms-bulk_action-group-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-compound-field-visible?){: #forms-bulk_action-group-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-group-compound-field-type){: #forms-bulk_action-group-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.group.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-group-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-compound-combobox-name){: #forms-bulk_action-group-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-compound-combobox-label){: #forms-bulk_action-group-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-compound-combobox-description){: #forms-bulk_action-group-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-compound-combobox-autofocus){: #forms-bulk_action-group-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-compound-combobox-path){: #forms-bulk_action-group-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-compound-combobox-size){: #forms-bulk_action-group-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-compound-combobox-visible?){: #forms-bulk_action-group-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-group-compound-combobox-read_action){: #forms-bulk_action-group-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-group-compound-combobox-search){: #forms-bulk_action-group-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-group-compound-combobox-filter){: #forms-bulk_action-group-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-group-compound-combobox-sort){: #forms-bulk_action-group-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-group-compound-combobox-limit){: #forms-bulk_action-group-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-group-compound-combobox-label_key){: #forms-bulk_action-group-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-group-compound-combobox-value_key){: #forms-bulk_action-group-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.group.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-compound-combobox-argument-name){: #forms-bulk_action-group-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-group-compound-combobox-argument-value){: #forms-bulk_action-group-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.group.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-compound-select-name){: #forms-bulk_action-group-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-compound-select-label){: #forms-bulk_action-group-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-compound-select-description){: #forms-bulk_action-group-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-compound-select-autofocus){: #forms-bulk_action-group-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-compound-select-path){: #forms-bulk_action-group-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-compound-select-size){: #forms-bulk_action-group-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-compound-select-visible?){: #forms-bulk_action-group-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-group-compound-select-prompt){: #forms-bulk_action-group-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-group-compound-select-options){: #forms-bulk_action-group-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.group.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-group-compound-input-name){: #forms-bulk_action-group-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-group-compound-input-type){: #forms-bulk_action-group-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-group-compound-input-label){: #forms-bulk_action-group-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-group-compound-input-description){: #forms-bulk_action-group-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-group-compound-input-autofocus){: #forms-bulk_action-group-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-group-compound-input-path){: #forms-bulk_action-group-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-group-compound-input-size){: #forms-bulk_action-group-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-group-compound-input-visible?){: #forms-bulk_action-group-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Group`
+
+### forms.bulk_action.row
+
+
+Inputs that stay on one line when there is space.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-row-field)
+ * [combobox](#forms-bulk_action-row-combobox)
+   * argument
+ * [select](#forms-bulk_action-row-select)
+ * [input](#forms-bulk_action-row-input)
+ * [compound](#forms-bulk_action-row-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`visible?`](#forms-bulk_action-row-visible?){: #forms-bulk_action-row-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.row.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-row-field-name){: #forms-bulk_action-row-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-row-field-label){: #forms-bulk_action-row-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-row-field-description){: #forms-bulk_action-row-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-row-field-autofocus){: #forms-bulk_action-row-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-row-field-path){: #forms-bulk_action-row-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-row-field-size){: #forms-bulk_action-row-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-row-field-visible?){: #forms-bulk_action-row-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-row-field-type){: #forms-bulk_action-row-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.row.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-row-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-row-combobox-name){: #forms-bulk_action-row-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-row-combobox-label){: #forms-bulk_action-row-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-row-combobox-description){: #forms-bulk_action-row-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-row-combobox-autofocus){: #forms-bulk_action-row-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-row-combobox-path){: #forms-bulk_action-row-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-row-combobox-size){: #forms-bulk_action-row-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-row-combobox-visible?){: #forms-bulk_action-row-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-row-combobox-read_action){: #forms-bulk_action-row-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-row-combobox-search){: #forms-bulk_action-row-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-row-combobox-filter){: #forms-bulk_action-row-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-row-combobox-sort){: #forms-bulk_action-row-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-row-combobox-limit){: #forms-bulk_action-row-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-row-combobox-label_key){: #forms-bulk_action-row-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-row-combobox-value_key){: #forms-bulk_action-row-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.row.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-row-combobox-argument-name){: #forms-bulk_action-row-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-row-combobox-argument-value){: #forms-bulk_action-row-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.row.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-row-select-name){: #forms-bulk_action-row-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-row-select-label){: #forms-bulk_action-row-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-row-select-description){: #forms-bulk_action-row-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-row-select-autofocus){: #forms-bulk_action-row-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-row-select-path){: #forms-bulk_action-row-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-row-select-size){: #forms-bulk_action-row-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-row-select-visible?){: #forms-bulk_action-row-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-row-select-prompt){: #forms-bulk_action-row-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-row-select-options){: #forms-bulk_action-row-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.row.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-row-input-name){: #forms-bulk_action-row-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-row-input-type){: #forms-bulk_action-row-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-row-input-label){: #forms-bulk_action-row-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-row-input-description){: #forms-bulk_action-row-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-row-input-autofocus){: #forms-bulk_action-row-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-row-input-path){: #forms-bulk_action-row-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-row-input-size){: #forms-bulk_action-row-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-row-input-visible?){: #forms-bulk_action-row-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.bulk_action.row.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-row-compound-field)
+ * [combobox](#forms-bulk_action-row-compound-combobox)
+   * argument
+ * [select](#forms-bulk_action-row-compound-select)
+ * [input](#forms-bulk_action-row-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-row-compound-label){: #forms-bulk_action-row-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-bulk_action-row-compound-description){: #forms-bulk_action-row-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-bulk_action-row-compound-show_labels?){: #forms-bulk_action-row-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-bulk_action-row-compound-visible?){: #forms-bulk_action-row-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.row.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-row-compound-field-name){: #forms-bulk_action-row-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-row-compound-field-label){: #forms-bulk_action-row-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-row-compound-field-description){: #forms-bulk_action-row-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-row-compound-field-autofocus){: #forms-bulk_action-row-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-row-compound-field-path){: #forms-bulk_action-row-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-row-compound-field-size){: #forms-bulk_action-row-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-row-compound-field-visible?){: #forms-bulk_action-row-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-row-compound-field-type){: #forms-bulk_action-row-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.row.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-row-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-row-compound-combobox-name){: #forms-bulk_action-row-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-row-compound-combobox-label){: #forms-bulk_action-row-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-row-compound-combobox-description){: #forms-bulk_action-row-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-row-compound-combobox-autofocus){: #forms-bulk_action-row-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-row-compound-combobox-path){: #forms-bulk_action-row-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-row-compound-combobox-size){: #forms-bulk_action-row-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-row-compound-combobox-visible?){: #forms-bulk_action-row-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-row-compound-combobox-read_action){: #forms-bulk_action-row-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-row-compound-combobox-search){: #forms-bulk_action-row-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-row-compound-combobox-filter){: #forms-bulk_action-row-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-row-compound-combobox-sort){: #forms-bulk_action-row-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-row-compound-combobox-limit){: #forms-bulk_action-row-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-row-compound-combobox-label_key){: #forms-bulk_action-row-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-row-compound-combobox-value_key){: #forms-bulk_action-row-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.row.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-row-compound-combobox-argument-name){: #forms-bulk_action-row-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-row-compound-combobox-argument-value){: #forms-bulk_action-row-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.row.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-row-compound-select-name){: #forms-bulk_action-row-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-row-compound-select-label){: #forms-bulk_action-row-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-row-compound-select-description){: #forms-bulk_action-row-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-row-compound-select-autofocus){: #forms-bulk_action-row-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-row-compound-select-path){: #forms-bulk_action-row-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-row-compound-select-size){: #forms-bulk_action-row-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-row-compound-select-visible?){: #forms-bulk_action-row-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-row-compound-select-prompt){: #forms-bulk_action-row-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-row-compound-select-options){: #forms-bulk_action-row-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.row.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-row-compound-input-name){: #forms-bulk_action-row-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-row-compound-input-type){: #forms-bulk_action-row-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-row-compound-input-label){: #forms-bulk_action-row-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-row-compound-input-description){: #forms-bulk_action-row-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-row-compound-input-autofocus){: #forms-bulk_action-row-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-row-compound-input-path){: #forms-bulk_action-row-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-row-compound-input-size){: #forms-bulk_action-row-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-row-compound-input-visible?){: #forms-bulk_action-row-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Row`
+
+### forms.bulk_action.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-compound-field)
+ * [combobox](#forms-bulk_action-compound-combobox)
+   * argument
+ * [select](#forms-bulk_action-compound-select)
+ * [input](#forms-bulk_action-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-compound-label){: #forms-bulk_action-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-bulk_action-compound-description){: #forms-bulk_action-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-bulk_action-compound-show_labels?){: #forms-bulk_action-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-bulk_action-compound-visible?){: #forms-bulk_action-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-compound-field-name){: #forms-bulk_action-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-compound-field-label){: #forms-bulk_action-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-compound-field-description){: #forms-bulk_action-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-compound-field-autofocus){: #forms-bulk_action-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-compound-field-path){: #forms-bulk_action-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-compound-field-size){: #forms-bulk_action-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-compound-field-visible?){: #forms-bulk_action-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-compound-field-type){: #forms-bulk_action-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-compound-combobox-name){: #forms-bulk_action-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-compound-combobox-label){: #forms-bulk_action-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-compound-combobox-description){: #forms-bulk_action-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-compound-combobox-autofocus){: #forms-bulk_action-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-compound-combobox-path){: #forms-bulk_action-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-compound-combobox-size){: #forms-bulk_action-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-compound-combobox-visible?){: #forms-bulk_action-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-compound-combobox-read_action){: #forms-bulk_action-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-compound-combobox-search){: #forms-bulk_action-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-compound-combobox-filter){: #forms-bulk_action-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-compound-combobox-sort){: #forms-bulk_action-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-compound-combobox-limit){: #forms-bulk_action-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-compound-combobox-label_key){: #forms-bulk_action-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-compound-combobox-value_key){: #forms-bulk_action-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-compound-combobox-argument-name){: #forms-bulk_action-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-compound-combobox-argument-value){: #forms-bulk_action-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-compound-select-name){: #forms-bulk_action-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-compound-select-label){: #forms-bulk_action-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-compound-select-description){: #forms-bulk_action-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-compound-select-autofocus){: #forms-bulk_action-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-compound-select-path){: #forms-bulk_action-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-compound-select-size){: #forms-bulk_action-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-compound-select-visible?){: #forms-bulk_action-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-compound-select-prompt){: #forms-bulk_action-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-compound-select-options){: #forms-bulk_action-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-compound-input-name){: #forms-bulk_action-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-compound-input-type){: #forms-bulk_action-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-compound-input-label){: #forms-bulk_action-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-compound-input-description){: #forms-bulk_action-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-compound-input-autofocus){: #forms-bulk_action-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-compound-input-path){: #forms-bulk_action-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-compound-input-size){: #forms-bulk_action-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-compound-input-visible?){: #forms-bulk_action-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
 
 ### forms.bulk_action.step
 ```elixir
@@ -1051,8 +6348,52 @@ Configure a form step in the `PyroManiac` extension.
 
 ### Nested DSLs
  * [field](#forms-bulk_action-step-field)
- * [field_group](#forms-bulk_action-step-field_group)
+ * [combobox](#forms-bulk_action-step-combobox)
+   * argument
+ * [select](#forms-bulk_action-step-select)
+ * [input](#forms-bulk_action-step-input)
+ * [group](#forms-bulk_action-step-group)
    * field
+   * combobox
+     * argument
+   * select
+   * input
+   * row
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+     * compound
+       * field
+       * combobox
+         * argument
+       * select
+       * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [row](#forms-bulk_action-step-row)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [compound](#forms-bulk_action-step-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
 
 
 
@@ -1066,12 +6407,13 @@ Configure a form step in the `PyroManiac` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#forms-bulk_action-step-class){: #forms-bulk_action-step-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
 | [`label`](#forms-bulk_action-step-label){: #forms-bulk_action-step-label } | `String.t` |  | The label of this step (defaults to capitalized name). |
-| [`path`](#forms-bulk_action-step-path){: #forms-bulk_action-step-path } | `list(atom)` | `[]` | Base path for all fields in this step. When set, fields are rendered within inputs_for for this path. |
-| [`render_fn`](#forms-bulk_action-step-render_fn){: #forms-bulk_action-step-render_fn } | `(map -> any)` |  | Custom render override function. Receives assigns map, returns HEEx. |
+| [`path`](#forms-bulk_action-step-path){: #forms-bulk_action-step-path } | `list(atom)` | `[]` | Base path for all inputs in this step. When set, inputs are rendered within the nested form of this path. |
+| [`render`](#forms-bulk_action-step-render){: #forms-bulk_action-step-render } | `atom` |  | A render module that replaces the rendering of the step. The renderer requires its render behaviour. |
 | [`review?`](#forms-bulk_action-step-review?){: #forms-bulk_action-step-review? } | `boolean` | `false` | When true, auto-generates a read-only summary of previous steps. |
-| [`when`](#forms-bulk_action-step-when){: #forms-bulk_action-step-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), step is always visible. |
+| [`density`](#forms-bulk_action-step-density){: #forms-bulk_action-step-density } | `:normal \| :dense` | `:normal` | `:dense` uses narrower tracks. |
+| [`max_columns`](#forms-bulk_action-step-max_columns){: #forms-bulk_action-step-max_columns } | `pos_integer` |  | The maximum number of columns. |
+| [`visible?`](#forms-bulk_action-step-visible?){: #forms-bulk_action-step-visible? } | `any` |  | Conditional visibility: an Ash expression. |
 
 
 ### forms.bulk_action.step.field
@@ -1080,7 +6422,7 @@ field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac` extension.
+A form input for an attribute or an argument of the action.
 
 
 
@@ -1090,29 +6432,18 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`name`](#forms-bulk_action-step-field-name){: #forms-bulk_action-step-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+| [`name`](#forms-bulk_action-step-field-name){: #forms-bulk_action-step-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`combobox_option_label_key`](#forms-bulk_action-step-field-combobox_option_label_key){: #forms-bulk_action-step-field-combobox_option_label_key } | `atom` |  | Combobox label key. Auto-populated for `belongs_to` fields from the destination resource's `default_label`; falls back to `:label` if neither is set. |
-| [`combobox_option_value_key`](#forms-bulk_action-step-field-combobox_option_value_key){: #forms-bulk_action-step-field-combobox_option_value_key } | `atom` |  | Combobox value key. Auto-populated for `belongs_to` fields from the destination resource's primary key; falls back to `:id`. |
-| [`combobox_search_action`](#forms-bulk_action-step-field-combobox_search_action){: #forms-bulk_action-step-field-combobox_search_action } | `atom` |  | Combobox search action name. Auto-populated for `belongs_to` fields to the destination resource's primary `:read` action. |
-| [`combobox_search_arg`](#forms-bulk_action-step-field-combobox_search_arg){: #forms-bulk_action-step-field-combobox_search_arg } | `atom` |  | Argument name on `combobox_search_action` that receives the typed search string. |
-| [`autofocus`](#forms-bulk_action-step-field-autofocus){: #forms-bulk_action-step-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`class`](#forms-bulk_action-step-field-class){: #forms-bulk_action-step-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`description`](#forms-bulk_action-step-field-description){: #forms-bulk_action-step-field-description } | `String.t` |  | Override the default extracted description. |
-| [`form_only?`](#forms-bulk_action-step-field-form_only?){: #forms-bulk_action-step-field-form_only? } | `boolean` | `false` | When true, this field exists only in the form UI and is not submitted to the action. |
-| [`input_class`](#forms-bulk_action-step-field-input_class){: #forms-bulk_action-step-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`label`](#forms-bulk_action-step-field-label){: #forms-bulk_action-step-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`options`](#forms-bulk_action-step-field-options){: #forms-bulk_action-step-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`path`](#forms-bulk_action-step-field-path){: #forms-bulk_action-step-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`prompt`](#forms-bulk_action-step-field-prompt){: #forms-bulk_action-step-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`type`](#forms-bulk_action-step-field-type){: #forms-bulk_action-step-field-type } | `atom` | `:default` | The type of the value in the form. Extensible via `extra_form_types` on the forms section. |
-| [`allow_nil?`](#forms-bulk_action-step-field-allow_nil?){: #forms-bulk_action-step-field-allow_nil? } | `boolean` | `true` | Whether nil is allowed. Auto-populated by the transformer from the Ash attribute. |
-| [`enum_options`](#forms-bulk_action-step-field-enum_options){: #forms-bulk_action-step-field-enum_options } | `list(any)` | `[]` | Options from Ash enum types or one_of constraints. Auto-populated by the transformer. |
-| [`multiple?`](#forms-bulk_action-step-field-multiple?){: #forms-bulk_action-step-field-multiple? } | `boolean` | `false` | Whether the field accepts multiple values (e.g. an array enum). Auto-populated by the transformer; the renderer reads this to choose between single and multi-valued chrome on the same atom. |
-| [`when`](#forms-bulk_action-step-field-when){: #forms-bulk_action-step-field-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), field is always visible. |
+| [`label`](#forms-bulk_action-step-field-label){: #forms-bulk_action-step-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-field-description){: #forms-bulk_action-step-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-field-autofocus){: #forms-bulk_action-step-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-field-path){: #forms-bulk_action-step-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-field-size){: #forms-bulk_action-step-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-field-visible?){: #forms-bulk_action-step-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-step-field-type){: #forms-bulk_action-step-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
 
 
 
@@ -1122,16 +6453,16 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 Target: `PyroManiac.Form.Field`
 
-### forms.bulk_action.step.field_group
+### forms.bulk_action.step.combobox
 ```elixir
-field_group label
+combobox name
 ```
 
 
-Configure the appearance of form field groups in the `PyroManiac` extension.
+A form input that searches for its value.
 
 ### Nested DSLs
- * [field](#forms-bulk_action-step-field_group-field)
+ * [argument](#forms-bulk_action-step-combobox-argument)
 
 
 
@@ -1140,23 +6471,197 @@ Configure the appearance of form field groups in the `PyroManiac` extension.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`label`](#forms-bulk_action-step-field_group-label){: #forms-bulk_action-step-field_group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
+| [`name`](#forms-bulk_action-step-combobox-name){: #forms-bulk_action-step-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`class`](#forms-bulk_action-step-field_group-class){: #forms-bulk_action-step-field_group-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`path`](#forms-bulk_action-step-field_group-path){: #forms-bulk_action-step-field_group-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`when`](#forms-bulk_action-step-field_group-when){: #forms-bulk_action-step-field_group-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), group is always visible. |
+| [`label`](#forms-bulk_action-step-combobox-label){: #forms-bulk_action-step-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-combobox-description){: #forms-bulk_action-step-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-combobox-autofocus){: #forms-bulk_action-step-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-combobox-path){: #forms-bulk_action-step-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-combobox-size){: #forms-bulk_action-step-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-combobox-visible?){: #forms-bulk_action-step-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-step-combobox-read_action){: #forms-bulk_action-step-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-step-combobox-search){: #forms-bulk_action-step-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-step-combobox-filter){: #forms-bulk_action-step-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-step-combobox-sort){: #forms-bulk_action-step-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-step-combobox-limit){: #forms-bulk_action-step-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-step-combobox-label_key){: #forms-bulk_action-step-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-step-combobox-value_key){: #forms-bulk_action-step-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
 
 
-### forms.bulk_action.step.field_group.field
+### forms.bulk_action.step.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-combobox-argument-name){: #forms-bulk_action-step-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-step-combobox-argument-value){: #forms-bulk_action-step-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.step.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-select-name){: #forms-bulk_action-step-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-select-label){: #forms-bulk_action-step-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-select-description){: #forms-bulk_action-step-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-select-autofocus){: #forms-bulk_action-step-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-select-path){: #forms-bulk_action-step-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-select-size){: #forms-bulk_action-step-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-select-visible?){: #forms-bulk_action-step-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-step-select-prompt){: #forms-bulk_action-step-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-step-select-options){: #forms-bulk_action-step-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.step.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-input-name){: #forms-bulk_action-step-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-step-input-type){: #forms-bulk_action-step-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-input-label){: #forms-bulk_action-step-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-input-description){: #forms-bulk_action-step-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-input-autofocus){: #forms-bulk_action-step-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-input-path){: #forms-bulk_action-step-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-input-size){: #forms-bulk_action-step-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-input-visible?){: #forms-bulk_action-step-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.bulk_action.step.group
+```elixir
+group label
+```
+
+
+A group of form inputs.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-step-group-field)
+ * [combobox](#forms-bulk_action-step-group-combobox)
+   * argument
+ * [select](#forms-bulk_action-step-group-select)
+ * [input](#forms-bulk_action-step-group-input)
+ * [row](#forms-bulk_action-step-group-row)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+   * compound
+     * field
+     * combobox
+       * argument
+     * select
+     * input
+ * [compound](#forms-bulk_action-step-group-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-label){: #forms-bulk_action-step-group-label } | `String.t` |  | The label of this group (defaults to the capitalized last path segment). |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-bulk_action-step-group-description){: #forms-bulk_action-step-group-description } | `String.t` |  | Text below the label. |
+| [`path`](#forms-bulk_action-step-group-path){: #forms-bulk_action-step-group-path } | `list(atom)` | `[]` | A relative path of relationships. The inputs are in the nested form of that path. |
+| [`density`](#forms-bulk_action-step-group-density){: #forms-bulk_action-step-group-density } | `:normal \| :dense` | `:normal` | `:dense` uses narrower tracks. Use it for lists of short inputs. |
+| [`max_columns`](#forms-bulk_action-step-group-max_columns){: #forms-bulk_action-step-group-max_columns } | `pos_integer` |  | The maximum number of columns. `nil`: no limit from the DSL. |
+| [`collapsible?`](#forms-bulk_action-step-group-collapsible?){: #forms-bulk_action-step-group-collapsible? } | `boolean` | `false` | The user can close and open the group. |
+| [`collapsed?`](#forms-bulk_action-step-group-collapsed?){: #forms-bulk_action-step-group-collapsed? } | `boolean` | `false` | The group starts closed. Requires `collapsible? true`. |
+| [`visible?`](#forms-bulk_action-step-group-visible?){: #forms-bulk_action-step-group-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.step.group.field
 ```elixir
 field name
 ```
 
 
-Declare non-default behavior for a specific form field in the `PyroManiac` extension.
+A form input for an attribute or an argument of the action.
 
 
 
@@ -1166,29 +6671,18 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`name`](#forms-bulk_action-step-field_group-field-name){: #forms-bulk_action-step-field_group-field-name .spark-required} | `atom` |  | The name of the field to be modified |
+| [`name`](#forms-bulk_action-step-group-field-name){: #forms-bulk_action-step-group-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
 ### Options
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`combobox_option_label_key`](#forms-bulk_action-step-field_group-field-combobox_option_label_key){: #forms-bulk_action-step-field_group-field-combobox_option_label_key } | `atom` |  | Combobox label key. Auto-populated for `belongs_to` fields from the destination resource's `default_label`; falls back to `:label` if neither is set. |
-| [`combobox_option_value_key`](#forms-bulk_action-step-field_group-field-combobox_option_value_key){: #forms-bulk_action-step-field_group-field-combobox_option_value_key } | `atom` |  | Combobox value key. Auto-populated for `belongs_to` fields from the destination resource's primary key; falls back to `:id`. |
-| [`combobox_search_action`](#forms-bulk_action-step-field_group-field-combobox_search_action){: #forms-bulk_action-step-field_group-field-combobox_search_action } | `atom` |  | Combobox search action name. Auto-populated for `belongs_to` fields to the destination resource's primary `:read` action. |
-| [`combobox_search_arg`](#forms-bulk_action-step-field_group-field-combobox_search_arg){: #forms-bulk_action-step-field_group-field-combobox_search_arg } | `atom` |  | Argument name on `combobox_search_action` that receives the typed search string. |
-| [`autofocus`](#forms-bulk_action-step-field_group-field-autofocus){: #forms-bulk_action-step-field_group-field-autofocus } | `boolean` | `false` | Autofocus the field. |
-| [`class`](#forms-bulk_action-step-field_group-field-class){: #forms-bulk_action-step-field_group-field-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
-| [`description`](#forms-bulk_action-step-field_group-field-description){: #forms-bulk_action-step-field_group-field-description } | `String.t` |  | Override the default extracted description. |
-| [`form_only?`](#forms-bulk_action-step-field_group-field-form_only?){: #forms-bulk_action-step-field_group-field-form_only? } | `boolean` | `false` | When true, this field exists only in the form UI and is not submitted to the action. |
-| [`input_class`](#forms-bulk_action-step-field_group-field-input_class){: #forms-bulk_action-step-field_group-field-input_class } | `nil \| String.t \| (map -> String.t)` |  | Customize input class. |
-| [`label`](#forms-bulk_action-step-field_group-field-label){: #forms-bulk_action-step-field_group-field-label } | `String.t` |  | The label of the field (defaults to capitalized name). |
-| [`options`](#forms-bulk_action-step-field_group-field-options){: #forms-bulk_action-step-field_group-field-options } | `list(any)` | `[]` | The options for a select type input. |
-| [`path`](#forms-bulk_action-step-field_group-field-path){: #forms-bulk_action-step-field_group-field-path } | `list(atom)` | `[]` | Append to the root path (nested paths are appended). |
-| [`prompt`](#forms-bulk_action-step-field_group-field-prompt){: #forms-bulk_action-step-field_group-field-prompt } | `String.t` |  | Override the default prompt. |
-| [`type`](#forms-bulk_action-step-field_group-field-type){: #forms-bulk_action-step-field_group-field-type } | `atom` | `:default` | The type of the value in the form. Extensible via `extra_form_types` on the forms section. |
-| [`allow_nil?`](#forms-bulk_action-step-field_group-field-allow_nil?){: #forms-bulk_action-step-field_group-field-allow_nil? } | `boolean` | `true` | Whether nil is allowed. Auto-populated by the transformer from the Ash attribute. |
-| [`enum_options`](#forms-bulk_action-step-field_group-field-enum_options){: #forms-bulk_action-step-field_group-field-enum_options } | `list(any)` | `[]` | Options from Ash enum types or one_of constraints. Auto-populated by the transformer. |
-| [`multiple?`](#forms-bulk_action-step-field_group-field-multiple?){: #forms-bulk_action-step-field_group-field-multiple? } | `boolean` | `false` | Whether the field accepts multiple values (e.g. an array enum). Auto-populated by the transformer; the renderer reads this to choose between single and multi-valued chrome on the same atom. |
-| [`when`](#forms-bulk_action-step-field_group-field-when){: #forms-bulk_action-step-field_group-field-when } | `nil \| (any -> any)` |  | Conditional visibility function. Receives the form and returns a boolean. When nil (default), field is always visible. |
+| [`label`](#forms-bulk_action-step-group-field-label){: #forms-bulk_action-step-group-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-field-description){: #forms-bulk_action-step-group-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-field-autofocus){: #forms-bulk_action-step-group-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-field-path){: #forms-bulk_action-step-group-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-field-size){: #forms-bulk_action-step-group-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-field-visible?){: #forms-bulk_action-step-group-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-step-group-field-type){: #forms-bulk_action-step-group-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
 
 
 
@@ -1198,12 +6692,1498 @@ Declare non-default behavior for a specific form field in the `PyroManiac` exten
 
 Target: `PyroManiac.Form.Field`
 
+### forms.bulk_action.step.group.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-step-group-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-combobox-name){: #forms-bulk_action-step-group-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-combobox-label){: #forms-bulk_action-step-group-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-combobox-description){: #forms-bulk_action-step-group-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-combobox-autofocus){: #forms-bulk_action-step-group-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-combobox-path){: #forms-bulk_action-step-group-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-combobox-size){: #forms-bulk_action-step-group-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-combobox-visible?){: #forms-bulk_action-step-group-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-step-group-combobox-read_action){: #forms-bulk_action-step-group-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-step-group-combobox-search){: #forms-bulk_action-step-group-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-step-group-combobox-filter){: #forms-bulk_action-step-group-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-step-group-combobox-sort){: #forms-bulk_action-step-group-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-step-group-combobox-limit){: #forms-bulk_action-step-group-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-step-group-combobox-label_key){: #forms-bulk_action-step-group-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-step-group-combobox-value_key){: #forms-bulk_action-step-group-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.step.group.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-combobox-argument-name){: #forms-bulk_action-step-group-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-step-group-combobox-argument-value){: #forms-bulk_action-step-group-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
 
 
 
 ### Introspection
 
-Target: `PyroManiac.Form.FieldGroup`
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.step.group.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-select-name){: #forms-bulk_action-step-group-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-select-label){: #forms-bulk_action-step-group-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-select-description){: #forms-bulk_action-step-group-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-select-autofocus){: #forms-bulk_action-step-group-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-select-path){: #forms-bulk_action-step-group-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-select-size){: #forms-bulk_action-step-group-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-select-visible?){: #forms-bulk_action-step-group-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-step-group-select-prompt){: #forms-bulk_action-step-group-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-step-group-select-options){: #forms-bulk_action-step-group-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.step.group.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-input-name){: #forms-bulk_action-step-group-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-step-group-input-type){: #forms-bulk_action-step-group-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-input-label){: #forms-bulk_action-step-group-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-input-description){: #forms-bulk_action-step-group-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-input-autofocus){: #forms-bulk_action-step-group-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-input-path){: #forms-bulk_action-step-group-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-input-size){: #forms-bulk_action-step-group-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-input-visible?){: #forms-bulk_action-step-group-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.bulk_action.step.group.row
+
+
+Inputs that stay on one line when there is space.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-step-group-row-field)
+ * [combobox](#forms-bulk_action-step-group-row-combobox)
+   * argument
+ * [select](#forms-bulk_action-step-group-row-select)
+ * [input](#forms-bulk_action-step-group-row-input)
+ * [compound](#forms-bulk_action-step-group-row-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`visible?`](#forms-bulk_action-step-group-row-visible?){: #forms-bulk_action-step-group-row-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.step.group.row.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-row-field-name){: #forms-bulk_action-step-group-row-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-row-field-label){: #forms-bulk_action-step-group-row-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-row-field-description){: #forms-bulk_action-step-group-row-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-row-field-autofocus){: #forms-bulk_action-step-group-row-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-row-field-path){: #forms-bulk_action-step-group-row-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-row-field-size){: #forms-bulk_action-step-group-row-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-row-field-visible?){: #forms-bulk_action-step-group-row-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-step-group-row-field-type){: #forms-bulk_action-step-group-row-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.step.group.row.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-step-group-row-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-row-combobox-name){: #forms-bulk_action-step-group-row-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-row-combobox-label){: #forms-bulk_action-step-group-row-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-row-combobox-description){: #forms-bulk_action-step-group-row-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-row-combobox-autofocus){: #forms-bulk_action-step-group-row-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-row-combobox-path){: #forms-bulk_action-step-group-row-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-row-combobox-size){: #forms-bulk_action-step-group-row-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-row-combobox-visible?){: #forms-bulk_action-step-group-row-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-step-group-row-combobox-read_action){: #forms-bulk_action-step-group-row-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-step-group-row-combobox-search){: #forms-bulk_action-step-group-row-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-step-group-row-combobox-filter){: #forms-bulk_action-step-group-row-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-step-group-row-combobox-sort){: #forms-bulk_action-step-group-row-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-step-group-row-combobox-limit){: #forms-bulk_action-step-group-row-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-step-group-row-combobox-label_key){: #forms-bulk_action-step-group-row-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-step-group-row-combobox-value_key){: #forms-bulk_action-step-group-row-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.step.group.row.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-row-combobox-argument-name){: #forms-bulk_action-step-group-row-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-step-group-row-combobox-argument-value){: #forms-bulk_action-step-group-row-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.step.group.row.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-row-select-name){: #forms-bulk_action-step-group-row-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-row-select-label){: #forms-bulk_action-step-group-row-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-row-select-description){: #forms-bulk_action-step-group-row-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-row-select-autofocus){: #forms-bulk_action-step-group-row-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-row-select-path){: #forms-bulk_action-step-group-row-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-row-select-size){: #forms-bulk_action-step-group-row-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-row-select-visible?){: #forms-bulk_action-step-group-row-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-step-group-row-select-prompt){: #forms-bulk_action-step-group-row-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-step-group-row-select-options){: #forms-bulk_action-step-group-row-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.step.group.row.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-row-input-name){: #forms-bulk_action-step-group-row-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-step-group-row-input-type){: #forms-bulk_action-step-group-row-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-row-input-label){: #forms-bulk_action-step-group-row-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-row-input-description){: #forms-bulk_action-step-group-row-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-row-input-autofocus){: #forms-bulk_action-step-group-row-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-row-input-path){: #forms-bulk_action-step-group-row-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-row-input-size){: #forms-bulk_action-step-group-row-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-row-input-visible?){: #forms-bulk_action-step-group-row-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.bulk_action.step.group.row.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-step-group-row-compound-field)
+ * [combobox](#forms-bulk_action-step-group-row-compound-combobox)
+   * argument
+ * [select](#forms-bulk_action-step-group-row-compound-select)
+ * [input](#forms-bulk_action-step-group-row-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-row-compound-label){: #forms-bulk_action-step-group-row-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-bulk_action-step-group-row-compound-description){: #forms-bulk_action-step-group-row-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-bulk_action-step-group-row-compound-show_labels?){: #forms-bulk_action-step-group-row-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-bulk_action-step-group-row-compound-visible?){: #forms-bulk_action-step-group-row-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.step.group.row.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-row-compound-field-name){: #forms-bulk_action-step-group-row-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-row-compound-field-label){: #forms-bulk_action-step-group-row-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-row-compound-field-description){: #forms-bulk_action-step-group-row-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-row-compound-field-autofocus){: #forms-bulk_action-step-group-row-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-row-compound-field-path){: #forms-bulk_action-step-group-row-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-row-compound-field-size){: #forms-bulk_action-step-group-row-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-row-compound-field-visible?){: #forms-bulk_action-step-group-row-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-step-group-row-compound-field-type){: #forms-bulk_action-step-group-row-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.step.group.row.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-step-group-row-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-row-compound-combobox-name){: #forms-bulk_action-step-group-row-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-row-compound-combobox-label){: #forms-bulk_action-step-group-row-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-row-compound-combobox-description){: #forms-bulk_action-step-group-row-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-row-compound-combobox-autofocus){: #forms-bulk_action-step-group-row-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-row-compound-combobox-path){: #forms-bulk_action-step-group-row-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-row-compound-combobox-size){: #forms-bulk_action-step-group-row-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-row-compound-combobox-visible?){: #forms-bulk_action-step-group-row-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-step-group-row-compound-combobox-read_action){: #forms-bulk_action-step-group-row-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-step-group-row-compound-combobox-search){: #forms-bulk_action-step-group-row-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-step-group-row-compound-combobox-filter){: #forms-bulk_action-step-group-row-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-step-group-row-compound-combobox-sort){: #forms-bulk_action-step-group-row-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-step-group-row-compound-combobox-limit){: #forms-bulk_action-step-group-row-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-step-group-row-compound-combobox-label_key){: #forms-bulk_action-step-group-row-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-step-group-row-compound-combobox-value_key){: #forms-bulk_action-step-group-row-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.step.group.row.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-row-compound-combobox-argument-name){: #forms-bulk_action-step-group-row-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-step-group-row-compound-combobox-argument-value){: #forms-bulk_action-step-group-row-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.step.group.row.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-row-compound-select-name){: #forms-bulk_action-step-group-row-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-row-compound-select-label){: #forms-bulk_action-step-group-row-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-row-compound-select-description){: #forms-bulk_action-step-group-row-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-row-compound-select-autofocus){: #forms-bulk_action-step-group-row-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-row-compound-select-path){: #forms-bulk_action-step-group-row-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-row-compound-select-size){: #forms-bulk_action-step-group-row-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-row-compound-select-visible?){: #forms-bulk_action-step-group-row-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-step-group-row-compound-select-prompt){: #forms-bulk_action-step-group-row-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-step-group-row-compound-select-options){: #forms-bulk_action-step-group-row-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.step.group.row.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-row-compound-input-name){: #forms-bulk_action-step-group-row-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-step-group-row-compound-input-type){: #forms-bulk_action-step-group-row-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-row-compound-input-label){: #forms-bulk_action-step-group-row-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-row-compound-input-description){: #forms-bulk_action-step-group-row-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-row-compound-input-autofocus){: #forms-bulk_action-step-group-row-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-row-compound-input-path){: #forms-bulk_action-step-group-row-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-row-compound-input-size){: #forms-bulk_action-step-group-row-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-row-compound-input-visible?){: #forms-bulk_action-step-group-row-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Row`
+
+### forms.bulk_action.step.group.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-step-group-compound-field)
+ * [combobox](#forms-bulk_action-step-group-compound-combobox)
+   * argument
+ * [select](#forms-bulk_action-step-group-compound-select)
+ * [input](#forms-bulk_action-step-group-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-compound-label){: #forms-bulk_action-step-group-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-bulk_action-step-group-compound-description){: #forms-bulk_action-step-group-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-bulk_action-step-group-compound-show_labels?){: #forms-bulk_action-step-group-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-bulk_action-step-group-compound-visible?){: #forms-bulk_action-step-group-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.step.group.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-compound-field-name){: #forms-bulk_action-step-group-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-compound-field-label){: #forms-bulk_action-step-group-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-compound-field-description){: #forms-bulk_action-step-group-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-compound-field-autofocus){: #forms-bulk_action-step-group-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-compound-field-path){: #forms-bulk_action-step-group-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-compound-field-size){: #forms-bulk_action-step-group-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-compound-field-visible?){: #forms-bulk_action-step-group-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-step-group-compound-field-type){: #forms-bulk_action-step-group-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.step.group.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-step-group-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-compound-combobox-name){: #forms-bulk_action-step-group-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-compound-combobox-label){: #forms-bulk_action-step-group-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-compound-combobox-description){: #forms-bulk_action-step-group-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-compound-combobox-autofocus){: #forms-bulk_action-step-group-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-compound-combobox-path){: #forms-bulk_action-step-group-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-compound-combobox-size){: #forms-bulk_action-step-group-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-compound-combobox-visible?){: #forms-bulk_action-step-group-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-step-group-compound-combobox-read_action){: #forms-bulk_action-step-group-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-step-group-compound-combobox-search){: #forms-bulk_action-step-group-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-step-group-compound-combobox-filter){: #forms-bulk_action-step-group-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-step-group-compound-combobox-sort){: #forms-bulk_action-step-group-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-step-group-compound-combobox-limit){: #forms-bulk_action-step-group-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-step-group-compound-combobox-label_key){: #forms-bulk_action-step-group-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-step-group-compound-combobox-value_key){: #forms-bulk_action-step-group-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.step.group.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-compound-combobox-argument-name){: #forms-bulk_action-step-group-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-step-group-compound-combobox-argument-value){: #forms-bulk_action-step-group-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.step.group.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-compound-select-name){: #forms-bulk_action-step-group-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-compound-select-label){: #forms-bulk_action-step-group-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-compound-select-description){: #forms-bulk_action-step-group-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-compound-select-autofocus){: #forms-bulk_action-step-group-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-compound-select-path){: #forms-bulk_action-step-group-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-compound-select-size){: #forms-bulk_action-step-group-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-compound-select-visible?){: #forms-bulk_action-step-group-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-step-group-compound-select-prompt){: #forms-bulk_action-step-group-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-step-group-compound-select-options){: #forms-bulk_action-step-group-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.step.group.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-group-compound-input-name){: #forms-bulk_action-step-group-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-step-group-compound-input-type){: #forms-bulk_action-step-group-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-group-compound-input-label){: #forms-bulk_action-step-group-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-group-compound-input-description){: #forms-bulk_action-step-group-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-group-compound-input-autofocus){: #forms-bulk_action-step-group-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-group-compound-input-path){: #forms-bulk_action-step-group-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-group-compound-input-size){: #forms-bulk_action-step-group-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-group-compound-input-visible?){: #forms-bulk_action-step-group-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Group`
+
+### forms.bulk_action.step.row
+
+
+Inputs that stay on one line when there is space.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-step-row-field)
+ * [combobox](#forms-bulk_action-step-row-combobox)
+   * argument
+ * [select](#forms-bulk_action-step-row-select)
+ * [input](#forms-bulk_action-step-row-input)
+ * [compound](#forms-bulk_action-step-row-compound)
+   * field
+   * combobox
+     * argument
+   * select
+   * input
+
+
+
+
+
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`visible?`](#forms-bulk_action-step-row-visible?){: #forms-bulk_action-step-row-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.step.row.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-row-field-name){: #forms-bulk_action-step-row-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-row-field-label){: #forms-bulk_action-step-row-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-row-field-description){: #forms-bulk_action-step-row-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-row-field-autofocus){: #forms-bulk_action-step-row-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-row-field-path){: #forms-bulk_action-step-row-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-row-field-size){: #forms-bulk_action-step-row-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-row-field-visible?){: #forms-bulk_action-step-row-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-step-row-field-type){: #forms-bulk_action-step-row-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.step.row.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-step-row-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-row-combobox-name){: #forms-bulk_action-step-row-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-row-combobox-label){: #forms-bulk_action-step-row-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-row-combobox-description){: #forms-bulk_action-step-row-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-row-combobox-autofocus){: #forms-bulk_action-step-row-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-row-combobox-path){: #forms-bulk_action-step-row-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-row-combobox-size){: #forms-bulk_action-step-row-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-row-combobox-visible?){: #forms-bulk_action-step-row-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-step-row-combobox-read_action){: #forms-bulk_action-step-row-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-step-row-combobox-search){: #forms-bulk_action-step-row-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-step-row-combobox-filter){: #forms-bulk_action-step-row-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-step-row-combobox-sort){: #forms-bulk_action-step-row-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-step-row-combobox-limit){: #forms-bulk_action-step-row-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-step-row-combobox-label_key){: #forms-bulk_action-step-row-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-step-row-combobox-value_key){: #forms-bulk_action-step-row-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.step.row.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-row-combobox-argument-name){: #forms-bulk_action-step-row-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-step-row-combobox-argument-value){: #forms-bulk_action-step-row-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.step.row.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-row-select-name){: #forms-bulk_action-step-row-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-row-select-label){: #forms-bulk_action-step-row-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-row-select-description){: #forms-bulk_action-step-row-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-row-select-autofocus){: #forms-bulk_action-step-row-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-row-select-path){: #forms-bulk_action-step-row-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-row-select-size){: #forms-bulk_action-step-row-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-row-select-visible?){: #forms-bulk_action-step-row-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-step-row-select-prompt){: #forms-bulk_action-step-row-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-step-row-select-options){: #forms-bulk_action-step-row-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.step.row.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-row-input-name){: #forms-bulk_action-step-row-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-step-row-input-type){: #forms-bulk_action-step-row-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-row-input-label){: #forms-bulk_action-step-row-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-row-input-description){: #forms-bulk_action-step-row-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-row-input-autofocus){: #forms-bulk_action-step-row-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-row-input-path){: #forms-bulk_action-step-row-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-row-input-size){: #forms-bulk_action-step-row-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-row-input-visible?){: #forms-bulk_action-step-row-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+### forms.bulk_action.step.row.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-step-row-compound-field)
+ * [combobox](#forms-bulk_action-step-row-compound-combobox)
+   * argument
+ * [select](#forms-bulk_action-step-row-compound-select)
+ * [input](#forms-bulk_action-step-row-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-row-compound-label){: #forms-bulk_action-step-row-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-bulk_action-step-row-compound-description){: #forms-bulk_action-step-row-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-bulk_action-step-row-compound-show_labels?){: #forms-bulk_action-step-row-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-bulk_action-step-row-compound-visible?){: #forms-bulk_action-step-row-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.step.row.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-row-compound-field-name){: #forms-bulk_action-step-row-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-row-compound-field-label){: #forms-bulk_action-step-row-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-row-compound-field-description){: #forms-bulk_action-step-row-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-row-compound-field-autofocus){: #forms-bulk_action-step-row-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-row-compound-field-path){: #forms-bulk_action-step-row-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-row-compound-field-size){: #forms-bulk_action-step-row-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-row-compound-field-visible?){: #forms-bulk_action-step-row-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-step-row-compound-field-type){: #forms-bulk_action-step-row-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.step.row.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-step-row-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-row-compound-combobox-name){: #forms-bulk_action-step-row-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-row-compound-combobox-label){: #forms-bulk_action-step-row-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-row-compound-combobox-description){: #forms-bulk_action-step-row-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-row-compound-combobox-autofocus){: #forms-bulk_action-step-row-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-row-compound-combobox-path){: #forms-bulk_action-step-row-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-row-compound-combobox-size){: #forms-bulk_action-step-row-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-row-compound-combobox-visible?){: #forms-bulk_action-step-row-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-step-row-compound-combobox-read_action){: #forms-bulk_action-step-row-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-step-row-compound-combobox-search){: #forms-bulk_action-step-row-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-step-row-compound-combobox-filter){: #forms-bulk_action-step-row-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-step-row-compound-combobox-sort){: #forms-bulk_action-step-row-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-step-row-compound-combobox-limit){: #forms-bulk_action-step-row-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-step-row-compound-combobox-label_key){: #forms-bulk_action-step-row-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-step-row-compound-combobox-value_key){: #forms-bulk_action-step-row-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.step.row.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-row-compound-combobox-argument-name){: #forms-bulk_action-step-row-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-step-row-compound-combobox-argument-value){: #forms-bulk_action-step-row-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.step.row.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-row-compound-select-name){: #forms-bulk_action-step-row-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-row-compound-select-label){: #forms-bulk_action-step-row-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-row-compound-select-description){: #forms-bulk_action-step-row-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-row-compound-select-autofocus){: #forms-bulk_action-step-row-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-row-compound-select-path){: #forms-bulk_action-step-row-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-row-compound-select-size){: #forms-bulk_action-step-row-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-row-compound-select-visible?){: #forms-bulk_action-step-row-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-step-row-compound-select-prompt){: #forms-bulk_action-step-row-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-step-row-compound-select-options){: #forms-bulk_action-step-row-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.step.row.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-row-compound-input-name){: #forms-bulk_action-step-row-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-step-row-compound-input-type){: #forms-bulk_action-step-row-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-row-compound-input-label){: #forms-bulk_action-step-row-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-row-compound-input-description){: #forms-bulk_action-step-row-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-row-compound-input-autofocus){: #forms-bulk_action-step-row-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-row-compound-input-path){: #forms-bulk_action-step-row-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-row-compound-input-size){: #forms-bulk_action-step-row-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-row-compound-input-visible?){: #forms-bulk_action-step-row-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Row`
+
+### forms.bulk_action.step.compound
+```elixir
+compound label
+```
+
+
+One value made of two or more tiny inputs.
+
+### Nested DSLs
+ * [field](#forms-bulk_action-step-compound-field)
+ * [combobox](#forms-bulk_action-step-compound-combobox)
+   * argument
+ * [select](#forms-bulk_action-step-compound-select)
+ * [input](#forms-bulk_action-step-compound-input)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-compound-label){: #forms-bulk_action-step-compound-label .spark-required} | `String.t` |  | The name of the value. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#forms-bulk_action-step-compound-description){: #forms-bulk_action-step-compound-description } | `String.t` |  | Help text for the value. |
+| [`show_labels?`](#forms-bulk_action-step-compound-show_labels?){: #forms-bulk_action-step-compound-show_labels? } | `boolean` | `false` | Show the labels of the parts. If `false`, they are only for assistive technology. |
+| [`visible?`](#forms-bulk_action-step-compound-visible?){: #forms-bulk_action-step-compound-visible? } | `any` |  | Conditional visibility: an Ash expression. |
+
+
+### forms.bulk_action.step.compound.field
+```elixir
+field name
+```
+
+
+A form input for an attribute or an argument of the action.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-compound-field-name){: #forms-bulk_action-step-compound-field-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-compound-field-label){: #forms-bulk_action-step-compound-field-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-compound-field-description){: #forms-bulk_action-step-compound-field-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-compound-field-autofocus){: #forms-bulk_action-step-compound-field-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-compound-field-path){: #forms-bulk_action-step-compound-field-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-compound-field-size){: #forms-bulk_action-step-compound-field-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-compound-field-visible?){: #forms-bulk_action-step-compound-field-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`type`](#forms-bulk_action-step-compound-field-type){: #forms-bulk_action-step-compound-field-type } | `atom` | `:default` | The input type. `:default` is inferred from the Ash type. For example `:textarea`, `:checkbox`, `:toggle`, `:password`, `:email`, `:attachment`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Field`
+
+### forms.bulk_action.step.compound.combobox
+```elixir
+combobox name
+```
+
+
+A form input that searches for its value.
+
+### Nested DSLs
+ * [argument](#forms-bulk_action-step-compound-combobox-argument)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-compound-combobox-name){: #forms-bulk_action-step-compound-combobox-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-compound-combobox-label){: #forms-bulk_action-step-compound-combobox-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-compound-combobox-description){: #forms-bulk_action-step-compound-combobox-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-compound-combobox-autofocus){: #forms-bulk_action-step-compound-combobox-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-compound-combobox-path){: #forms-bulk_action-step-compound-combobox-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-compound-combobox-size){: #forms-bulk_action-step-compound-combobox-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-compound-combobox-visible?){: #forms-bulk_action-step-compound-combobox-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`read_action`](#forms-bulk_action-step-compound-combobox-read_action){: #forms-bulk_action-step-compound-combobox-read_action } | `atom` |  | The read action of the searched resource. Defaults to its primary read action. Its own filter, preparations, and policies apply. |
+| [`search`](#forms-bulk_action-step-compound-combobox-search){: #forms-bulk_action-step-compound-combobox-search } | `list(atom) \| false` |  | The fields that the typed text matches (`contains`, joined with `or`). Defaults to `[label_key]`. `false` when `filter` uses `^search()` or an `argument` uses `search()`. |
+| [`filter`](#forms-bulk_action-step-compound-combobox-filter){: #forms-bulk_action-step-compound-combobox-filter } | `any` |  | An additional filter (an Ash expression), joined with `and`. It can use `^search()`, `^input(:name)`, and `^actor(...)`. |
+| [`sort`](#forms-bulk_action-step-compound-combobox-sort){: #forms-bulk_action-step-compound-combobox-sort } | `keyword` |  | The order of the options. Defaults to `[{label_key, :asc}]`. |
+| [`limit`](#forms-bulk_action-step-compound-combobox-limit){: #forms-bulk_action-step-compound-combobox-limit } | `pos_integer` | `20` | The maximum number of options, from 1 to 100. |
+| [`label_key`](#forms-bulk_action-step-compound-combobox-label_key){: #forms-bulk_action-step-compound-combobox-label_key } | `atom` |  | The text of an option. Select mode: defaults to the `default_label` of the destination. Free text: always `value_key`. |
+| [`value_key`](#forms-bulk_action-step-compound-combobox-value_key){: #forms-bulk_action-step-compound-combobox-value_key } | `atom` |  | The value of an option. Select mode: defaults to the primary key of the destination. Free text: defaults to the name of the field. |
+
+
+### forms.bulk_action.step.compound.combobox.argument
+```elixir
+argument name, value
+```
+
+
+An input for one argument of the `read_action` of a combobox.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-compound-combobox-argument-name){: #forms-bulk_action-step-compound-combobox-argument-name .spark-required} | `atom` |  | The name of the argument of `read_action`. |
+| [`value`](#forms-bulk_action-step-compound-combobox-argument-value){: #forms-bulk_action-step-compound-combobox-argument-value .spark-required} | `any` |  | A literal, or a template: `search()`, `input(:name)`, `actor(:field)`, or `arg(:name)` (no `^`). |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox.Argument`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Combobox`
+
+### forms.bulk_action.step.compound.select
+```elixir
+select name
+```
+
+
+A form input for a closed set of values.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-compound-select-name){: #forms-bulk_action-step-compound-select-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-compound-select-label){: #forms-bulk_action-step-compound-select-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-compound-select-description){: #forms-bulk_action-step-compound-select-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-compound-select-autofocus){: #forms-bulk_action-step-compound-select-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-compound-select-path){: #forms-bulk_action-step-compound-select-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-compound-select-size){: #forms-bulk_action-step-compound-select-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-compound-select-visible?){: #forms-bulk_action-step-compound-select-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+| [`prompt`](#forms-bulk_action-step-compound-select-prompt){: #forms-bulk_action-step-compound-select-prompt } | `String.t` |  | The text of the empty option. |
+| [`options`](#forms-bulk_action-step-compound-select-options){: #forms-bulk_action-step-compound-select-options } | `list(any)` |  | Explicit options: values, or `{label, value}` tuples. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Select`
+
+### forms.bulk_action.step.compound.input
+```elixir
+input name, type
+```
+
+
+A form input with an app input type.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#forms-bulk_action-step-compound-input-name){: #forms-bulk_action-step-compound-input-name .spark-required} | `atom` |  | The attribute or argument of the action. |
+| [`type`](#forms-bulk_action-step-compound-input-type){: #forms-bulk_action-step-compound-input-type .spark-required} | `module` |  | The input type: a module that implements `PyroManiac.Form.InputType`, or `{module, options}`. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#forms-bulk_action-step-compound-input-label){: #forms-bulk_action-step-compound-input-label } | `String.t` |  | The label of the input (defaults to the capitalized name). |
+| [`description`](#forms-bulk_action-step-compound-input-description){: #forms-bulk_action-step-compound-input-description } | `String.t \| :inherit` |  | Help text for the input (defaults to the description of the attribute or argument). |
+| [`autofocus`](#forms-bulk_action-step-compound-input-autofocus){: #forms-bulk_action-step-compound-input-autofocus } | `boolean` | `false` | Focus this input when the form opens. Exactly one input of an action has it. |
+| [`path`](#forms-bulk_action-step-compound-input-path){: #forms-bulk_action-step-compound-input-path } | `list(atom)` | `[]` | A relative path of relationships. The input is in the nested form of that path, with no group. |
+| [`size`](#forms-bulk_action-step-compound-input-size){: #forms-bulk_action-step-compound-input-size } | `:auto \| :code \| :term \| :name \| :phrase \| :prose` | `:auto` | The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints. |
+| [`visible?`](#forms-bulk_action-step-compound-input-visible?){: #forms-bulk_action-step-compound-input-visible? } | `any` |  | Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`. |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Input`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Form.Compound`
 
 
 

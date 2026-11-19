@@ -138,8 +138,8 @@ must declare `type:`. View types and their characteristic entities:
 - `:calendar` — keyed on `date_field` (+ optional `end_date_field`, `granularity`)
 - `:gantt` — `start_field`, `end_field`, optional `progress_field`/`group_by`
 - `:kanban` — `group_by`, `kanban_action`, `priority`
-- `:list` — optional `parent_field` for tree, `indent_class`
-- `:render` — custom `render` fn, or `component` + `props` + `loads`
+- `:list` — optional `parent_field` for tree
+- `:render` — a `render` module, or `component` + `props` + `loads`
 - `:delegated` — `delegate_to` another PyroManiac module (required for this type, forbidden elsewhere)
 
 Views are recursive (`recursive_as: :views`) — nest to drill into
@@ -151,24 +151,44 @@ action when the nested view has an explicit `resource:` but no
 
 ### `forms` section
 
-Section schema: `class`, `description`, `exclude`, `extra_form_types`.
+The DSL declares meaning, not styles: no `class` options and no
+functions anywhere. See `forms.md` for the details.
 
-`action :name do ... end` — single-record forms. Schema: `class`,
-`description`, `label`, `name` (required, atom or list), `resource`
-(cross-resource), `delegate_to` (mutually exclusive with inline fields).
+Section schema: `description`, `exclude`.
+
+`action :name do ... end` — single-record forms. Schema: `description`,
+`label`, `max_columns`, `name` (required, atom or list), `resource`
+(cross-resource), `delegate_to` (mutually exclusive with inline items).
 
 `bulk_action :name do ... end` — multi-record forms. Adds
 `set_all_fields?` (default `false`).
 
-Field entities (in `action`, `bulk_action`, `field_group`, or `step`):
+Input entities (common options: `label`, `description`, `autofocus`,
+`path`, `size` (`:auto`/`:code`/`:term`/`:name`/`:phrase`/`:prose`),
+`visible?` (an Ash expression; `parent(field)` refers to the level above)):
 
-- `field :name do ... end` — `type` (default `:default`, extensible via
-  `extra_form_types`), `label`, `description`, `options`, `prompt`,
-  `class`, `input_class`, `path`, `autofocus`, `form_only?`, `when`
-  (1-arity predicate), autocomplete keys.
-- `field_group "Label" do ... end` — recursive; `class`, `path`, `when`.
-- `step :name do ... end` — wizard steps; `label`, `path`, `render_fn`,
-  `review?`, `when`.
+- `field :name` — a native control; `type` (default `:default`, inferred).
+  A `field` on a `belongs_to` foreign key or on a closed set of values is
+  a compile error.
+- `select :name` — a closed set of values (`one_of`, `Ash.Type.Enum`, a
+  new type of them, arrays); `prompt`, `options`.
+- `combobox :name` — a foreign key (select mode) or a `:string` /
+  `:ci_string` (free-text suggestions). Inline query: `read_action`,
+  `argument :name, value` entities, `search`, `filter` (`^search()`,
+  `^input(:name)`), `sort`,
+  `limit`, `label_key`, `value_key`. Validated at compile time.
+- `input :name, Module` or `{Module, opts}` — a custom
+  `PyroManiac.Form.InputType`.
+
+Layout entities:
+
+- `group "Label" do ... end` — recursive; `description`, `path`,
+  `density`, `max_columns`, `collapsible?`, `collapsed?`, `visible?`.
+- `row do ... end` — layout only: inputs on one line (2+ children).
+- `compound "Label" do ... end` — one value of tiny inputs (a value and
+  its unit): a legend and one error list; `show_labels?`.
+- `step :name do ... end` — wizard steps; `label`, `path`, `render`
+  (a module), `review?`, `density`, `max_columns`, `visible?`.
 - `set :name, :source` — only inside `action`; cross-resource form
   parent → child mapping.
 
@@ -249,7 +269,12 @@ Do not read persisted Spark keys (`:views_by_action_and_type`,
 - `default_label` pointing at a relationship — renderers cannot stringify it.
 - Multiple of `page`/`module`/`href` on one nav item — validator rejects.
 - `set` inside a `bulk_action` — only valid inside `action`.
-- Adding a custom field `type:` without listing it in
-  `extra_form_types` on the `forms` section.
+- `field` on a foreign key or an enum (use `combobox` / `select`), or an
+  unknown `type:` (use an `input` type module).
+- A `class`, `input_class`, `cell_class`, or `render_fn` option, or a
+  function for `visible?`/`render`. Use `size`, `density`, `tone`, an Ash
+  expression, or a render module.
+- A read action on a resource only for a combobox. Declare the query in
+  the combobox.
 - Mixing `delegate_to` with inline fields/groups/steps on `action`/
   `bulk_action` — they're mutually exclusive.

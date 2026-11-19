@@ -12,5 +12,7 @@ defmodule Brewery.Domain do
     resource Brewery.QualityTest
     resource Brewery.StorageBlob
     resource Brewery.StorageAttachment
+    resource Brewery.Shipment
+    resource Brewery.ShipmentLine
   end
 end

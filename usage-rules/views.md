@@ -50,17 +50,20 @@ Top-level schema (selected; see `PyroManiac.View.View` for the full set):
 | `lazy?`                                    | boolean (default `true`)           | Load nested view data only when expanded                                     |
 | `multiple?`                                | boolean (default `false`)          | Allow multiple rows expanded simultaneously                                  |
 | `selectable?`                              | boolean (default `true`)           | Enable row selection (data_table only)                                       |
-| `class`, `body_class`, `header_class`, ... | css class                          | Pass-through styling hooks for the renderer                                  |
+
+The DSL has no `class` options and no functions. A renderer maps the
+meaning (`tone`, `size`) to its own styles, and a `render` option takes a
+**render module** of the renderer (for LiveView, a module that implements
+`PyroManiac.LiveView.Render`).
 
 Type-specific keys:
 
-- `:data_table` — `default_display`, `selectable?`, `body_class`, `header_class`, `footer_class`, `caption_class`, etc.
-- `:grid` — `grid_class`
-- `:kanban` — `group_by`, `lane_class`, `kanban_action`, `priority`
+- `:data_table` — `default_display`, `selectable?`
+- `:kanban` — `group_by`, `kanban_action`, `priority`
 - `:calendar` — `date_field`, `end_date_field`, `granularity` (`:day`/`:week`/`:month`)
 - `:gantt` — `start_field`, `end_field`, `progress_field`, `group_by`
-- `:list` — `parent_field`, `indent_class`
-- `:render` — `render` (function), or `component`+`component_id_suffix`+`props`+`loads`
+- `:list` — `parent_field`
+- `:render` — `render` (a render module), or `component`+`component_id_suffix`+`props`+`loads`
 - `:delegated` — `delegate_to` (the sub-Viewer's PyroManiac module). Required for `:delegated`, forbidden otherwise.
 
 ## Nested views
@@ -90,7 +93,11 @@ Columns are interactive — users sort, filter, hide, and reorder them.
 column :name
 column :status do
   filterable? true
-  cell_class "whitespace-nowrap"
+  tone expr(cond do
+    status == :overdue -> :danger
+    status == :due_soon -> :warning
+    true -> nil
+  end)
 end
 ```
 
@@ -104,9 +111,9 @@ end
 | `sortable?`                  | `true`         | Auto-disabled if technically unsortable                               |
 | `keyset_sortable?`           | `true`         | Auto-disabled if technically unsortable                               |
 | `filterable?`                | `true`         | Auto-disabled if technically unfilterable                             |
-| `edit_with`                  | nil            | `:type`, `{action, type}`, render fn, or `nil` to disable inline edit |
-| `cell_class`, `header_class` | nil            | Renderer style hooks                                                  |
-| `render_cell_data`           | default        | Render function for the cell value                                    |
+| `edit_with`                  | nil            | `:type`, `{action, type}`, or `nil` to disable inline edit            |
+| `tone`                       | nil            | A tone, or an Ash expression that gives a tone or `nil` (see below)   |
+| `render`                     | nil            | A render module for the cell (default: `render_cell_data/1`)          |
 
 ## `field` (non-table views)
 
@@ -126,9 +133,10 @@ end
 | `name`       | required  | Attribute/calculation/aggregate                         |
 | `label`      | humanized | Display label                                           |
 | `source`     | `[name]`  | Path; allows traversal                                  |
-| `class`      | nil       | CSS classes                                             |
+| `size`       | `:auto`   | The content role, as in forms (`:code` … `:prose`)      |
+| `tone`       | nil       | A tone, or an Ash expression (see below)                |
 | `empty_text` | `"—"`     | Shown when value is nil/unloaded                        |
-| `render`     | nil       | Render function; receives `:record`, `:field`, `:value` |
+| `render`     | nil       | A render module for the value                           |
 
 ## `section` (grid views)
 
@@ -157,10 +165,9 @@ end
 | Key            | Default           | Notes                                             |
 | -------------- | ----------------- | ------------------------------------------------- |
 | `name`         | required (string) | Section heading                                   |
-| `class`        | nil               | CSS classes                                       |
 | `collapsible?` | `false`           | User can collapse/expand                          |
 | `collapsed?`   | `false`           | Starts collapsed (only with `collapsible?: true`) |
-| `render`       | nil               | Override the entire section's rendering           |
+| `render`       | nil               | A render module for the entire section            |
 
 ## `relationship` (within a section)
 
@@ -183,7 +190,22 @@ end
 | `limit`      | nil       | Maximum related records to display                               |
 | `link?`      | `true`    | Link records to their show page                                  |
 | `empty_text` | `"None"`  | Shown when no related records                                    |
-| `render`     | nil       | Render function; receives `:record`, `:relationship`, `:related` |
+| `render`     | nil       | A render module for the related records                          |
+
+## `tone`
+
+A column or a view field can have a `tone`: the meaning of the value, not
+a color. The tones are `:neutral`, `:info`, `:success`, `:warning`, and
+`:danger`. The value is a tone or an Ash expression that gives a tone or
+`nil`. The refs of the expression are validated at compile time and loaded
+with the rows (they can be calculations or aggregates). A navigation item
+or group has a `tone` too (a tone only).
+
+```elixir
+column :calibration_due_on do
+  tone expr(if calibration_due_on < today(), do: :danger)
+end
+```
 
 ## `set` (cross-resource views)
 
@@ -216,3 +238,6 @@ end
 - Forgetting `delegate_to` on a `:delegated` view (required) or supplying
   it on any other type (forbidden).
 - Using `set` without an explicit `resource` on the nested view (no effect).
+- A `class`, `cell_class`, `header_class`, or `render_cell_data` option, or a
+  function for `render`. They are removed: use `tone`, `size`, or a render
+  module.

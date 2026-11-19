@@ -14,10 +14,6 @@ defmodule PyroManiac.View.Relationship do
       fields: [PyroManiac.View.Field]
     ],
     schema: [
-      class: [
-        doc: "CSS classes for this relationship display.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
       display: [
         default: :list,
         doc:
@@ -49,8 +45,8 @@ defmodule PyroManiac.View.Relationship do
       ],
       render: [
         doc:
-          "Custom render function. Receives assigns with `:record`, `:relationship`, and `:related`.",
-        type: PyroManiac.Dsl.Type.render_fn()
+          "A render module for the related records. The renderer requires its render behaviour.",
+        type: PyroManiac.Dsl.Type.render_module()
       ]
     ],
     transform: {__MODULE__, :__set_defaults__, []}

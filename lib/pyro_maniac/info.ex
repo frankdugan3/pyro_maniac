@@ -3,7 +3,7 @@ defmodule PyroManiac.Info do
   Helpers to introspect `PyroManiac` modules. Intended for use in components that automatically build UI from resource configuration.
   """
 
-  alias PyroManiac.Form.{Action, BulkAction, FieldGroup}
+  alias PyroManiac.Form.{Action, BulkAction, Tree}
   alias PyroManiac.Page.ExtraAction
   alias PyroManiac.Search
   alias PyroManiac.TypeInfer
@@ -283,28 +283,101 @@ defmodule PyroManiac.Info do
   end
 
   @doc """
-  Builds the list of relationship loads required by a form action's field groups.
+  Builds the list of relationship loads required by the nested forms of a
+  form action: each distinct full path of a group, a step, or an input.
   """
   @spec loads_for_form(Action.t()) :: [atom() | {atom(), any()}]
   def loads_for_form(%Action{fields: fields}) do
-    collect_field_group_loads(fields)
+    fields
+    |> Tree.all()
+    |> Enum.map(&(Map.get(&1, :__full_path__) || []))
+    |> Enum.reject(&(&1 == []))
+    |> Enum.uniq()
+    |> Enum.map(&nest_load(&1, []))
   end
 
   def loads_for_form(_), do: []
 
-  defp collect_field_group_loads(fields) do
-    fields
-    |> Enum.flat_map(fn
-      %FieldGroup{fields: children, path: [_ | _] = path} ->
-        child_loads = collect_field_group_loads(children)
-        [nest_load(path, []) | child_loads]
+  @doc """
+  All inputs of a form action (`field`, `combobox`, `select`, `input`), in
+  DSL order, through each group, step, row, and compound.
+  """
+  @spec form_fields(Action.t() | BulkAction.t()) :: [struct()]
+  def form_fields(%{fields: fields}), do: Tree.inputs(fields)
 
-      %FieldGroup{fields: children} ->
-        collect_field_group_loads(children)
+  @doc """
+  The layout of a form action as a plain tree of maps, for renderers that
+  are not in Elixir (for example AshTypescript extensions). It has no
+  functions and no structs, so it encodes as JSON. For `visible?`, a node has
+  `depends_on` (the attributes and arguments that the expression refers
+  to, and `%{parent: name}` for a `parent(name)` reference); the server
+  evaluates the expression.
+  """
+  @spec form_layout(Action.t() | BulkAction.t()) :: map()
+  def form_layout(%{fields: fields} = action) do
+    %{
+      kind: :form,
+      name: action.name,
+      label: action.label,
+      max_columns: action.max_columns,
+      children: Enum.map(fields, &layout_node/1)
+    }
+  end
 
-      _ ->
-        []
-    end)
+  defp layout_dependency({:parent, name}), do: %{parent: name}
+  defp layout_dependency(name), do: name
+
+  defp layout_node(%module{} = entity) do
+    kind =
+      module
+      |> Module.split()
+      |> List.last()
+      |> Macro.underscore()
+      |> String.to_existing_atom()
+
+    base = %{
+      kind: kind,
+      path: Map.get(entity, :__full_path__, []),
+      depends_on: entity |> Map.get(:__depends_on__, []) |> Enum.map(&layout_dependency/1),
+      conditional?: Map.get(entity, :visible?) != nil
+    }
+
+    layout =
+      entity
+      |> Map.take([
+        :name,
+        :label,
+        :description,
+        :size,
+        :type,
+        :density,
+        :max_columns,
+        :collapsible?,
+        :collapsed?,
+        :show_labels?,
+        :autofocus,
+        :prompt
+      ])
+      |> Map.reject(fn {_key, value} -> is_function(value) end)
+
+    extra =
+      case entity do
+        %{"__allow_nil?__": allow_nil?} -> %{required?: not allow_nil?}
+        _ -> %{}
+      end
+
+    extra =
+      case entity do
+        %{__enum_options__: [_ | _] = options} -> Map.put(extra, :options, options)
+        _ -> extra
+      end
+
+    children =
+      if Tree.container?(entity),
+        do: %{children: Enum.map(Tree.children(entity), &layout_node/1)},
+        else: %{}
+
+    base |> Map.merge(layout) |> Map.merge(extra) |> Map.merge(children)
   end
 
   defp nest_load([single], []), do: single
@@ -331,8 +404,28 @@ defmodule PyroManiac.Info do
     view
     |> do_build_loads_from_view(resource)
     |> merge_ensure_loaded(view)
+    |> with_tone_loads(view, resource)
     |> with_attachment_loads(resource)
   end
+
+  # The calculations and aggregates that `tone` expressions refer to.
+  defp with_tone_loads(loads, %View{} = view, resource) do
+    refs =
+      ((view.columns || []) ++
+         (view.fields || []) ++ Enum.flat_map(view.sections || [], &(&1.fields || [])))
+      |> Enum.flat_map(&(Map.get(&1, :__tone_refs__) || []))
+      |> Enum.uniq()
+      |> Enum.filter(fn name ->
+        match?(
+          %struct{} when struct in [Ash.Resource.Calculation, Ash.Resource.Aggregate],
+          Ash.Resource.Info.field(resource, name)
+        )
+      end)
+
+    Enum.uniq(List.wrap(loads) ++ refs)
+  end
+
+  defp with_tone_loads(loads, _view, _resource), do: loads
 
   defp merge_ensure_loaded(loads, %View{ensure_loaded: [_ | _] = ensure_loaded}) do
     Enum.uniq(loads ++ ensure_loaded)

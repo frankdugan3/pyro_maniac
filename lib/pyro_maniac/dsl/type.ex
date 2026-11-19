@@ -1,10 +1,10 @@
 defmodule PyroManiac.Dsl.Type do
   @moduledoc false
 
-  @css_class {:or, [nil, :string, {:fun, [:map], :string}]}
   @load {:list, {:or, [:atom, {:tuple, [:atom, :any]}]}}
   @pagination {:one_of, [:keyset, :offset, :none]}
-  @render_fn {:fun, [:map], :any}
+  @sizes [:auto, :code, :term, :name, :phrase, :prose]
+  @tones [:neutral, :info, :success, :warning, :danger]
   @sort {:or,
          [
            :string,
@@ -28,11 +28,6 @@ defmodule PyroManiac.Dsl.Type do
          ]}
 
   @doc """
-  Extra CSS classes. Will be appended to base classes. If a function, it will be passed the component assigns.
-  """
-  def css_class, do: @css_class
-
-  @doc """
   Inheritable types will inherit from parent DSL if not defined, falling back to the Ash resource DSL where applicable.
   """
   def inheritable(type), do: {:or, [type, {:one_of, [:inherit]}]}
@@ -43,10 +38,10 @@ defmodule PyroManiac.Dsl.Type do
   - `nil` — not editable
   - `:text`, `:number`, etc. — input type using primary update action
   - `{:action_name, :input_type}` — specific action + input type
-  - render function — custom render function
+  - a render module — custom edit UI (see `render_module/0`)
   """
   def edit_with do
-    {:or, [nil, :atom, {:tuple, [:atom, :atom]}, @render_fn]}
+    {:or, [nil, :atom, {:tuple, [:atom, :atom]}]}
   end
 
   @doc """
@@ -75,9 +70,28 @@ defmodule PyroManiac.Dsl.Type do
   def on_destroy, do: {:or, [nil, {:one_of, [:none, :remove, :reload, :notify]}]}
 
   @doc """
-  A render function to render the item. It will be passed assigns.
+  A render module. PyroManiac stores the module only. Each renderer requires
+  that the module implements its render behaviour (for the LiveView renderer,
+  `PyroManiac.LiveView.Render`).
   """
-  def render_fn, do: @render_fn
+  def render_module, do: :atom
+
+  @doc "The content role of an input. `:auto` is resolved by the transformer."
+  def size, do: {:one_of, @sizes}
+
+  @doc false
+  def sizes, do: @sizes
+
+  @doc "The density of a group or a step."
+  def density, do: {:one_of, [:normal, :dense]}
+
+  @doc "The meaning of a value. Each renderer maps it to its own style."
+  def tones, do: @tones
+
+  @doc """
+  An Ash expression, made with `expr/1`. The transformer validates it.
+  """
+  def expression, do: :any
 
   @doc """
   A validated Ash sort input. Supports string or keyword list syntax.

@@ -29,7 +29,6 @@ defmodule PyroManiac.Dsl.Transformers.ExpandViewArguments do
 
   defp expand(dsl, views) do
     context = %{
-      extra_form_types: Transformer.get_option(dsl, [:forms], :extra_form_types, []),
       module: Transformer.get_persisted(dsl, :module, nil),
       path_root: [:views]
     }
@@ -78,12 +77,17 @@ defmodule PyroManiac.Dsl.Transformers.ExpandViewArguments do
 
   defp read_action_name(%View{name: names}), do: names |> List.wrap() |> List.first()
 
+  # The transformer makes the input, so it selects the entity that fits the
+  # argument (a `select` for a closed set of values) instead of raising.
   defp argument_field(argument, view, action_name, context) do
-    [name: argument.name, label: default_label(argument.name), allow_nil?: argument.allow_nil?]
-    |> put_description(argument.description)
-    |> FieldResolver.new_field()
+    attrs =
+      [name: argument.name, label: default_label(argument.name)]
+      |> put_description(argument.description)
+
+    view.resource
+    |> FieldResolver.new_input_for(argument, attrs)
     |> FieldResolver.resolve(view.resource, action_name, context)
-    |> Map.put(:allow_nil?, argument.allow_nil?)
+    |> Map.put(:"__allow_nil?__", argument.allow_nil?)
   end
 
   defp put_description(opts, description) when is_binary(description) and description != "",

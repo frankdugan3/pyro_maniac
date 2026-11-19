@@ -16,10 +16,10 @@ defmodule PyroManiac.Dsl do
             doc: "Page title used for the document title and rendered as a page header."
           ],
           description: [
-            type: {:or, [:string, __MODULE__.Type.render_fn()]},
+            type: {:or, [:string, __MODULE__.Type.render_module()]},
             doc:
               "Optional page description rendered below the title. " <>
-                "Accepts a string or a render function that receives assigns."
+                "A string, or a render module (the renderer requires its render behaviour)."
           ],
           route: [
             type: :string,
@@ -64,10 +64,6 @@ defmodule PyroManiac.Dsl do
         ],
         name: :forms,
         schema: [
-          class: [
-            doc: "The default class for the form.",
-            type: __MODULE__.Type.css_class()
-          ],
           description: [
             doc: "The default description for forms.",
             type: __MODULE__.Type.inheritable(:string)
@@ -75,11 +71,6 @@ defmodule PyroManiac.Dsl do
           exclude: [
             default: [],
             doc: "The actions to exclude from forms.",
-            type: {:list, :atom}
-          ],
-          extra_form_types: [
-            default: [],
-            doc: "Additional field type atoms accepted by the form DSL.",
             type: {:list, :atom}
           ]
         ]

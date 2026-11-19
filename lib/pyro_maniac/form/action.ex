@@ -2,20 +2,26 @@ defmodule PyroManiac.Form.Action do
   @moduledoc """
   A form configuration for an Ash resource action.
   """
+  @moduledoc group: "PyroManiac"
 
   use PyroManiac.Dsl.Entity,
     name: :action,
     args: [:name],
-    describe: "Configure the appearance forms forms for specific action(s).",
+    describe: "Configure the forms for specific action(s).",
     entities: [
-      fields: [PyroManiac.Form.Field, PyroManiac.Form.FieldGroup, PyroManiac.Form.Step],
+      fields: [
+        PyroManiac.Form.Field,
+        PyroManiac.Form.Combobox,
+        PyroManiac.Form.Select,
+        PyroManiac.Form.Input,
+        PyroManiac.Form.Group,
+        PyroManiac.Form.Row,
+        PyroManiac.Form.Compound,
+        PyroManiac.Form.Step
+      ],
       sets: [PyroManiac.Form.Set]
     ],
     schema: [
-      class: [
-        doc: "Customize form classes.",
-        type: PyroManiac.Dsl.Type.css_class()
-      ],
       description: [
         doc: "The description for this form (defaults to action's description).",
         type: :string
@@ -23,6 +29,10 @@ defmodule PyroManiac.Form.Action do
       label: [
         doc: "The label for this form (defaults to capitalized name).",
         type: :string
+      ],
+      max_columns: [
+        doc: "The maximum number of columns of the form.",
+        type: :pos_integer
       ],
       name: [
         doc: "The action name(s) for this form.",

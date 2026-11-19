@@ -4,7 +4,7 @@ defmodule PyroManiac.AttachmentValidationTest do
   @moduledoc """
   The attachment upload field is required on a form action only when that action
   exposes an `Ash.Type.File` argument (single or list) — not for every AshStorage
-  attachment on the resource. A `form_only?` field never satisfies the requirement.
+  attachment on the resource. A field of another type never satisfies the requirement.
   """
   use ExUnit.Case, async: false
 
@@ -21,12 +21,12 @@ defmodule PyroManiac.AttachmentValidationTest do
 
       action :create do
         field :name, autofocus: true
-        field :style
+        select :style
         field :description
         field :target_abv
         field :target_og
         field :target_fg
-        field :status
+        select :status
       end
     end
   end
@@ -68,7 +68,7 @@ defmodule PyroManiac.AttachmentValidationTest do
   end
 
   test "a file argument surfaced as a non-attachment field is rejected" do
-    assert_dsl_error ~r/action :archive has a file argument :lab_reports but this form does not declare a \(non-`form_only\?`\) `type: :attachment` field for it/ do
+    assert_dsl_error ~r/action :archive has a file argument :lab_reports but this form does not declare a `type: :attachment` field for it/ do
       defmodule WrongFieldTypePage do
         @moduledoc false
         use PyroManiac, resource: Brewery.QualityTest

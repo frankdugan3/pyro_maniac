@@ -40,7 +40,7 @@ Declare a navigation link.
 |------|------|---------|------|
 | [`path`](#nav-item-path){: #nav-item-path } | `String.t` |  | URL path for `page` or `module` items (must start with `/`). |
 | [`label`](#nav-item-label){: #nav-item-label } | `String.t` |  | Display text. Auto-derived from name if omitted. |
-| [`class`](#nav-item-class){: #nav-item-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`tone`](#nav-item-tone){: #nav-item-tone } | `:neutral \| :info \| :success \| :warning \| :danger` |  | The meaning of the item: `:neutral`, `:info`, `:success`, `:warning`, or `:danger`. Each renderer maps it to its own style. |
 | [`icon`](#nav-item-icon){: #nav-item-icon } | `atom` |  | Icon name to be passed to the renderer. |
 | [`image`](#nav-item-image){: #nav-item-image } | `String.t` |  | Path or URL to an image (e.g. company logo). Mutually exclusive with `icon`. |
 | [`image_alt`](#nav-item-image_alt){: #nav-item-image_alt } | `String.t` |  | Alt text for the image. |
@@ -81,7 +81,7 @@ Declare a collapsible navigation group containing items and nested groups.
 | Name | Type | Default | Docs |
 |------|------|---------|------|
 | [`label`](#nav-group-label){: #nav-group-label } | `String.t` |  | Display text. Auto-derived from name if omitted. |
-| [`class`](#nav-group-class){: #nav-group-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`tone`](#nav-group-tone){: #nav-group-tone } | `:neutral \| :info \| :success \| :warning \| :danger` |  | The meaning of the group: `:neutral`, `:info`, `:success`, `:warning`, or `:danger`. Each renderer maps it to its own style. |
 | [`icon`](#nav-group-icon){: #nav-group-icon } | `atom` |  | Icon name to be passed to the renderer. |
 | [`image`](#nav-group-image){: #nav-group-image } | `String.t` |  | Path or URL to an image. Mutually exclusive with `icon`. |
 | [`image_alt`](#nav-group-image_alt){: #nav-group-image_alt } | `String.t` |  | Alt text for the image. |
@@ -111,7 +111,7 @@ Declare a navigation link.
 |------|------|---------|------|
 | [`path`](#nav-group-item-path){: #nav-group-item-path } | `String.t` |  | URL path for `page` or `module` items (must start with `/`). |
 | [`label`](#nav-group-item-label){: #nav-group-item-label } | `String.t` |  | Display text. Auto-derived from name if omitted. |
-| [`class`](#nav-group-item-class){: #nav-group-item-class } | `nil \| String.t \| (map -> String.t)` |  | Customize class. |
+| [`tone`](#nav-group-item-tone){: #nav-group-item-tone } | `:neutral \| :info \| :success \| :warning \| :danger` |  | The meaning of the item: `:neutral`, `:info`, `:success`, `:warning`, or `:danger`. Each renderer maps it to its own style. |
 | [`icon`](#nav-group-item-icon){: #nav-group-item-icon } | `atom` |  | Icon name to be passed to the renderer. |
 | [`image`](#nav-group-item-image){: #nav-group-item-image } | `String.t` |  | Path or URL to an image (e.g. company logo). Mutually exclusive with `icon`. |
 | [`image_alt`](#nav-group-item-image_alt){: #nav-group-item-image_alt } | `String.t` |  | Alt text for the image. |
