@@ -1,6 +1,7 @@
 import Config
 
 config :ash, :custom_expressions, [PyroManiac.KanBan.Expressions.FractionalKeyBetween]
+config :ash, :default_string_length_count, :codepoints
 
 config :spark, :formatter,
   remove_parens?: true,

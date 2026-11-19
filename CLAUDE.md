@@ -125,6 +125,14 @@ _A declarative, extensible framework for building Elixir applications._
 ## ash:relationships usage
 [ash:relationships usage rules](deps/ash/usage-rules/relationships.md)
 <!-- ash:relationships-end -->
+<!-- ash:signals-start -->
+## ash:signals usage
+[ash:signals usage rules](deps/ash/usage-rules/signals.md)
+<!-- ash:signals-end -->
+<!-- ash:temporal-start -->
+## ash:temporal usage
+[ash:temporal usage rules](deps/ash/usage-rules/temporal.md)
+<!-- ash:temporal-end -->
 <!-- ash:testing-start -->
 ## ash:testing usage
 [ash:testing usage rules](deps/ash/usage-rules/testing.md)
@@ -171,6 +179,12 @@ _The PostgreSQL data layer for Ash Framework_
 ## ash_postgres:multitenancy usage
 [ash_postgres:multitenancy usage rules](deps/ash_postgres/usage-rules/multitenancy.md)
 <!-- ash_postgres:multitenancy-end -->
+<!-- ex_check-start -->
+## ex_check usage
+_ex_check_
+
+[ex_check usage rules](deps/ex_check/usage-rules.md)
+<!-- ex_check-end -->
 <!-- igniter-start -->
 ## igniter usage
 _A code generation and project patching framework_
