@@ -114,7 +114,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
       expected = """
       [PyroManiac.DslErrors.FormsTest.MissingActions]
       forms defined in <FILE:LINE>:
-        the following :create/:update actions are not defined or excluded: [:update, :activate, :retire]
+        the following exposed :create/:update actions are not defined or excluded: [:update, :activate, :retire]
 
         Fix: either define `action` blocks for these actions, or add them to `exclude([...])`
       │

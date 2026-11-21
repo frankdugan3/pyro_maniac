@@ -196,11 +196,10 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
     validate_action_exists(view, resource, module)
     validate_no_duplicate_columns(view, module)
     validate_all_columns_valid(view, resource, module)
-    validate_all_public_included(view, resource, module)
+    validate_all_exposed_included(view, resource, module)
     validate_default_displays_valid(view, module)
     validate_default_sorts_valid(view, resource, module)
     validate_edit_with_valid(view, resource, module)
-    validate_realtime_pubsub(view, resource, module)
     validate_nested_views(view, module)
   end
 
@@ -453,76 +452,66 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
     end
   end
 
-  defp validate_all_public_included(
+  # Each exposed field of the read actions of the view is a column, or it is
+  # excluded. Refer to `PyroManiac.Resource.Expose`.
+  defp validate_all_exposed_included(
          %View{columns: columns, exclude: exclude} = view,
          resource,
          module
        ) do
     excluded = MapSet.new(exclude || [])
-    location = Entity.anno(view)
 
-    root_defined =
-      columns
-      |> Enum.reduce(MapSet.new(), fn
-        %Column{source: [key]}, acc -> MapSet.put(acc, key)
-        _, acc -> acc
-      end)
+    root = for %Column{source: [key]} <- columns, into: excluded, do: key
 
-    root = MapSet.union(excluded, root_defined)
-
-    nested_defined =
-      columns
-      |> Enum.reduce(MapSet.new(), fn
-        %Column{source: [head | _]}, acc -> MapSet.put(acc, head)
-        _, acc -> acc
-      end)
-
-    nested = MapSet.union(excluded, nested_defined)
-
-    for field <- Resource.Info.public_attributes(resource),
-        !MapSet.member?(root, field.name) do
-      Error.raise!(
-        module: module,
-        location: location,
-        path: [:views, :view, hd(view.name)],
-        why: "public attribute #{inspect(field.name)} is not a defined or excluded column",
-        fix: "either add `column #{inspect(field.name)}` or list it in `exclude([...])`"
+    # A column traversing a relationship, or a nested view on it, shows it.
+    nested =
+      for(%Column{source: [head | _]} <- columns, into: excluded, do: head)
+      |> MapSet.union(
+        for %View{relationship: rel} <- view.views || [], rel, into: MapSet.new(), do: rel
       )
-    end
 
-    for field <- Resource.Info.public_calculations(resource),
-        !MapSet.member?(root, field.name) do
-      Error.raise!(
-        module: module,
-        location: location,
-        path: [:views, :view, hd(view.name)],
-        why: "public calculation #{inspect(field.name)} is not a defined or excluded column",
-        fix: "either add `column #{inspect(field.name)}` or list it in `exclude([...])`"
-      )
-    end
+    for name <- exposed_fields(view, resource) do
+      {kind, shown} =
+        if Resource.Info.relationship(resource, name),
+          do: {:relationship, nested},
+          else: {:field, root}
 
-    for field <- Resource.Info.public_aggregates(resource),
-        !MapSet.member?(root, field.name) do
-      Error.raise!(
-        module: module,
-        location: location,
-        path: [:views, :view, hd(view.name)],
-        why: "public aggregation #{inspect(field.name)} is not a defined or excluded column",
-        fix: "either add `column #{inspect(field.name)}` or list it in `exclude([...])`"
-      )
+      if !MapSet.member?(shown, name), do: raise_not_included(view, name, kind, module)
     end
+  end
 
-    for field <- Resource.Info.public_relationships(resource),
-        !MapSet.member?(nested, field.name) do
-      Error.raise!(
-        module: module,
-        location: location,
-        path: [:views, :view, hd(view.name)],
-        why: "public relationship #{inspect(field.name)} is not a defined or excluded column",
-        fix:
-          "either add a column traversing #{inspect(field.name)}, or list it in `exclude([...])`"
-      )
-    end
+  defp raise_not_included(view, name, :relationship, module) do
+    Error.raise!(
+      module: module,
+      location: Entity.anno(view),
+      path: [:views, :view, hd(view.name)],
+      why: "exposed relationship #{inspect(name)} is not a defined or excluded column",
+      fix: "either add a column traversing #{inspect(name)}, or list it in `exclude([...])`"
+    )
+  end
+
+  defp raise_not_included(view, name, :field, module) do
+    Error.raise!(
+      module: module,
+      location: Entity.anno(view),
+      path: [:views, :view, hd(view.name)],
+      why: "exposed field #{inspect(name)} is not a defined or excluded column",
+      fix: "either add `column #{inspect(name)}` or list it in `exclude([...])`"
+    )
+  end
+
+  # The first field of each path of the exposed loads of the read actions of
+  # the view.
+  defp exposed_fields(%View{name: names}, resource) do
+    names
+    |> List.wrap()
+    |> Enum.flat_map(fn name ->
+      case PyroManiac.Resource.Info.exposed(resource, name) do
+        nil -> []
+        expose -> PyroManiac.Surface.top_level(expose.loads)
+      end
+    end)
+    |> Enum.uniq()
   end
 
   defp validate_default_displays_valid(%View{default_display: nil}, _module), do: :ok
@@ -719,43 +708,6 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
           "either add #{inspect(column.name)} to the action's `accept` list, " <>
             "or pick an action that accepts it"
       )
-    end
-  end
-
-  defp validate_realtime_pubsub(%View{} = view, resource, module) do
-    has_realtime? =
-      view.on_create not in [nil, :none] ||
-        view.on_update not in [nil, :none] ||
-        view.on_destroy not in [nil, :none]
-
-    if has_realtime? do
-      prefix = Ash.Notifier.PubSub.Info.prefix(resource)
-
-      if is_nil(prefix) do
-        Error.raise!(
-          module: module,
-          location: Entity.anno(view),
-          path: [:views, :view, hd(view.name)],
-          why:
-            "view has realtime options (on_create/on_update/on_destroy) but the resource " <>
-              "#{inspect(resource)} does not have a pub_sub configuration with a prefix",
-          fix: "add a `pub_sub do prefix \"...\" end` block to the resource"
-        )
-      end
-
-      pubsub_module = Ash.Notifier.PubSub.Info.module(resource)
-
-      if is_nil(pubsub_module) do
-        Error.raise!(
-          module: module,
-          location: Entity.anno(view),
-          path: [:views, :view, hd(view.name)],
-          why:
-            "view has realtime options but the resource #{inspect(resource)} does not " <>
-              "have a pub_sub module configured",
-          fix: "add `module MyAppWeb.Endpoint` inside the resource's pub_sub block"
-        )
-      end
     end
   end
 

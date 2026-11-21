@@ -126,6 +126,11 @@ defmodule PyroManiac.View.View do
         doc: "How to handle PubSub destroy notifications.",
         type: PyroManiac.Dsl.Type.on_destroy()
       ],
+      on_bulk: [
+        doc:
+          "How to handle a `PyroManiac.Realtime.Bulk` message (one message for a bulk operation). The resource needs `bulk` in its `realtime` section.",
+        type: PyroManiac.Dsl.Type.on_bulk()
+      ],
       lazy?: [
         default: true,
         doc: "Load nested view data only when the row is expanded.",
@@ -247,6 +252,10 @@ defmodule PyroManiac.View.View do
        v -> v
      end)
      |> Map.update!(:on_destroy, fn
+       nil -> :none
+       v -> v
+     end)
+     |> Map.update!(:on_bulk, fn
        nil -> :none
        v -> v
      end)}

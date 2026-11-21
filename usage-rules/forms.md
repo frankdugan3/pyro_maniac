@@ -25,8 +25,7 @@ end
 ## The boundary: meaning, not styles
 
 The form DSL declares **meaning**. It has no `class` or `input_class`
-option, and no functions. A renderer (LiveView, or a native renderer such as
-Mob or Scenic) maps the meaning to its own styles:
+option, and no functions. A renderer maps the meaning to its own styles:
 
 - The kind of input: `field`, `select`, `combobox`, or `input`.
 - The content role of an input: `size`.
@@ -228,8 +227,8 @@ input :body, {MyAppWeb.Inputs.Markdown, profile: :issue}
 input :color, MyAppWeb.Inputs.Color
 ```
 
-A renderer renders it with its own behaviour. For LiveView, the module also
-implements `PyroManiac.LiveView.Input`.
+A renderer renders it with its own behaviour, which the module also
+implements.
 
 ## Sizes
 
@@ -341,7 +340,7 @@ end
 | `name`        | required  | Step identifier                                                          |
 | `label`       | humanized | Step heading                                                             |
 | `path`        | `[]`      | Base path; the renderer wraps the inputs in a nested form for this path  |
-| `render`      | nil       | A render module of the renderer (for LiveView, `PyroManiac.LiveView.Render`) |
+| `render`      | nil       | A render module of the renderer                                              |
 | `review?`     | `false`   | Auto-generate a read-only summary of previous steps                      |
 | `density`     | `:normal` | `:dense` uses narrower tracks                                            |
 | `max_columns` | nil       | The maximum number of columns                                            |

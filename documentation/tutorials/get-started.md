@@ -16,9 +16,8 @@ end
 ```
 
 PyroManiac is the DSL layer only. To actually render anything you also
-need a renderer library — for Phoenix LiveView apps, add
-[`pyro_maniac_live_view`](https://github.com/frankdugan3/pyro_maniac_live_view)
-and follow its installation guide.
+need a renderer library. Add the renderer for your stack and follow its
+installation guide.
 
 ## 2. Configure the formatter
 
@@ -34,7 +33,8 @@ In `.formatter.exs`:
 ## 3. Add the `PyroManiac.Resource` extension to each resource
 
 Every resource that backs a PyroManiac page must use the
-`PyroManiac.Resource` extension and declare a `default_label`:
+`PyroManiac.Resource` extension, declare a `default_label`, and expose the
+actions and fields that its pages use:
 
 ```elixir
 defmodule MyApp.Brewery.Recipe do
@@ -44,6 +44,18 @@ defmodule MyApp.Brewery.Recipe do
 
   pyro_maniac do
     default_label :name
+
+    realtime do
+      mode :auto
+    end
+
+    expose :read do
+      loads [:name, :style, :status]
+      filter [:name, :status]
+      sort [:name]
+    end
+
+    expose [:create, :update]
   end
 
   # ... attributes, actions, etc.
@@ -53,6 +65,10 @@ end
 The `default_label` is the field renderers use as the human-readable name
 for a record (in dropdowns, breadcrumbs, etc.). It can be any attribute,
 calculation, or aggregate.
+
+The `expose` entities are the **surface** of the resource. A page that uses
+an action or a field that is not exposed does not compile. Refer to
+[The surface](surface.md).
 
 ## 4. Define a page module
 

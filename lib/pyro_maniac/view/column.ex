@@ -6,8 +6,7 @@ defmodule PyroManiac.View.Column do
   are interactive — users can sort, filter, hide, and reorder them at runtime.
 
   For custom cell rendering, give a render module. Each renderer requires
-  that the module implements its render behaviour (for the LiveView
-  renderer, `PyroManiac.LiveView.Render`):
+  that the module implements its render behaviour:
 
   ```elixir
   column :code do

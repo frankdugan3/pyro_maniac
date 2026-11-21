@@ -13,6 +13,54 @@ defmodule Brewery.Ingredient do
 
   pyro_maniac do
     default_label :name
+
+    expose :read do
+      loads [
+        :id,
+        :name,
+        :lot_number,
+        :type,
+        :unit,
+        :description,
+        :supplier_id,
+        supplier: [:id, :name, :code, :contact_email, :phone, :active, :notes, :ingredient_count]
+      ]
+
+      filter [
+        :id,
+        :name,
+        :lot_number,
+        :type,
+        :unit,
+        :description,
+        :supplier_id,
+        supplier: [:id, :name, :code, :contact_email, :phone, :active, :notes, :ingredient_count]
+      ]
+
+      sort [
+        :id,
+        :name,
+        :lot_number,
+        :type,
+        :unit,
+        :description,
+        :supplier_id,
+        supplier: [:id, :name, :code, :contact_email, :phone, :active, :notes, :ingredient_count]
+      ]
+    end
+
+    expose [:destroy, :create, :update] do
+      loads [
+        :id,
+        :name,
+        :lot_number,
+        :type,
+        :unit,
+        :description,
+        :supplier_id,
+        supplier: [:id, :name, :code, :contact_email, :phone, :active, :notes, :ingredient_count]
+      ]
+    end
   end
 
   attributes do

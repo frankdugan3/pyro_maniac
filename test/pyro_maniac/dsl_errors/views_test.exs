@@ -503,8 +503,7 @@ defmodule PyroManiac.DslErrors.ViewsTest do
                 :recipe,
                 :recipe_id,
                 :brewer,
-                :brewer_id,
-                :quality_tests
+                :brewer_id
               ])
 
               column :batch_number
@@ -570,7 +569,7 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       expected = """
       [PyroManiac.DslErrors.ViewsTest.MissingPublicAttribute]
       views -> view -> read defined in <FILE:LINE>:
-        public attribute :description is not a defined or excluded column
+        exposed field :description is not a defined or excluded column
 
         Fix: either add `column :description` or list it in `exclude([...])`
       │
@@ -947,7 +946,7 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       expected = """
       [PyroManiac.DslErrors.ViewsTest.MissingPublicCalculation]
       views -> view -> read defined in <FILE:LINE>:
-        public calculation :gravity_spread is not a defined or excluded column
+        exposed field :gravity_spread is not a defined or excluded column
 
         Fix: either add `column :gravity_spread` or list it in `exclude([...])`
       │
@@ -989,7 +988,7 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       expected = """
       [PyroManiac.DslErrors.ViewsTest.MissingPublicAggregation]
       views -> view -> read defined in <FILE:LINE>:
-        public aggregation :ingredient_count is not a defined or excluded column
+        exposed field :ingredient_count is not a defined or excluded column
 
         Fix: either add `column :ingredient_count` or list it in `exclude([...])`
       │
@@ -1039,7 +1038,7 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       expected = """
       [PyroManiac.DslErrors.ViewsTest.MissingPublicRelationship]
       views -> view -> read defined in <FILE:LINE>:
-        public relationship :brewer is not a defined or excluded column
+        exposed relationship :brewer is not a defined or excluded column
 
         Fix: either add a column traversing :brewer, or list it in `exclude([...])`
       │
@@ -1067,7 +1066,6 @@ defmodule PyroManiac.DslErrors.ViewsTest do
                 :recipe,
                 :recipe_id,
                 :brewer_id,
-                :quality_tests,
                 :kanban_priority,
                 :pass_rate
               ])
@@ -1094,13 +1092,13 @@ defmodule PyroManiac.DslErrors.ViewsTest do
     test "realtime options without pub_sub prefix" do
       expected = """
       [PyroManiac.DslErrors.ViewsTest.RealtimeWithoutPubSub]
-      views -> view -> read defined in <FILE:LINE>:
-        view has realtime options (on_create/on_update/on_destroy) but the resource Brewery.Supplier does not have a pub_sub configuration with a prefix
+      views -> view -> read -> on_create defined in <FILE:LINE>:
+        the view has realtime options (`on_create`), but Brewery.Supplier has no `realtime` section
 
-        Fix: add a `pub_sub do prefix "..." end` block to the resource
+        Fix: add `realtime do mode :auto end` to the `pyro_maniac` section of Brewery.Supplier
       │
-      <LINE> │             view :read do
-      │             ~~~~~~~~~~~~~
+      <LINE> │               on_create :notify
+      │               ~~~~~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """

@@ -79,8 +79,8 @@ Schema:
 | `button` | module    | Optional. A render module for the button; receives `:action`, `:base_path`, `:params`, optionally `:row` |
 | `render` | module    | Optional. A render module for the action target (modal, panel, etc.) with the same assigns               |
 
-A render module implements the render behaviour of the renderer (for
-LiveView, `PyroManiac.LiveView.Render`). The DSL holds no functions.
+A render module implements the render behaviour of the renderer. The DSL
+holds no functions.
 
 If neither `button` nor `render` is supplied, the renderer uses its
 default link/action treatment.

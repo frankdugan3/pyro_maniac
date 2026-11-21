@@ -16,6 +16,20 @@ defmodule Brewery.Staff do
 
   pyro_maniac do
     default_label :name
+
+    realtime do
+      mode :validate
+    end
+
+    expose [:read, :list, :autocomplete] do
+      loads [:id, :name, :email, :role, :active, :name_email]
+      filter [:id, :name, :email, :role, :active, :name_email]
+      sort [:id, :name, :email, :role, :active, :name_email]
+    end
+
+    expose [:destroy, :create, :update, :deactivate] do
+      loads [:id, :name, :email, :role, :active, :name_email]
+    end
   end
 
   pub_sub do
@@ -46,6 +60,7 @@ defmodule Brewery.Staff do
   calculations do
     calculate :name_email, :ci_string do
       calculation expr(name <> " (" <> email <> ")")
+      public? true
     end
   end
 

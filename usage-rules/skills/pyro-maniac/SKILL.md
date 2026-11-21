@@ -8,12 +8,11 @@ description: Use this skill when defining or modifying PyroManiac DSL on Ash res
 PyroManiac is a declarative, framework-agnostic UI DSL for Ash Framework
 resources. It compiles UI configuration at build time via Spark and exposes
 it through `PyroManiac.Info` for renderers to consume. Rendering itself
-lives in separate libraries (e.g. `pyro_maniac_live_view`); the core
-package is render-agnostic by design.
+lives in separate libraries; the core package is render-agnostic by design.
 
 ## Non-negotiable rules
 
-- **Never** import or reference Phoenix/LiveView/Hologram modules from
+- **Never** import or reference renderer or web framework modules from
   PyroManiac DSL or extension code. Rendering and routing live in renderer
   libraries — keep the DSL clean.
 - **Spark DSL entity keyword options cannot be passed inline** when a `do`

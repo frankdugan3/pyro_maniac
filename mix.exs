@@ -184,11 +184,12 @@ defmodule PyroManiac.MixProject do
       {:ash_postgres, "~> 2.0"},
       # Optional deps
       {:ash_storage, github: "ash-project/ash_storage", branch: "main", optional: true},
+      {:ash_typescript, "~> 0.19", optional: true},
       {:igniter, "~> 0.6", optional: true, override: true}
     ]
   end
 
-  @extensions "PyroManiac.Dsl,PyroManiac.Resource,PyroManiac.Navigation.Dsl,PyroManiac.KanBan"
+  @extensions "PyroManiac.Dsl,PyroManiac.Resource,PyroManiac.Navigation.Dsl,PyroManiac.KanBan,PyroManiac.Domain.Typescript"
   defp aliases do
     [
       usage: "usage_rules.sync --yes",

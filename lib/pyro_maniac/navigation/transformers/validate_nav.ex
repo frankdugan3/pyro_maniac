@@ -57,7 +57,7 @@ defmodule PyroManiac.Navigation.Transformers.ValidateNav do
            location: Entity.anno(item),
            path: [:nav, :item, item.name],
            why: "item #{inspect(item.name)} must have exactly one of `page`, `module`, or `href`",
-           fix: "set one of `page MyApp.SomePage`, `module MyApp.LiveView`, or `href \"/url\"`"
+           fix: "set one of `page MyApp.SomePage`, `module MyApp.SomeModule`, or `href \"/url\"`"
          )}
 
       targets > 1 ->

@@ -47,14 +47,14 @@ Top-level schema (selected; see `PyroManiac.View.View` for the full set):
 | `page_sizes`                               | `[pos_integer]`                    | Available page-size options                                                  |
 | `exclude`                                  | `[atom]`                           | Fields to exclude from the view                                              |
 | `on_create`/`on_update`/`on_destroy`       | PubSub handler spec                | How to handle resource notifications                                         |
+| `on_bulk`                                  | `:none`, `:reload`, `:notify`      | How to handle the single message of a bulk operation (needs `bulk`)          |
 | `lazy?`                                    | boolean (default `true`)           | Load nested view data only when expanded                                     |
 | `multiple?`                                | boolean (default `false`)          | Allow multiple rows expanded simultaneously                                  |
 | `selectable?`                              | boolean (default `true`)           | Enable row selection (data_table only)                                       |
 
 The DSL has no `class` options and no functions. A renderer maps the
 meaning (`tone`, `size`) to its own styles, and a `render` option takes a
-**render module** of the renderer (for LiveView, a module that implements
-`PyroManiac.LiveView.Render`).
+**render module**, which implements the render behaviour of the renderer.
 
 Type-specific keys:
 

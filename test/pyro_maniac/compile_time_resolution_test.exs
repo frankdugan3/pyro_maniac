@@ -104,8 +104,7 @@ defmodule PyroManiac.CompileTimeResolutionTest do
           :recipe,
           :recipe_id,
           :brewer,
-          :brewer_id,
-          :quality_tests
+          :brewer_id
         ])
 
         column(:batch_number)

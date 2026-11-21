@@ -40,7 +40,7 @@ defmodule PyroManiac.Navigation do
 
   The compiled module exposes a nav tree and a route manifest via
   `PyroManiac.Navigation.Info`. Routing and layout rendering are the
-  responsibility of the chosen renderer (e.g. `pyro_maniac_live_view`).
+  responsibility of the chosen renderer.
   """
   use Spark.Dsl,
     default_extensions: [extensions: [PyroManiac.Navigation.Dsl]]

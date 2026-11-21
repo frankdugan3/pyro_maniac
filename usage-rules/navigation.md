@@ -4,8 +4,8 @@
 Spark DSL module. It compiles to a tree (groups + items) plus a flat
 route manifest, both available via `PyroManiac.Navigation.Info`. The
 core library does **not** generate routes or render markup —
-that's the renderer's job. Each renderer (e.g. `pyro_maniac_live_view`)
-provides its own routing macro and layout components.
+that's the renderer's job. Each renderer provides its own routing and
+layout components.
 
 ## Defining a navigation module
 

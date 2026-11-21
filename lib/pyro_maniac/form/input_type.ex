@@ -5,8 +5,7 @@ defmodule PyroManiac.Form.InputType do
       input :body, {MyAppWeb.Inputs.Markdown, profile: :issue}
 
   The behaviour has no rendering, so that PyroManiac stays
-  renderer-agnostic. Each renderer has its own render behaviour (for the
-  LiveView renderer, `PyroManiac.LiveView.Render`).
+  renderer-agnostic. Each renderer has its own render behaviour.
   """
   @moduledoc group: "PyroManiac"
 

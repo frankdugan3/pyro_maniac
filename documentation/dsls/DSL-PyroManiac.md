@@ -135,6 +135,7 @@ Declare a view for displaying resource data. Can be nested recursively.
 | [`on_create`](#views-view-on_create){: #views-view-on_create } | `nil \| :none \| :prepend \| :append \| :reload \| :notify` |  | How to handle PubSub create notifications. |
 | [`on_update`](#views-view-on_update){: #views-view-on_update } | `nil \| :none \| :replace \| :reload \| :notify` |  | How to handle PubSub update notifications. |
 | [`on_destroy`](#views-view-on_destroy){: #views-view-on_destroy } | `nil \| :none \| :remove \| :reload \| :notify` |  | How to handle PubSub destroy notifications. |
+| [`on_bulk`](#views-view-on_bulk){: #views-view-on_bulk } | `nil \| :none \| :reload \| :notify` |  | How to handle a `PyroManiac.Realtime.Bulk` message (one message for a bulk operation). The resource needs `bulk` in its `realtime` section. |
 | [`lazy?`](#views-view-lazy?){: #views-view-lazy? } | `boolean` | `true` | Load nested view data only when the row is expanded. |
 | [`multiple?`](#views-view-multiple?){: #views-view-multiple? } | `boolean` | `false` | Allow multiple rows to be expanded simultaneously. When false, acts as accordion. |
 | [`selectable?`](#views-view-selectable?){: #views-view-selectable? } | `boolean` | `true` | Enable row selection for bulk actions (`:data_table` only). |

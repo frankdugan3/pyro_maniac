@@ -15,9 +15,7 @@ configuration at build time and exposes the result through
 
 PyroManiac does not render anything by itself. Rendering, routing, and
 real-time wiring are the responsibility of a separate renderer library.
-Pair PyroManiac with the renderer for your stack — for example
-[`pyro_maniac_live_view`](https://github.com/frankdugan3/pyro_maniac_live_view)
-for Phoenix LiveView applications.
+Pair PyroManiac with the renderer for your stack.
 
 ## Why
 

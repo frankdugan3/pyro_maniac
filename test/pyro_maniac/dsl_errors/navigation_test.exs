@@ -12,7 +12,7 @@ defmodule PyroManiac.DslErrors.NavigationTest do
     nav -> item -> orphan defined in <FILE:LINE>:
       item :orphan must have exactly one of `page`, `module`, or `href`
 
-      Fix: set one of `page MyApp.SomePage`, `module MyApp.LiveView`, or `href "/url"`
+      Fix: set one of `page MyApp.SomePage`, `module MyApp.SomeModule`, or `href "/url"`
     │
     <LINE> │           item :orphan do
     │           ~~~~~~~~~~~~~~~

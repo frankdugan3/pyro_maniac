@@ -68,11 +68,11 @@ defmodule PyroManiac.Dsl.Type do
   def on_create, do: {:or, [nil, {:one_of, [:none, :prepend, :append, :reload, :notify]}]}
   def on_update, do: {:or, [nil, {:one_of, [:none, :replace, :reload, :notify]}]}
   def on_destroy, do: {:or, [nil, {:one_of, [:none, :remove, :reload, :notify]}]}
+  def on_bulk, do: {:or, [nil, {:one_of, [:none, :reload, :notify]}]}
 
   @doc """
   A render module. PyroManiac stores the module only. Each renderer requires
-  that the module implements its render behaviour (for the LiveView renderer,
-  `PyroManiac.LiveView.Render`).
+  that the module implements its render behaviour.
   """
   def render_module, do: :atom
 

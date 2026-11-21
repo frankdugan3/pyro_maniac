@@ -14,6 +14,29 @@ defmodule Brewery.Recipe do
 
   pyro_maniac do
     default_label :name
+
+    realtime do
+      mode :validate
+    end
+
+    expose [:read, :list] do
+      loads [:*, :photos, :batches, recipe_ingredients: [:*, :ingredient]]
+      filter [:*, :photos, :batches, recipe_ingredients: [:*, :ingredient]]
+      sort [:*, :photos, :batches, recipe_ingredients: [:*, :ingredient]]
+    end
+
+    expose [
+      :destroy,
+      :create,
+      :update,
+      :activate,
+      :retire,
+      :attach_photos,
+      :detach_photos,
+      :purge_photos
+    ] do
+      loads [:*, :photos, :batches, recipe_ingredients: [:*, :ingredient]]
+    end
   end
 
   storage do
@@ -70,8 +93,8 @@ defmodule Brewery.Recipe do
   end
 
   relationships do
-    has_many :recipe_ingredients, Brewery.RecipeIngredient
-    has_many :batches, Brewery.Batch
+    has_many :recipe_ingredients, Brewery.RecipeIngredient, public?: true
+    has_many :batches, Brewery.Batch, public?: true
   end
 
   aggregates do

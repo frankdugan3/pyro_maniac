@@ -10,8 +10,7 @@ Extensible, declarative, framework-agnostic UI DSL for Ash Framework resources.
 
 PyroManiac is the DSL layer only — it compiles your UI configuration and
 exposes it via `PyroManiac.Info`. Rendering is provided by a separate
-renderer library such as
-[`pyro_maniac_live_view`](https://github.com/frankdugan3/pyro_maniac_live_view).
+renderer library.
 
 - Compile-time validation of UI configuration (Spark transformers and verifiers)
 - DSL sections: `page`, `views`, `forms`, `searches`

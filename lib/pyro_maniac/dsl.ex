@@ -89,7 +89,8 @@ defmodule PyroManiac.Dsl do
       __MODULE__.Transformers.ExpandViewArguments,
       __MODULE__.Transformers.ValidateViews,
       __MODULE__.Transformers.ExpandFormActions,
-      __MODULE__.Transformers.ValidatePage
+      __MODULE__.Transformers.ValidatePage,
+      __MODULE__.Transformers.ValidateSurface
     ],
     verifiers: [
       __MODULE__.Verifiers.ResourceHasExtension

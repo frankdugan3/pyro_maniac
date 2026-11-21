@@ -14,6 +14,28 @@ defmodule Brewery.QualityTest do
 
   pyro_maniac do
     default_label :test_type
+
+    realtime do
+      mode :validate
+    end
+
+    expose :read do
+      loads [:*, :batch, :tester, :lab_reports]
+      filter [:*, :batch, :tester, :lab_reports]
+      sort [:*, :batch, :tester, :lab_reports]
+    end
+
+    expose [
+      :destroy,
+      :create,
+      :update,
+      :archive,
+      :attach_lab_reports,
+      :detach_lab_reports,
+      :purge_lab_reports
+    ] do
+      loads [:*, :batch, :tester, :lab_reports]
+    end
   end
 
   storage do

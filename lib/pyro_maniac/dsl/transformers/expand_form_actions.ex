@@ -423,6 +423,7 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
       |> get_resource_actions()
       |> Enum.filter(fn ra ->
         ra.type in [:create, :update] &&
+          PyroManiac.Resource.Info.exposed?(resource, ra.name) &&
           ra.name not in excluded_actions &&
           ra.name not in storage_action_names &&
           !MapSet.member?(defined_names, ra.name)
@@ -435,7 +436,7 @@ defmodule PyroManiac.Dsl.Transformers.ExpandFormActions do
         location: Transformer.get_section_anno(dsl, [:forms]),
         path: [:forms],
         why:
-          "the following :create/:update actions are not defined or excluded: #{inspect(missing)}",
+          "the following exposed :create/:update actions are not defined or excluded: #{inspect(missing)}",
         fix: "either define `action` blocks for these actions, or add them to `exclude([...])`"
       )
     end

@@ -14,6 +14,20 @@ defmodule Brewery.Batch do
 
   pyro_maniac do
     default_label :batch_number
+
+    realtime do
+      mode :validate
+    end
+
+    expose [:read, :list, :kanban_read] do
+      loads [:*, :recipe, :brewer]
+      filter [:*, :recipe, :brewer]
+      sort [:*, :recipe, :brewer]
+    end
+
+    expose [:destroy, :create, :update, :start_brewing, :advance_status, :complete, :move_card] do
+      loads [:*, :recipe, :brewer]
+    end
   end
 
   kan_ban do

@@ -65,7 +65,9 @@ defmodule PyroManiac.SubscriptionManager do
   Compute all subscribable topics from a resource's publications.
 
   Only includes topics that are fully static (no dynamic segments like `:id`).
-  Topics with dynamic segments cannot be subscribed to ahead of time.
+  Topics with dynamic segments cannot be subscribed to ahead of time. A
+  resource with `bulk` in its `realtime` section also has
+  `PyroManiac.Realtime.bulk_topic/1`.
   """
   @spec publication_topics(module()) :: [String.t()]
   def publication_topics(resource) do
@@ -75,7 +77,14 @@ defmodule PyroManiac.SubscriptionManager do
     resource
     |> Ash.Notifier.PubSub.Info.publications()
     |> Enum.flat_map(&static_topic(&1, prefix, delimiter))
+    |> Enum.concat(bulk_topics(resource))
     |> Enum.uniq()
+  end
+
+  defp bulk_topics(resource) do
+    if PyroManiac.Resource.Info.realtime_bulk(resource) == [],
+      do: [],
+      else: [PyroManiac.Realtime.bulk_topic(resource)]
   end
 
   defp static_topic(pub, prefix, delimiter) do
@@ -95,7 +104,7 @@ defmodule PyroManiac.SubscriptionManager do
 
   @doc """
   Check whether a PyroManiac module has any realtime options configured
-  on its views (on_create, on_update, on_destroy).
+  on its views (on_create, on_update, on_destroy, on_bulk).
   """
   @spec has_realtime?(module()) :: boolean()
   def has_realtime?(pyro_maniac_module) do
@@ -104,7 +113,8 @@ defmodule PyroManiac.SubscriptionManager do
     Enum.any?(views, fn view ->
       Map.get(view, :on_create, :none) != :none ||
         Map.get(view, :on_update, :none) != :none ||
-        Map.get(view, :on_destroy, :none) != :none
+        Map.get(view, :on_destroy, :none) != :none ||
+        Map.get(view, :on_bulk, :none) != :none
     end)
   rescue
     _ -> false
@@ -121,6 +131,7 @@ defmodule PyroManiac.SubscriptionManager do
   - `{:remove, id}` — remove the record with this ID from the list
   - `:reload` — reload the entire data set from the server
   - `{:notify, action_type}` — show a notification without modifying data
+    (`:bulk` for a `PyroManiac.Realtime.Bulk` message)
   - `:ignore` — no action needed
   """
   @spec handle_notification(term(), map()) ::
@@ -137,7 +148,26 @@ defmodule PyroManiac.SubscriptionManager do
         dispatch_action(action.type, data, view)
 
       nil ->
-        :ignore
+        message |> extract_bulk() |> dispatch_bulk(view)
+    end
+  end
+
+  @doc """
+  Extract the `PyroManiac.Realtime.Bulk` message from any broadcast format,
+  the same as `extract_notification/1`.
+  """
+  @spec extract_bulk(term()) :: PyroManiac.Realtime.Bulk.t() | nil
+  def extract_bulk(%PyroManiac.Realtime.Bulk{} = bulk), do: bulk
+  def extract_bulk(%{payload: %PyroManiac.Realtime.Bulk{} = bulk}), do: bulk
+  def extract_bulk(_), do: nil
+
+  defp dispatch_bulk(nil, _view), do: :ignore
+
+  defp dispatch_bulk(_bulk, view) do
+    case Map.get(view, :on_bulk, :none) do
+      :reload -> :reload
+      :notify -> {:notify, :bulk}
+      _ -> :ignore
     end
   end
 

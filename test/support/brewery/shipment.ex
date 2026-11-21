@@ -10,6 +10,42 @@ defmodule Brewery.Shipment do
 
   pyro_maniac do
     default_label :reference
+
+    expose :read do
+      loads [
+        :id,
+        :reference,
+        :carrier,
+        :line_count,
+        lines: [:id, :description, :quantity, :pallet_count, :shipment_id]
+      ]
+
+      filter [
+        :id,
+        :reference,
+        :carrier,
+        :line_count,
+        lines: [:id, :description, :quantity, :pallet_count, :shipment_id]
+      ]
+
+      sort [
+        :id,
+        :reference,
+        :carrier,
+        :line_count,
+        lines: [:id, :description, :quantity, :pallet_count, :shipment_id]
+      ]
+    end
+
+    expose [:destroy, :create] do
+      loads [
+        :id,
+        :reference,
+        :carrier,
+        :line_count,
+        lines: [:id, :description, :quantity, :pallet_count, :shipment_id]
+      ]
+    end
   end
 
   attributes do
@@ -53,6 +89,46 @@ defmodule Brewery.ShipmentLine do
 
   pyro_maniac do
     default_label :description
+
+    expose :read do
+      loads [
+        :id,
+        :description,
+        :quantity,
+        :pallet_count,
+        :shipment_id,
+        shipment: [:id, :reference, :carrier, :line_count]
+      ]
+
+      filter [
+        :id,
+        :description,
+        :quantity,
+        :pallet_count,
+        :shipment_id,
+        shipment: [:id, :reference, :carrier, :line_count]
+      ]
+
+      sort [
+        :id,
+        :description,
+        :quantity,
+        :pallet_count,
+        :shipment_id,
+        shipment: [:id, :reference, :carrier, :line_count]
+      ]
+    end
+
+    expose [:destroy, :create] do
+      loads [
+        :id,
+        :description,
+        :quantity,
+        :pallet_count,
+        :shipment_id,
+        shipment: [:id, :reference, :carrier, :line_count]
+      ]
+    end
   end
 
   attributes do

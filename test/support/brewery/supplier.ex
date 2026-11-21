@@ -13,6 +13,16 @@ defmodule Brewery.Supplier do
 
   pyro_maniac do
     default_label :name
+
+    expose [:read, :suggest_codes, :by_prefix] do
+      loads [:id, :name, :code, :contact_email, :phone, :active, :notes, :ingredient_count]
+      filter [:id, :name, :code, :contact_email, :phone, :active, :notes, :ingredient_count]
+      sort [:id, :name, :code, :contact_email, :phone, :active, :notes, :ingredient_count]
+    end
+
+    expose [:destroy, :create, :update, :rename] do
+      loads [:id, :name, :code, :contact_email, :phone, :active, :notes, :ingredient_count]
+    end
   end
 
   attributes do

@@ -42,6 +42,71 @@ Renderers consume it via `PyroManiac.Info.default_label/1` and
 A verifier checks that the field exists on the resource at compile time.
 If it doesn't, compilation fails with a clear error.
 
+## `expose` (the surface)
+
+A page can use only the actions and fields that the resource exposes. The
+lists are explicit: also list the `default_label` and the fields of `tone`
+expressions that a page loads.
+
+```elixir
+pyro_maniac do
+  default_label :name
+
+  expose :read do
+    loads [:name, :status, supplier: [:name]]
+    filter [:name, :status]
+    sort [:name]
+  end
+
+  expose [:create, :update]
+end
+```
+
+- `filter` and `sort` are only for read actions.
+- `:*` in a field list is all the public attributes, calculations, and
+  aggregates (not the relationships): `loads [:*, owner: [:name]]`. Prefer it
+  to a list of all the fields. In `filter` and `sort`, `:*` skips the fields
+  with `filterable? false` / `sortable? false`. Set those on a field (for
+  example a password) that no filter or sort may use, also through RPC.
+- A relationship atom (`:owner`) is the relationship with `:*` of its
+  resource, one level deep. A deeper load is always explicit.
+- Each option defaults to `[:*]` (`filter` and `sort` only for a read action):
+  `expose :read` exposes all the fields. Opt out explicitly: `filter []`.
+  There is no `expose :*` for all actions.
+- Each field must be public. Each action must be public.
+- `exclude` lists on pages can name only exposed things.
+
+## `realtime`
+
+Required for views with `on_create`, `on_update`, `on_destroy`, or
+`on_bulk`. Prefer `mode :auto` (it writes the `Ash.Notifier.PubSub` setup).
+Use `PyroManiac.Realtime.topic/2` for topic strings in app code.
+
+```elixir
+pyro_maniac do
+  realtime do
+    mode :auto
+    except [:punch_in]
+    # One `PyroManiac.Realtime.Bulk` message for each bulk operation of
+    # :import, and an event for `PyroManiac.Realtime.broadcast_bulk/3`.
+    bulk [:import, :truncate]
+  end
+end
+```
+
+- Each exposed create, update, and destroy action of a view option
+  (`on_create`, `on_update`, `on_destroy`) must be published to a static
+  topic, or be in `except`.
+- `on_bulk` needs `bulk`. An action cannot be in `bulk` and in `except`.
+- Add `PyroManiac.Realtime.BulkCoalescer` to the supervision tree when
+  `bulk` has actions.
+
+## AshTypescript (optional)
+
+`PyroManiac.Domain.Typescript` on the domain makes (`mode :auto`) or checks
+(`mode :validate`) the `typescript_rpc` of the exposed actions. Each resource
+with `expose` also needs `AshTypescript.Resource` and `type_name`.
+
 ## Combining with other extensions
 
 `PyroManiac.Resource` is independent of, and composes with, other Ash

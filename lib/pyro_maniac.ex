@@ -4,7 +4,7 @@ defmodule PyroManiac do
 
   A page module binds an Ash resource and configures the `page`, `views`,
   `forms`, and `searches` sections that describe the UI. The DSL is consumed
-  at runtime via `PyroManiac.Info` by a renderer (e.g. `pyro_maniac_live_view`).
+  at runtime via `PyroManiac.Info` by a renderer.
 
       defmodule MyAppWeb.RecipeLive do
         use PyroManiac, resource: MyApp.Brewery.Recipe

@@ -2,8 +2,8 @@
 
 PyroManiac is a declarative, framework-agnostic UI DSL for Ash Framework
 resources. The DSL compiles at build time via Spark and exposes the result
-through `PyroManiac.Info`. Rendering belongs to a separate renderer library
-(e.g. `pyro_maniac_live_view`); this package is render-agnostic by design.
+through `PyroManiac.Info`. Rendering belongs to a separate renderer library;
+this package is render-agnostic by design.
 
 Read the relevant sub-rule under `usage-rules/` _before_ writing PyroManiac
 code. Do not assume prior knowledge of the DSL — the surface has changed
@@ -11,7 +11,7 @@ across recent versions.
 
 ## Non-negotiable rules
 
-- **Do not** import or reference Phoenix/LiveView/Hologram modules from
+- **Do not** import or reference renderer or web framework modules from
   PyroManiac DSL or extension code. The DSL is framework-agnostic;
   rendering and routing live in renderer libraries.
 - Spark DSL entity keyword options **cannot** be passed inline when a `do`
@@ -35,6 +35,10 @@ across recent versions.
 - The `pyro_maniac do default_label :field end` block on the resource is
   **required**. `PyroManiac.Dsl` has a verifier that rejects any page whose
   resource lacks the `PyroManiac.Resource` extension.
+- The **surface** is required: a page can use only the actions and fields
+  that its resources `expose`. When a page does not compile because of the
+  surface, add the action or field to the `expose` of the resource. Do not
+  add fields that no page uses. Refer to [resource](usage-rules/resource.md).
 
 ## Sub-rules
 
