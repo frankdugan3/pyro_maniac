@@ -28,14 +28,13 @@ defmodule PyroManiac.Dsl.Transformers.ResolveViewResources do
   defp resolve_views(dsl) do
     module = Transformer.get_persisted(dsl, :module, nil)
     resource = Transformer.get_persisted(dsl, :resource, nil)
-    excluded_actions = Transformer.get_option(dsl, [:views], :exclude, [])
+    excluded_actions = Transformer.get_option(dsl, [:page], :exclude, [])
 
     views =
       for %View{} = view <- Transformer.get_entities(dsl, [:views]) do
         view
-        |> resolve_resource(resource, nil, module)
+        |> resolve_resource(resource, module)
         |> validate_not_excluded(excluded_actions, module)
-        |> resolve_nested_views(resource, module)
         |> tag_attachment_columns()
         |> resolve_tones_and_sizes(module)
       end
@@ -46,7 +45,7 @@ defmodule PyroManiac.Dsl.Transformers.ResolveViewResources do
         _ -> false
       end)
 
-    Enum.reduce(views, dsl, fn view, dsl ->
+    Enum.reduce(Enum.reverse(views), dsl, fn view, dsl ->
       Transformer.add_entity(dsl, [:views], view, prepend: true)
     end)
   end
@@ -71,68 +70,54 @@ defmodule PyroManiac.Dsl.Transformers.ResolveViewResources do
           column
       end)
 
-    nested = Enum.map(view.views || [], &tag_attachment_columns/1)
-
-    %{view | columns: columns, views: nested}
+    %{view | columns: columns}
   end
 
-  defp tag_attachment_columns(other), do: other
-
-  # Validates `tone` (a tone atom or an Ash expression) on columns and view
-  # fields, and records the fields that the expression needs. Resolves the
-  # `size: :auto` of view fields.
+  # Validates `decoration` (a decoration atom or an Ash expression) on the columns, and
+  # records the fields that the expression needs. The record tree of a view
+  # is resolved with the actions (`ExpandFormActions`).
   defp resolve_tones_and_sizes(%View{} = view, module) do
-    resource = view.resource
-
-    columns = Enum.map(view.columns || [], &resolve_tone(&1, resource, view, module))
-
-    fields =
-      Enum.map(view.fields || [], fn field ->
-        field |> resolve_tone(resource, view, module) |> resolve_view_field_size(resource)
+    columns =
+      Enum.map(view.columns || [], fn column ->
+        column
+        |> resolve_decoration(view.resource, view, module)
+        |> resolve_content(view, module)
+        |> inherit_column_description(view.resource)
       end)
 
-    sections =
-      Enum.map(view.sections || [], fn section ->
-        section_fields =
-          Enum.map(section.fields || [], fn field ->
-            field |> resolve_tone(resource, view, module) |> resolve_view_field_size(resource)
-          end)
+    read = Ash.Resource.Info.action(view.resource, view.read_action || List.first(view.name))
+    description = PyroManiac.Content.inherit(view.description, read && read.description)
 
-        %{section | fields: section_fields}
-      end)
-
-    nested = Enum.map(view.views || [], &resolve_tones_and_sizes(&1, module))
-
-    %{view | columns: columns, fields: fields, sections: sections, views: nested}
+    %{view | columns: columns, description: description}
   end
 
-  defp resolve_tones_and_sizes(other, _module), do: other
+  defp resolve_decoration(%{decoration: nil} = entity, _resource, _view, _module), do: entity
 
-  defp resolve_tone(%{tone: nil} = entity, _resource, _view, _module), do: entity
-
-  defp resolve_tone(%{tone: tone} = entity, resource, view, module) do
-    tones = PyroManiac.Dsl.Type.tones()
+  defp resolve_decoration(%{decoration: decoration} = entity, resource, view, module) do
+    decorations = PyroManiac.Dsl.Type.decorations()
 
     cond do
-      tone in tones ->
+      decoration in decorations ->
         entity
 
-      is_atom(tone) ->
+      is_atom(decoration) ->
         Error.raise!(
           module: module,
-          location: Entity.property_anno(entity, :tone) || Entity.anno(entity),
-          path: [:views, :view, view_name(view), entity.name, :tone],
-          why: "#{inspect(tone)} is not a tone. The tones are #{inspect(tones)}",
-          suggestions: Error.did_you_mean(tone, tones)
+          location: Entity.property_anno(entity, :decoration) || Entity.anno(entity),
+          path: [:views, :view, view_name(view), entity.name, :decoration],
+          why:
+            "#{inspect(decoration)} is not a decoration. The decorations are #{inspect(decorations)}",
+          suggestions: Error.did_you_mean(decoration, decorations)
         )
 
-      is_function(tone) or is_nil(resource) ->
+      is_function(decoration) or is_nil(resource) ->
         Error.raise!(
           module: module,
-          location: Entity.property_anno(entity, :tone) || Entity.anno(entity),
-          path: [:views, :view, view_name(view), entity.name, :tone],
-          why: "`tone` is a tone or an Ash expression",
-          fix: "use for example `tone :danger` or `tone expr(if overdue?, do: :danger)`"
+          location: Entity.property_anno(entity, :decoration) || Entity.anno(entity),
+          path: [:views, :view, view_name(view), entity.name, :decoration],
+          why: "`decoration` is a decoration or an Ash expression",
+          fix:
+            "use for example `decoration :danger` or `decoration expr(if overdue?, do: :danger)`"
         )
 
       true ->
@@ -140,67 +125,65 @@ defmodule PyroManiac.Dsl.Transformers.ResolveViewResources do
     end
   end
 
-  defp resolve_tone(entity, _resource, _view, _module), do: entity
+  defp resolve_decoration(entity, _resource, _view, _module), do: entity
 
-  # The refs of a `tone` expression are loaded with the rows, so they can be
+  # The refs of a `decoration` expression are loaded with the rows, so they can be
   # any field (`in_memory_only?: false`).
   defp resolve_tone_expression(entity, resource, view, module) do
-    case PyroManiac.Dsl.Expression.validate_refs(resource, entity.tone, in_memory_only?: false) do
+    case PyroManiac.Dsl.Expression.validate_refs(resource, entity.decoration,
+           in_memory_only?: false
+         ) do
       {:ok, names} ->
-        %{entity | __tone_refs__: names}
+        %{entity | __decoration_refs__: names}
 
       {:error, message} ->
         Error.raise!(
           module: module,
-          location: Entity.property_anno(entity, :tone) || Entity.anno(entity),
-          path: [:views, :view, view_name(view), entity.name, :tone],
-          why: "the `tone` expression is invalid: #{message}"
+          location: Entity.property_anno(entity, :decoration) || Entity.anno(entity),
+          path: [:views, :view, view_name(view), entity.name, :decoration],
+          why: "the `decoration` expression is invalid: #{message}"
         )
     end
   end
 
-  defp view_name(%View{name: [name | _]}), do: name
-  defp view_name(_view), do: :view
+  # The expressions of `render`, `description`, and `label` of a column, on
+  # the resource of the view.
+  defp resolve_content(column, view, module) do
+    case PyroManiac.Content.resolve_refs(column, view.resource) do
+      {:ok, column} ->
+        column
 
-  defp resolve_view_field_size(
-         %PyroManiac.View.Field{size: :auto, source: [name]} = field,
-         resource
-       )
-       when not is_nil(resource) do
-    size =
-      case Ash.Resource.Info.field(resource, name) do
-        %{type: type} = info ->
-          cond do
-            PyroManiac.TypeInfer.text_type?(type) -> :prose
-            PyroManiac.TypeInfer.boolean_type?(type) -> :term
-            PyroManiac.TypeInfer.numeric_type?(type) -> :term
-            PyroManiac.TypeInfer.date_type?(type) -> :term
-            PyroManiac.TypeInfer.time_type?(type) -> :term
-            true -> constraint_size(info)
-          end
-
-        _ ->
-          :name
-      end
-
-    %{field | size: size}
-  end
-
-  defp resolve_view_field_size(%PyroManiac.View.Field{size: :auto} = field, _resource),
-    do: %{field | size: :name}
-
-  defp resolve_view_field_size(field, _resource), do: field
-
-  defp constraint_size(%{constraints: constraints}) when is_list(constraints) do
-    case Keyword.get(constraints, :max_length) do
-      max when is_integer(max) and max <= 10 -> :code
-      max when is_integer(max) and max <= 24 -> :term
-      max when is_integer(max) and max >= 100 -> :phrase
-      _ -> :name
+      {:error, key, message} ->
+        Error.raise!(
+          module: module,
+          location: Entity.anno(column),
+          path: [:views, :view, view_name(view), column.name, key],
+          why: "the `#{key}` expression is invalid: #{message}"
+        )
     end
   end
 
-  defp constraint_size(_info), do: :name
+  # `description :inherit` on a column: the description of its field.
+  defp inherit_column_description(column, resource) do
+    {path, [name]} = Enum.split(column.source, -1)
+
+    field =
+      case PyroManiac.Info.resource_by_path(resource, path) do
+        nil -> nil
+        level -> Ash.Resource.Info.field(level, name)
+      end
+
+    %{
+      column
+      | description:
+          PyroManiac.Content.inherit(column.description, field && Map.get(field, :description))
+    }
+  rescue
+    _ -> column
+  end
+
+  defp view_name(%View{name: [name | _]}), do: name
+  defp view_name(_view), do: :view
 
   defp attachment_destination(nil, _name), do: nil
 
@@ -217,85 +200,10 @@ defmodule PyroManiac.Dsl.Transformers.ResolveViewResources do
     _ -> nil
   end
 
-  defp resolve_resource(
-         %View{relationship: nil, resource: nil} = view,
-         parent_resource,
-         _parent_rel_resource,
-         _module
-       ) do
-    maybe_put_resource(view, parent_resource)
-  end
+  defp resolve_resource(%View{resource: nil} = view, page_resource, _module),
+    do: %{view | resource: page_resource}
 
-  defp resolve_resource(
-         %View{relationship: rel_name, resource: nil} = view,
-         parent_resource,
-         _parent_rel_resource,
-         module
-       ) do
-    case Ash.Resource.Info.relationship(parent_resource, rel_name) do
-      nil ->
-        Error.raise!(
-          module: module,
-          location: Entity.property_anno(view, :relationship) || Entity.anno(view),
-          path: [:views, :view, hd(view.name || [:_])],
-          why: "relationship #{inspect(rel_name)} does not exist on #{inspect(parent_resource)}",
-          suggestions: relationship_suggestions(rel_name, parent_resource)
-        )
-
-      rel ->
-        maybe_put_resource(view, rel.destination)
-    end
-  end
-
-  defp resolve_resource(
-         %View{relationship: nil, resource: explicit_resource} = view,
-         _parent_resource,
-         _parent_rel_resource,
-         module
-       ) do
-    if Enum.empty?(view.sets || []) do
-      Error.raise!(
-        module: module,
-        location: Entity.anno(view),
-        path: [:views, :view, hd(view.name || [:_])],
-        why:
-          "view targeting #{inspect(explicit_resource)} without a relationship requires at " <>
-            "least one `set` to map parent fields to the read action",
-        fix:
-          "add a `set :foo, ...` entity inside the view, or remove `resource:` and use " <>
-            "`relationship:` instead"
-      )
-    end
-
-    maybe_put_resource(view, explicit_resource)
-  end
-
-  defp resolve_resource(
-         %View{relationship: rel_name, resource: explicit_resource} = view,
-         parent_resource,
-         _parent_rel_resource,
-         module
-       ) do
-    case Ash.Resource.Info.relationship(parent_resource, rel_name) do
-      nil ->
-        Error.raise!(
-          module: module,
-          location: Entity.property_anno(view, :relationship) || Entity.anno(view),
-          path: [:views, :view, hd(view.name || [:_])],
-          why: "relationship #{inspect(rel_name)} does not exist on #{inspect(parent_resource)}",
-          suggestions: relationship_suggestions(rel_name, parent_resource)
-        )
-
-      _rel ->
-        maybe_put_resource(view, explicit_resource)
-    end
-  end
-
-  defp maybe_put_resource(%View{resource: nil} = view, resource), do: %{view | resource: resource}
-
-  defp maybe_put_resource(view, _resource), do: view
-
-  defp validate_not_excluded(%View{type: :delegated} = view, _excluded_actions, _module), do: view
+  defp resolve_resource(view, _page_resource, _module), do: view
 
   defp validate_not_excluded(%View{name: names} = view, excluded_actions, module) do
     for name <- names do
@@ -312,30 +220,5 @@ defmodule PyroManiac.Dsl.Transformers.ResolveViewResources do
     end
 
     view
-  end
-
-  defp resolve_nested_views(%View{views: nil} = view, _parent_resource, _module), do: view
-  defp resolve_nested_views(%View{views: []} = view, _parent_resource, _module), do: view
-
-  defp resolve_nested_views(%View{views: nested_views} = view, _parent_resource, module) do
-    view_resource = view.resource
-
-    resolved =
-      Enum.map(nested_views, fn nested ->
-        nested
-        |> resolve_resource(view_resource, view_resource, module)
-        |> resolve_nested_views(view_resource, module)
-      end)
-
-    Map.put(view, :views, resolved)
-  end
-
-  defp relationship_suggestions(name, resource) do
-    candidates =
-      resource
-      |> Ash.Resource.Info.relationships()
-      |> Enum.map(& &1.name)
-
-    Error.did_you_mean(name, candidates)
   end
 end

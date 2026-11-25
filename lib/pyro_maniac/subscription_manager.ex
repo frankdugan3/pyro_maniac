@@ -218,11 +218,44 @@ defmodule PyroManiac.SubscriptionManager do
   defp dispatch_action(_, _, _), do: :ignore
 
   @doc """
-  Build a Phoenix Presence topic string for a PyroManiac page.
+  The presence topic of the users who view a page.
+
+  The topic is of the page, not of its resource: two pages of the same
+  resource have two topics, and the views of a page show only the viewers
+  of that page.
+
+      iex> PyroManiac.SubscriptionManager.view_presence_topic(MyApp.RecipesPage)
+      "pyro_maniac:presence:page:MyApp.RecipesPage"
   """
-  @spec presence_topic(module()) :: String.t()
-  def presence_topic(pyro_maniac_module) do
-    resource = Info.resource(pyro_maniac_module)
-    "pyro_maniac:presence:#{inspect(resource)}"
+  @spec view_presence_topic(module()) :: String.t()
+  def view_presence_topic(page), do: "pyro_maniac:presence:page:#{inspect(page)}"
+
+  @doc """
+  The presence topic of the users who edit the records of a resource with an
+  action.
+
+  The topic is of the resource and the action, not of a page: an edit
+  registers in every view of the resource, whatever page the edit is from.
+
+      iex> PyroManiac.SubscriptionManager.edit_presence_topic(MyApp.Recipe, :update)
+      "pyro_maniac:presence:edit:MyApp.Recipe:update"
+  """
+  @spec edit_presence_topic(module(), atom()) :: String.t()
+  def edit_presence_topic(resource, action),
+    do: "pyro_maniac:presence:edit:#{inspect(resource)}:#{action}"
+
+  @doc """
+  The edit presence topics of a resource: one for each exposed action of the
+  resource that changes a record (`:update` and `:destroy`).
+
+  A view subscribes to them to show who edits its records, from any page.
+  """
+  @spec edit_presence_topics(module()) :: [String.t()]
+  def edit_presence_topics(resource) do
+    for %{name: name} <- PyroManiac.Resource.Info.exposed(resource),
+        %{type: type} <- [Ash.Resource.Info.action(resource, name)],
+        type in [:update, :destroy] do
+      edit_presence_topic(resource, name)
+    end
   end
 end

@@ -14,8 +14,9 @@ defmodule PyroManiac.Resource do
 
   ## Usage
 
-      defmodule MyApp.Brewery.Recipe do
+      defmodule Brewery.Recipe do
         use Ash.Resource,
+          domain: Brewery.Domain,
           extensions: [PyroManiac.Resource]
 
         pyro_maniac do
@@ -26,12 +27,12 @@ defmodule PyroManiac.Resource do
           end
 
           expose :read do
-            loads [:name, :style]
-            filter [:name]
-            sort [:name]
+            loads [:name, :style, :status, :ingredient_count]
+            filter [:name, :style, :status]
+            sort [:name, :style]
           end
 
-          expose [:create, :update]
+          expose [:create, :update, :activate, :retire]
         end
       end
 
@@ -67,8 +68,8 @@ defmodule PyroManiac.Resource do
   the resources.
 
   The default `prefix` is the module name without its first segment, in
-  snake case, joined with `_`: `MyApp.Brewery.Recipe` gives
-  `"brewery_recipe"`.
+  snake case, joined with `_`: `Brewery.Recipe` gives
+  `"recipe"`.
 
   ## Bulk notifications
 
@@ -83,7 +84,7 @@ defmodule PyroManiac.Resource do
 
       realtime do
         mode :auto
-        bulk [:import, :truncate]
+        bulk [:create, :truncate]
       end
 
   A view gets the message with `on_bulk` (`:reload` or `:notify`).
@@ -156,7 +157,10 @@ defmodule PyroManiac.Resource do
       }
     ],
     add_extensions: [Ash.Notifier.PubSub],
-    transformers: [PyroManiac.Resource.Transformers.SetupRealtime],
+    transformers: [
+      PyroManiac.Resource.Transformers.SetupRealtime,
+      PyroManiac.Resource.Transformers.TypescriptFieldNames
+    ],
     persisters: [PyroManiac.Resource.Persisters.ExpandExpose],
     verifiers: [
       PyroManiac.Resource.Verifiers.ValidateDefaultLabel,

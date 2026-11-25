@@ -2,6 +2,16 @@ defmodule PyroManiac.Page.ExtraAction do
   @moduledoc """
   A custom action button that can be added to the page toolbar, data table rows, or card actions.
 
+  `render` gives the whole action for a renderer: its button and its
+  content (for example a modal or a panel). It gets `:action`, `:base_path`,
+  `:params`, and (for row-level) `:row`. Without it, the renderer shows a
+  link button and a generic action.
+
+      extra_action :export do
+        label "Export"
+        render PyroManiac.LiveView, BreweryWeb.RecipeLive.ExportAction
+      end
+
   ## Fields
 
   """
@@ -10,6 +20,8 @@ defmodule PyroManiac.Page.ExtraAction do
     name: :extra_action,
     args: [:name],
     describe: "Add a custom action to the page toolbar, data table rows, or card actions.",
+    imports: [Ash.Expr],
+    entities: [render: [PyroManiac.Render]],
     schema: [
       name: [
         type: :atom,
@@ -20,16 +32,6 @@ defmodule PyroManiac.Page.ExtraAction do
         type: :string,
         required: true,
         doc: "Display label for the action button."
-      ],
-      button: [
-        type: PyroManiac.Dsl.Type.render_module(),
-        doc:
-          "A render module for the action button. It gets `:action`, `:base_path`, `:params`, and (for row-level) `:row`. The renderer requires its render behaviour. Defaults to a generic link button."
-      ],
-      render: [
-        type: PyroManiac.Dsl.Type.render_module(),
-        doc:
-          "A render module for the action content (e.g. a modal or panel). It gets `:action`, `:base_path`, `:params`, and (for row-level) `:row`. The renderer requires its render behaviour. Defaults to a generic action renderer."
       ]
     ]
 end

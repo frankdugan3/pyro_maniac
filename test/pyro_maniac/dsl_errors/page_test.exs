@@ -24,13 +24,40 @@ defmodule PyroManiac.DslErrors.PageTest do
       defmodule BadRoute do
         use PyroManiac, resource: Brewery.Recipe
 
+        view :read do
+          type :card
+          primary? true
+
+          section :main do
+            field :name
+          end
+        end
+
         page do
+          exclude [:create, :update, :activate, :retire]
           title "Recipes"
           route "recipes"
         end
+      end
+    end
+  end
 
-        forms do
-          exclude([:create, :update, :activate, :retire])
+  test "a page section has a route" do
+    assert_dsl_error ~r/required :route option not found/ do
+      defmodule NoRoute do
+        use PyroManiac, resource: Brewery.Recipe
+
+        page do
+          title "Recipes"
+        end
+
+        view :read do
+          type :card
+          primary? true
+
+          section :main do
+            field :name
+          end
         end
       end
     end

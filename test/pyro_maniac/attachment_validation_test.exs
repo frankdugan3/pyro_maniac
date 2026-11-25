@@ -16,10 +16,16 @@ defmodule PyroManiac.AttachmentValidationTest do
     @moduledoc false
     use PyroManiac, resource: Brewery.Recipe
 
-    forms do
-      exclude([:update, :activate, :retire])
+    view :read do
+      type :card
+      primary? true
+
+      section :main do
+        field :name
+      end
 
       action :create do
+        state :guard
         field :name, autofocus: true
         select :style
         field :description
@@ -29,6 +35,11 @@ defmodule PyroManiac.AttachmentValidationTest do
         select :status
       end
     end
+
+    page do
+      route "/test"
+      exclude [:update, :activate, :retire, :destroy, :list]
+    end
   end
 
   # Brewery.QualityTest `:archive` exposes `argument :lab_reports, {:array,
@@ -37,12 +48,23 @@ defmodule PyroManiac.AttachmentValidationTest do
     @moduledoc false
     use PyroManiac, resource: Brewery.QualityTest
 
-    forms do
-      exclude([:create, :update])
+    view :read do
+      type :card
+      primary? true
+
+      section :main do
+        field :test_type
+      end
 
       action :archive do
+        state :guard
         field :lab_reports, type: :attachment, autofocus: true
       end
+    end
+
+    page do
+      route "/test"
+      exclude [:create, :update, :destroy]
     end
   end
 
@@ -51,7 +73,7 @@ defmodule PyroManiac.AttachmentValidationTest do
 
     field_names =
       NoFileArgumentPage
-      |> PyroManiac.Info.form_for(:create)
+      |> PyroManiac.Info.action_for(:create)
       |> Map.get(:fields)
       |> Enum.map(& &1.name)
 
@@ -62,7 +84,7 @@ defmodule PyroManiac.AttachmentValidationTest do
     assert Brewery.QualityTest == FileArgumentPage.persisted(:resource, nil)
 
     assert :lab_reports in (FileArgumentPage
-                            |> PyroManiac.Info.form_for(:archive)
+                            |> PyroManiac.Info.action_for(:archive)
                             |> Map.get(:fields)
                             |> Enum.map(& &1.name))
   end
@@ -73,12 +95,23 @@ defmodule PyroManiac.AttachmentValidationTest do
         @moduledoc false
         use PyroManiac, resource: Brewery.QualityTest
 
-        forms do
-          exclude([:create, :update])
+        view :read do
+          type :card
+          primary? true
+
+          section :main do
+            field :test_type
+          end
 
           action :archive do
+            state :guard
             field :lab_reports, autofocus: true
           end
+        end
+
+        page do
+          route "/test"
+          exclude [:create, :update]
         end
       end
     end

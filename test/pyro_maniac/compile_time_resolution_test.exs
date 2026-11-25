@@ -8,37 +8,43 @@ defmodule PyroManiac.CompileTimeResolutionTest do
     @moduledoc false
     use PyroManiac, resource: Brewery.Recipe
 
-    forms do
-      exclude([:activate, :retire])
-
-      action [:create, :update] do
-        field :name, autofocus: true
-        select :style
-        field :description
-        field :target_abv
-        field :target_og
-        field :target_fg
-        select :status
-        field :photos, type: :attachment
-      end
+    page do
+      route "/test"
+      exclude [:activate, :retire, :destroy]
     end
 
-    views do
-      view [:read, :list] do
-        type :data_table
-        default_sort "name"
-        exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
-        column(:name)
-        column(:style)
-        column(:description)
-        column(:status)
-        column(:target_abv)
-        column(:target_og)
-        column(:target_fg)
-        column(:gravity_spread)
-        column(:ingredient_count)
-        column(:batch_count)
-      end
+    view [:read, :list] do
+      type :data_table
+      primary? true
+      default_sort "name"
+      exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
+      column(:name)
+      column(:style)
+      column(:description)
+      column(:status)
+      column(:target_abv)
+      column(:target_og)
+      column(:target_fg)
+      column(:gravity_spread)
+      column(:ingredient_count)
+      column(:batch_count)
+    end
+
+    view :read do
+      type :card
+
+      primary? true
+
+      action [:create, :update], :guard
+
+      field :name, autofocus: true
+      select :style
+      field :description
+      field :target_abv
+      field :target_og
+      field :target_fg
+      select :status
+      field :photos, type: :attachment
     end
   end
 
@@ -46,27 +52,33 @@ defmodule PyroManiac.CompileTimeResolutionTest do
     @moduledoc false
     use PyroManiac, resource: Brewery.Staff
 
-    views do
-      view [:read, :list] do
-        type :data_table
-        default_sort "email"
-        exclude([:id, :name_email])
-        column(:name)
-        column(:email)
-        column(:role)
-        column(:active)
-      end
+    view [:read, :list] do
+      type :data_table
+      primary? true
+      default_sort "email"
+      exclude([:id, :name_email])
+      column(:name)
+      column(:email)
+      column(:role)
+      column(:active)
     end
 
-    forms do
-      exclude([:deactivate])
+    view :read do
+      type :card
 
-      action [:create, :update] do
-        field :name, autofocus: true
-        field :email
-        select :role
-        field :active
-      end
+      primary? true
+
+      action [:create, :update], :guard
+
+      field :name, autofocus: true
+      field :email
+      select :role
+      field :active
+    end
+
+    page do
+      route "/test"
+      exclude [:deactivate, :destroy, :autocomplete]
     end
   end
 
@@ -74,51 +86,57 @@ defmodule PyroManiac.CompileTimeResolutionTest do
     @moduledoc false
     use PyroManiac, resource: Brewery.Batch
 
-    forms do
-      exclude([:start_brewing, :advance_status, :complete, :move_card])
-
-      action [:create, :update] do
-        field :batch_number, autofocus: true
-        select :status
-        field :brew_date
-        field :package_date
-        field :actual_og
-        field :actual_fg
-        field :actual_abv
-        field :volume_liters
-        field :notes
-        combobox :recipe_id
-        combobox :brewer_id
-      end
+    page do
+      route "/test"
+      exclude [:start_brewing, :advance_status, :complete, :move_card, :destroy, :kanban_read]
     end
 
-    views do
-      view [:read, :list] do
-        type :data_table
-        default_sort "batch_number"
+    view [:read, :list] do
+      type :data_table
+      primary? true
+      default_sort "batch_number"
 
-        exclude([
-          :id,
-          :kanban_priority,
-          :pass_rate,
-          :recipe,
-          :recipe_id,
-          :brewer,
-          :brewer_id
-        ])
+      exclude([
+        :id,
+        :kanban_priority,
+        :pass_rate,
+        :recipe,
+        :recipe_id,
+        :brewer,
+        :brewer_id
+      ])
 
-        column(:batch_number)
-        column(:status)
-        column(:brew_date)
-        column(:package_date)
-        column(:actual_og)
-        column(:actual_fg)
-        column(:actual_abv)
-        column(:volume_liters)
-        column(:notes)
-        column(:test_count)
-        column(:passed_test_count)
-      end
+      column(:batch_number)
+      column(:status)
+      column(:brew_date)
+      column(:package_date)
+      column(:actual_og)
+      column(:actual_fg)
+      column(:actual_abv)
+      column(:volume_liters)
+      column(:notes)
+      column(:test_count)
+      column(:passed_test_count)
+    end
+
+    view :read do
+      type :card
+
+      primary? true
+
+      action [:create, :update], :guard
+
+      field :batch_number, autofocus: true
+      select :status
+      field :brew_date
+      field :package_date
+      field :actual_og
+      field :actual_fg
+      field :actual_abv
+      field :volume_liters
+      field :notes
+      combobox :recipe_id
+      combobox :brewer_id
     end
   end
 
@@ -187,10 +205,16 @@ defmodule PyroManiac.CompileTimeResolutionTest do
     @moduledoc false
     use PyroManiac, resource: Brewery.Supplier
 
-    forms do
-      exclude([:update, :rename])
+    view :read do
+      type :card
+      primary? true
+
+      section :main do
+        field :name
+      end
 
       action :create do
+        state :guard
         combobox :name, autofocus: true
 
         combobox :code do
@@ -207,6 +231,11 @@ defmodule PyroManiac.CompileTimeResolutionTest do
         field :active
         field :notes
       end
+    end
+
+    page do
+      route "/test"
+      exclude [:update, :rename, :destroy, :suggest_codes, :by_prefix]
     end
   end
 
@@ -342,10 +371,16 @@ defmodule PyroManiac.CompileTimeResolutionTest do
         @moduledoc false
         use PyroManiac, resource: Brewery.Recipe
 
-        forms do
-          exclude([:update, :activate, :retire])
+        view :read do
+          type :card
+          primary? true
+
+          section :main do
+            field :name
+          end
 
           action :create do
+            state :guard
             field :name, autofocus: true
             select :style
             field :description
@@ -355,6 +390,11 @@ defmodule PyroManiac.CompileTimeResolutionTest do
             select :status
             field :photos, type: :attachment
           end
+        end
+
+        page do
+          route "/test"
+          exclude [:update, :activate, :retire, :destroy, :list]
         end
       end
 
@@ -375,10 +415,16 @@ defmodule PyroManiac.CompileTimeResolutionTest do
         @moduledoc false
         use PyroManiac, resource: Brewery.Recipe
 
-        forms do
-          exclude([:update, :activate, :retire])
+        view :read do
+          type :card
+          primary? true
+
+          section :main do
+            field :name
+          end
 
           action :create do
+            state :guard
             field :name, autofocus: true
             select :style
             field :description, visible?: expr(status == :draft and not is_nil(name))
@@ -388,6 +434,11 @@ defmodule PyroManiac.CompileTimeResolutionTest do
             select :status
             field :photos, type: :attachment
           end
+        end
+
+        page do
+          route "/test"
+          exclude [:update, :activate, :retire, :destroy, :list]
         end
       end
 
@@ -403,12 +454,25 @@ defmodule PyroManiac.CompileTimeResolutionTest do
       @moduledoc false
       use PyroManiac, resource: Brewery.Shipment
 
-      forms do
+      page do
+        route "/test"
+        exclude [:destroy]
+      end
+
+      view :read do
+        type :card
+        primary? true
+
+        section :main do
+          field :reference
+        end
+
         action :create do
+          state :guard
           field :reference, autofocus: true
           select :carrier
 
-          group "Lines" do
+          section :lines do
             path [:lines]
             visible? expr(carrier != :pickup)
             field :description
@@ -427,19 +491,33 @@ defmodule PyroManiac.CompileTimeResolutionTest do
       @moduledoc false
       use PyroManiac, resource: Brewery.Shipment
 
-      forms do
+      page do
+        route "/test"
+        exclude [:destroy]
+      end
+
+      view :read do
+        type :card
+        primary? true
+
+        section :main do
+          field :reference
+        end
+
         action :create do
+          state :guard
+
           row do
             visible? expr(carrier != :pickup)
             field :reference, autofocus: true
             select :carrier
           end
 
-          group "Lines" do
+          section :lines do
             path [:lines]
             field :description
 
-            compound "Amount" do
+            compound :amount do
               description "The quantity and the pallets."
               visible? expr(not is_nil(description))
               field :quantity
@@ -451,7 +529,7 @@ defmodule PyroManiac.CompileTimeResolutionTest do
     end
 
     test "visible? can be the first line or a later line of a block" do
-      [row, group] = Info.form_for(V.CompileTime.VisibleBlockPage, :create).fields
+      [row, group] = Info.action_for(V.CompileTime.VisibleBlockPage, :create).fields
       [_description, compound] = group.fields
 
       assert row.__depends_on__ == [:carrier]
@@ -460,7 +538,7 @@ defmodule PyroManiac.CompileTimeResolutionTest do
 
     test "a parent reference is in __depends_on__ as {:parent, name}" do
       [_reference, _carrier, group] =
-        Info.form_for(V.CompileTime.ParentVisiblePage, :create).fields
+        Info.action_for(V.CompileTime.ParentVisiblePage, :create).fields
 
       [_description, _quantity, pallets] = group.fields
       assert Enum.sort(pallets.__depends_on__) == [:quantity, {:parent, :carrier}]
@@ -473,7 +551,7 @@ defmodule PyroManiac.CompileTimeResolutionTest do
     test "form_layout/1 gives a parent dependency as a map" do
       layout =
         V.CompileTime.ParentVisiblePage
-        |> Info.form_for(:create)
+        |> Info.action_for(:create)
         |> Info.form_layout()
 
       [_, _, %{children: [_, _, pallets]}] = layout.children
@@ -486,7 +564,7 @@ defmodule PyroManiac.CompileTimeResolutionTest do
     test "gives a plain tree that encodes as JSON" do
       layout =
         RecipePage
-        |> Info.form_for(:create)
+        |> Info.action_for(:create)
         |> Info.form_layout()
 
       assert %{kind: :form, children: [first | _]} = layout
@@ -501,22 +579,36 @@ defmodule PyroManiac.CompileTimeResolutionTest do
       @moduledoc false
       use PyroManiac, resource: Brewery.Recipe
 
-      views do
-        view [:read, :list] do
-          type :data_table
-          default_sort "name"
-          exclude([:id, :recipe_ingredients, :batches, :photos_urls])
-          column(:name)
-          column(:style)
-          column(:description)
-          column(:status)
-          column(:target_abv)
-          column(:target_og)
-          column(:target_fg)
-          column(:gravity_spread)
-          column(:ingredient_count)
-          column(:batch_count)
-          column(:photos)
+      page do
+        route "/test"
+        exclude [:destroy, :create, :update, :activate, :retire]
+      end
+
+      view [:read, :list] do
+        type :data_table
+        primary? true
+        default_sort "name"
+        exclude([:id, :recipe_ingredients, :batches, :photos_urls])
+        column(:name)
+        column(:style)
+        column(:description)
+        column(:status)
+        column(:target_abv)
+        column(:target_og)
+        column(:target_fg)
+        column(:gravity_spread)
+        column(:ingredient_count)
+        column(:batch_count)
+        column(:photos)
+      end
+
+      view :read do
+        type :card
+
+        primary? true
+
+        section :main do
+          field :name
         end
       end
     end
@@ -545,7 +637,7 @@ defmodule PyroManiac.CompileTimeResolutionTest do
 
   defp get_field(module, action_name, field_name) do
     module
-    |> Info.form_for(action_name)
+    |> Info.action_for(action_name)
     |> Info.form_fields()
     |> Enum.find(&(&1.name == field_name))
   end

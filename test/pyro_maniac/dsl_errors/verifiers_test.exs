@@ -35,7 +35,7 @@ defmodule PyroManiac.DslErrors.VerifiersTest do
             extensions: [PyroManiac.Resource]
 
           pyro_maniac do
-            default_label :nme
+            default_label(:nme)
           end
 
           attributes do
@@ -72,15 +72,25 @@ defmodule PyroManiac.DslErrors.VerifiersTest do
       resource :
         resource PyroManiac.DslErrors.VerifiersTest.NoLabelResource must use the PyroManiac.Resource extension with a default_label configured
 
-        Fix: add `extensions: [PyroManiac.Resource]` to PyroManiac.DslErrors.VerifiersTest.NoLabelResource and configure `pyro_maniac do default_label :foo end`\
+        Fix: add `extensions: [PyroManiac.Resource]` to PyroManiac.DslErrors.VerifiersTest.NoLabelResource and configure `pyro_maniac do default_label :name end`\
       """
 
       assert_dsl_warning expected do
         defmodule PageOnNoLabel do
           use PyroManiac, resource: PyroManiac.DslErrors.VerifiersTest.NoLabelResource
 
-          forms do
-            exclude([:create, :update])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
+          end
+
+          page do
+            route "/test"
+            exclude [:create, :update]
           end
         end
       end

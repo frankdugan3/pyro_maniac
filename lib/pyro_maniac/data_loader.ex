@@ -22,7 +22,7 @@ defmodule PyroManiac.DataLoader do
   - `:arguments` — map of action arguments passed to `Ash.Query.for_read/4`
   - `:sort` — Ash sort list
   - `:loads` — fields to load on the query
-  - `:filter` — filter map passed to `Ash.Query.filter_input/2` — pulled from URL params or scoped by callers (e.g. `%{vendor_id: id}` or `%{"name" => %{"contains" => "ipa"}}`)
+  - `:filter` — filter map passed to `Ash.Query.filter_input/2` — pulled from URL params or scoped by callers (e.g. `%{recipe_id: id}` or `%{"name" => %{"contains" => "ipa"}}`)
   - `:page_params` — map of pagination params (`"offset"`, `"limit"`, `"after"`, `"before"`)
   - `:pagination_config` — action pagination struct/map
   - `:pagination_type` — `:keyset`, `:offset` or `:none`; the view's declared

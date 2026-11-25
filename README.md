@@ -13,11 +13,16 @@ exposes it via `PyroManiac.Info`. Rendering is provided by a separate
 renderer library.
 
 - Compile-time validation of UI configuration (Spark transformers and verifiers)
-- DSL sections: `page`, `views`, `forms`, `searches`
-- View types: `data_table`, `grid`, `calendar`, `gantt`, `kanban`, `list`, `render`, `delegated`
-- Forms with field groups, wizard steps, conditional visibility, and bulk actions
-- Declarative navigation (`PyroManiac.Navigation`) with a precomputed route manifest
-- Kanban support (`PyroManiac.KanBan` extension on resources)
+- A page module: the `page` section (with its `route`), and the top-level `view` and `search` entities; a module without the `page` section declares views and searches that the pages reuse
+- View types: `data_table`, `grid`, `card`, `calendar`, `gantt`, `kanban`, `list`, `timeline`, `render`
+- Views that run their actions: forms with sections, tabs, wizard steps, and conditional visibility; a declared state of the unsaved inputs (guard, recover, or discard); confirmations, inline cell edits, inline new rows, clones, drag to reorder, and bulk actions
+- The status and the transitions of a state machine or a workflow (`workflow` node)
+- Filters: search presets, and filters that users build, save, and share (`PyroManiac.FilterPresets`)
+- One record tree for a view and the forms of its actions (`only [names]` for the differences), with links between the cards
+- Portable content: `render`, `description`, and column `label` take a text or an Ash expression for every renderer, and an implementation for one renderer
+- Declarative navigation (`PyroManiac.Navigation`) with a precomputed route manifest (the routes of the pages, checked for overlap) and a command palette
+- Kanban support (`PyroManiac.KanBan`) with static lanes (an enum) or dynamic lanes (a `belongs_to`; lanes that users add, rename, delete, and move, stored with `PyroManiac.KanBan.Lanes`), and user-defined order (`PyroManiac.Ordering`) extensions on resources
+- Configurable decorations: the meaning of a value, mapped to styles by each renderer
 - Renderer-agnostic — pair with the renderer for your stack
 
 ## About

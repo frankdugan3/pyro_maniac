@@ -52,7 +52,7 @@ defmodule Brewery.Supplier do
   end
 
   relationships do
-    has_many :ingredients, Brewery.Ingredient
+    has_many :ingredients, Brewery.Ingredient, public?: true
   end
 
   aggregates do

@@ -18,11 +18,11 @@ defmodule PyroManiac.Helpers do
       iex> encode_sort([{:name, :asc}, {:code, :desc}])
       "name,-code"
 
-      iex> encode_sort([{%Ash.Query.Calculation{calc_name: :calibration_status, name: :__calc__}, :desc}])
-      "-calibration_status"
+      iex> encode_sort([{%Ash.Query.Calculation{calc_name: :gravity_spread, name: :__calc__}, :desc}])
+      "-gravity_spread"
 
-      iex> encode_sort([{%Ash.Query.Aggregate{agg_name: :order_count, name: :__agg__}, :asc}])
-      "order_count"
+      iex> encode_sort([{%Ash.Query.Aggregate{agg_name: :batch_count, name: :__agg__}, :asc}])
+      "batch_count"
   """
   def encode_sort(sort) do
     sort

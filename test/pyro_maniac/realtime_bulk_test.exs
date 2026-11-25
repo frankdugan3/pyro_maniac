@@ -31,11 +31,11 @@ defmodule PyroManiac.RealtimeBulkTest do
       extensions: [PyroManiac.Resource]
 
     pyro_maniac do
-      default_label :name
-      expose [:read, :create, :update, :import, :clear]
+      default_label(:name)
+      expose([:read, :create, :update, :import, :clear])
 
       realtime do
-        mode :auto
+        mode(:auto)
         module PyroManiac.RealtimeBulkTest.PubSub
         bulk([:import, :clear, :truncate])
       end
@@ -209,10 +209,10 @@ defmodule PyroManiac.RealtimeBulkTest do
               extensions: [PyroManiac.Resource]
 
             pyro_maniac do
-              default_label :name
+              default_label(:name)
 
               realtime do
-                mode :auto
+                mode(:auto)
                 module PyroManiac.RealtimeBulkTest.PubSub
                 except [:import]
                 bulk([:import])
@@ -245,7 +245,7 @@ defmodule PyroManiac.RealtimeBulkTest do
               extensions: [PyroManiac.Resource]
 
             pyro_maniac do
-              default_label :name
+              default_label(:name)
 
               realtime do
                 bulk([:import])
@@ -284,7 +284,7 @@ defmodule PyroManiac.RealtimeBulkTest do
               extensions: [PyroManiac.Resource]
 
             pyro_maniac do
-              default_label :name
+              default_label(:name)
 
               realtime do
                 bulk([:import])
@@ -322,8 +322,8 @@ defmodule PyroManiac.RealtimeBulkTest do
       extensions: [PyroManiac.Resource]
 
     pyro_maniac do
-      default_label :name
-      expose [:read, :create]
+      default_label(:name)
+      expose([:read, :create])
 
       realtime do
         except [:create]
@@ -356,11 +356,11 @@ defmodule PyroManiac.RealtimeBulkTest do
       extensions: [PyroManiac.Resource]
 
     pyro_maniac do
-      default_label :name
-      expose [:read, :update]
+      default_label(:name)
+      expose([:read, :update])
 
       realtime do
-        mode :validate
+        mode(:validate)
       end
     end
 
@@ -387,16 +387,26 @@ defmodule PyroManiac.RealtimeBulkTest do
         defmodule UnpublishedPage do
           use PyroManiac, resource: PyroManiac.RealtimeBulkTest.Unpublished
 
-          views do
-            view :read do
-              type :data_table
-              on_update :replace
-              exclude [:id]
-              column :name
+          view :read do
+            type :data_table
+            primary? true
+            on_update :replace
+            exclude [:id]
+            column :name
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
 
-          forms do
+          page do
+            route "/test"
             exclude [:update]
           end
         end
@@ -408,16 +418,26 @@ defmodule PyroManiac.RealtimeBulkTest do
         defmodule NoDestroyPage do
           use PyroManiac, resource: PyroManiac.RealtimeBulkTest.Partial
 
-          views do
-            view :read do
-              type :data_table
-              on_destroy :remove
-              exclude [:id]
-              column :name
+          view :read do
+            type :data_table
+            primary? true
+            on_destroy :remove
+            exclude [:id]
+            column :name
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
 
-          forms do
+          page do
+            route "/test"
             exclude [:create]
           end
         end
@@ -428,21 +448,32 @@ defmodule PyroManiac.RealtimeBulkTest do
       defmodule ExceptPage do
         use PyroManiac, resource: PyroManiac.RealtimeBulkTest.Partial
 
-        views do
-          view :read do
-            type :data_table
-            on_update :replace
-            exclude [:id]
-            column :name
+        view :read do
+          type :data_table
+          primary? true
+          on_update :replace
+          exclude [:id]
+          column :name
+        end
+
+        view :read do
+          type :card
+
+          primary? true
+
+          section :main do
+            field :name
           end
         end
 
-        forms do
+        page do
+          route "/test"
           exclude [:create]
         end
       end
 
-      assert [%{on_update: :replace, on_bulk: :none}] = PyroManiac.Info.views(ExceptPage)
+      assert %{on_update: :replace, on_bulk: :none} =
+               PyroManiac.Info.primary_list_view(ExceptPage)
     end
 
     test "on_bulk without bulk" do
@@ -450,16 +481,26 @@ defmodule PyroManiac.RealtimeBulkTest do
         defmodule NoBulkPage do
           use PyroManiac, resource: PyroManiac.RealtimeBulkTest.Partial
 
-          views do
-            view :read do
-              type :data_table
-              on_bulk(:reload)
-              exclude [:id]
-              column :name
+          view :read do
+            type :data_table
+            primary? true
+            on_bulk(:reload)
+            exclude [:id]
+            column :name
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
 
-          forms do
+          page do
+            route "/test"
             exclude [:create]
           end
         end
@@ -470,22 +511,32 @@ defmodule PyroManiac.RealtimeBulkTest do
       defmodule BulkPage do
         use PyroManiac, resource: PyroManiac.RealtimeBulkTest.Widget
 
-        views do
-          view :read do
-            type :data_table
-            on_bulk(:reload)
-            on_create :reload
-            exclude [:id]
-            column :name
+        view :read do
+          type :data_table
+          primary? true
+          on_bulk(:reload)
+          on_create :reload
+          exclude [:id]
+          column :name
+        end
+
+        view :read do
+          type :card
+
+          primary? true
+
+          section :main do
+            field :name
           end
         end
 
-        forms do
-          exclude [:create, :update, :import]
+        page do
+          route "/test"
+          exclude [:create, :update, :import, :clear]
         end
       end
 
-      assert [%{on_bulk: :reload}] = PyroManiac.Info.views(BulkPage)
+      assert %{on_bulk: :reload} = PyroManiac.Info.primary_list_view(BulkPage)
       assert PyroManiac.SubscriptionManager.has_realtime?(BulkPage)
     end
   end

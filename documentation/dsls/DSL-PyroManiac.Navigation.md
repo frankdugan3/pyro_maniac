@@ -17,6 +17,14 @@ Define the application navigation structure.
 
 
 
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`orientation`](#nav-orientation){: #nav-orientation } | `:horizontal \| :vertical` | `:vertical` | The axis of the navigation: `:vertical` (a sidebar, the default) or `:horizontal` (a top bar; its groups are menus). |
+
+
+
 ### nav.item
 ```elixir
 item name
@@ -38,13 +46,13 @@ Declare a navigation link.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`path`](#nav-item-path){: #nav-item-path } | `String.t` |  | URL path for `page` or `module` items (must start with `/`). |
+| [`path`](#nav-item-path){: #nav-item-path } | `String.t` |  | URL path of a `module` item (starts with `/`). A `page` item opens the `route` of its page. |
 | [`label`](#nav-item-label){: #nav-item-label } | `String.t` |  | Display text. Auto-derived from name if omitted. |
-| [`tone`](#nav-item-tone){: #nav-item-tone } | `:neutral \| :info \| :success \| :warning \| :danger` |  | The meaning of the item: `:neutral`, `:info`, `:success`, `:warning`, or `:danger`. Each renderer maps it to its own style. |
+| [`decoration`](#nav-item-decoration){: #nav-item-decoration } | `:neutral \| :info \| :success \| :warning \| :danger` |  | The meaning of the item: `:neutral`, `:info`, `:success`, `:warning`, or `:danger`. Each renderer maps it to its own style. |
 | [`icon`](#nav-item-icon){: #nav-item-icon } | `atom` |  | Icon name to be passed to the renderer. |
 | [`image`](#nav-item-image){: #nav-item-image } | `String.t` |  | Path or URL to an image (e.g. company logo). Mutually exclusive with `icon`. |
 | [`image_alt`](#nav-item-image_alt){: #nav-item-image_alt } | `String.t` |  | Alt text for the image. |
-| [`page`](#nav-item-page){: #nav-item-page } | `atom` |  | A PyroManiac page module. Validated and authorization-aware. |
+| [`page`](#nav-item-page){: #nav-item-page } | `atom` |  | A PyroManiac page (a module with a `page` section). The item opens its `route`. Validated and authorization-aware. |
 | [`module`](#nav-item-module){: #nav-item-module } | `atom` |  | A non-PyroManiac module. Not validated against PyroManiac. |
 | [`href`](#nav-item-href){: #nav-item-href } | `String.t` |  | External URL. Opens in a new tab. |
 | [`authorizer`](#nav-item-authorizer){: #nav-item-authorizer } | `(map -> boolean)` |  | Custom authorizer function `(scope -> boolean)`. When set, takes precedence over the default page-based authorization. |
@@ -81,7 +89,7 @@ Declare a collapsible navigation group containing items and nested groups.
 | Name | Type | Default | Docs |
 |------|------|---------|------|
 | [`label`](#nav-group-label){: #nav-group-label } | `String.t` |  | Display text. Auto-derived from name if omitted. |
-| [`tone`](#nav-group-tone){: #nav-group-tone } | `:neutral \| :info \| :success \| :warning \| :danger` |  | The meaning of the group: `:neutral`, `:info`, `:success`, `:warning`, or `:danger`. Each renderer maps it to its own style. |
+| [`decoration`](#nav-group-decoration){: #nav-group-decoration } | `:neutral \| :info \| :success \| :warning \| :danger` |  | The meaning of the group: `:neutral`, `:info`, `:success`, `:warning`, or `:danger`. Each renderer maps it to its own style. |
 | [`icon`](#nav-group-icon){: #nav-group-icon } | `atom` |  | Icon name to be passed to the renderer. |
 | [`image`](#nav-group-image){: #nav-group-image } | `String.t` |  | Path or URL to an image. Mutually exclusive with `icon`. |
 | [`image_alt`](#nav-group-image_alt){: #nav-group-image_alt } | `String.t` |  | Alt text for the image. |
@@ -109,13 +117,13 @@ Declare a navigation link.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`path`](#nav-group-item-path){: #nav-group-item-path } | `String.t` |  | URL path for `page` or `module` items (must start with `/`). |
+| [`path`](#nav-group-item-path){: #nav-group-item-path } | `String.t` |  | URL path of a `module` item (starts with `/`). A `page` item opens the `route` of its page. |
 | [`label`](#nav-group-item-label){: #nav-group-item-label } | `String.t` |  | Display text. Auto-derived from name if omitted. |
-| [`tone`](#nav-group-item-tone){: #nav-group-item-tone } | `:neutral \| :info \| :success \| :warning \| :danger` |  | The meaning of the item: `:neutral`, `:info`, `:success`, `:warning`, or `:danger`. Each renderer maps it to its own style. |
+| [`decoration`](#nav-group-item-decoration){: #nav-group-item-decoration } | `:neutral \| :info \| :success \| :warning \| :danger` |  | The meaning of the item: `:neutral`, `:info`, `:success`, `:warning`, or `:danger`. Each renderer maps it to its own style. |
 | [`icon`](#nav-group-item-icon){: #nav-group-item-icon } | `atom` |  | Icon name to be passed to the renderer. |
 | [`image`](#nav-group-item-image){: #nav-group-item-image } | `String.t` |  | Path or URL to an image (e.g. company logo). Mutually exclusive with `icon`. |
 | [`image_alt`](#nav-group-item-image_alt){: #nav-group-item-image_alt } | `String.t` |  | Alt text for the image. |
-| [`page`](#nav-group-item-page){: #nav-group-item-page } | `atom` |  | A PyroManiac page module. Validated and authorization-aware. |
+| [`page`](#nav-group-item-page){: #nav-group-item-page } | `atom` |  | A PyroManiac page (a module with a `page` section). The item opens its `route`. Validated and authorization-aware. |
 | [`module`](#nav-group-item-module){: #nav-group-item-module } | `atom` |  | A non-PyroManiac module. Not validated against PyroManiac. |
 | [`href`](#nav-group-item-href){: #nav-group-item-href } | `String.t` |  | External URL. Opens in a new tab. |
 | [`authorizer`](#nav-group-item-authorizer){: #nav-group-item-authorizer } | `(map -> boolean)` |  | Custom authorizer function `(scope -> boolean)`. When set, takes precedence over the default page-based authorization. |
@@ -134,6 +142,101 @@ Target: `PyroManiac.Navigation.Item`
 ### Introspection
 
 Target: `PyroManiac.Navigation.Group`
+
+
+
+
+## command_palette
+The command palette: a search of the navigation items and of the commands, opened with a hotkey.
+
+### Nested DSLs
+ * [command](#command_palette-command)
+   * render
+
+
+
+
+
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`enabled?`](#command_palette-enabled?){: #command_palette-enabled? } | `boolean` | `true` | Show the command palette. |
+| [`hotkey`](#command_palette-hotkey){: #command_palette-hotkey } | `String.t` | `"mod+k"` | The key that opens the palette (`mod` is Cmd on macOS, else Ctrl). |
+| [`navigation?`](#command_palette-navigation?){: #command_palette-navigation? } | `boolean` | `true` | The palette finds the items of the navigation (that the user can open). |
+| [`placeholder`](#command_palette-placeholder){: #command_palette-placeholder } | `String.t` | `"Search"` | The text of the empty search input. |
+
+
+
+### command_palette.command
+```elixir
+command name
+```
+
+
+A command of the command palette.
+
+### Nested DSLs
+ * [render](#command_palette-command-render)
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#command_palette-command-name){: #command_palette-command-name .spark-required} | `atom` |  | Unique identifier for this command. |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`label`](#command_palette-command-label){: #command_palette-command-label } | `String.t` |  | Display text. Auto-derived from name if omitted. |
+| [`description`](#command_palette-command-description){: #command_palette-command-description } | `String.t` |  | Text below the label. |
+| [`group`](#command_palette-command-group){: #command_palette-command-group } | `String.t` |  | The group of the command in the palette. |
+| [`keywords`](#command_palette-command-keywords){: #command_palette-command-keywords } | `list(String.t)` | `[]` | Words that also find the command. |
+| [`icon`](#command_palette-command-icon){: #command_palette-command-icon } | `atom` |  | Icon name to be passed to the renderer. |
+| [`page`](#command_palette-command-page){: #command_palette-command-page } | `atom` |  | A PyroManiac page module. Validated and authorization-aware. |
+| [`module`](#command_palette-command-module){: #command_palette-command-module } | `atom` |  | A non-PyroManiac module. |
+| [`path`](#command_palette-command-path){: #command_palette-command-path } | `String.t` |  | URL path. Required for `module` (starts with `/`). Optional for `page`: it starts with the `route` of the page (for example `"/batches?new"`); without it, the command opens the route. |
+| [`href`](#command_palette-command-href){: #command_palette-command-href } | `String.t` |  | A URL. |
+| [`authorizer`](#command_palette-command-authorizer){: #command_palette-command-authorizer } | `(map -> boolean)` |  | Custom authorizer function `(scope -> boolean)`. |
+
+
+### command_palette.command.render
+```elixir
+render renderer, implementation \\ nil
+```
+
+
+A custom render of the node: a text or an Ash expression for every renderer, or an implementation for one renderer.
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`renderer`](#command_palette-command-render-renderer){: #command_palette-command-render-renderer .spark-required} | `any` |  | The renderer library (for example `PyroManiac.LiveView`), or, alone, the portable value: a string or an Ash expression. |
+| [`implementation`](#command_palette-command-render-implementation){: #command_palette-command-render-implementation } | `any` |  | The implementation for the renderer. The renderer validates it. |
+
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Render`
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.Navigation.Command`
 
 
 

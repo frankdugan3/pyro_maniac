@@ -26,10 +26,11 @@ defmodule PyroManiac.Surface.Requirement do
         }
 
   @doc """
-  The requirements of a page: its resource, and its views, forms (actions and
-  bulk actions), and searches, after the transformers. Delegated views and
-  delegated forms are not included: the delegate module has its own
-  requirements.
+  The requirements of a page: its resource, and its views, the actions of
+  its views (`action`, `bulk_action`, the `action` of a column,
+  `edit_columns`), and its searches, after the transformers. A delegated
+  viewer (`related ... delegate_to`) is not included: the delegate page has
+  its own requirements.
   """
   @spec requirements(Ash.Resource.t(), [struct()], [struct()], [struct()]) :: [t()]
   def requirements(resource, views, forms, searches) do
@@ -37,7 +38,7 @@ defmodule PyroManiac.Surface.Requirement do
 
     view_requirements =
       Enum.flat_map(views, fn
-        %View{} = view -> view_requirements(view, resource, nil, search_paths)
+        %View{} = view -> view_requirements(view, resource, search_paths)
         _ -> []
       end)
 
@@ -65,70 +66,38 @@ defmodule PyroManiac.Surface.Requirement do
   end
 
   @doc "The read actions that a view uses."
-  @spec view_actions(View.t(), Ash.Resource.t() | nil) :: [atom()]
-  def view_actions(%View{read_action: read_action}, _parent) when not is_nil(read_action),
+  @spec view_actions(View.t()) :: [atom()]
+  def view_actions(%View{read_action: read_action}) when not is_nil(read_action),
     do: [read_action]
 
-  def view_actions(%View{relationship: rel, resource: resource} = view, parent)
-      when not is_nil(rel) and not is_nil(parent) do
-    case Ash.Resource.Info.relationship(parent, rel) do
-      %{read_action: read_action, destination: ^resource} when not is_nil(read_action) ->
-        [read_action]
-
-      _ ->
-        List.wrap(view.name)
-    end
-  end
-
-  def view_actions(%View{name: names}, _parent), do: List.wrap(names)
+  def view_actions(%View{name: names}), do: List.wrap(names)
 
   # Views -----------------------------------------------------------------
 
-  defp view_requirements(%View{type: :delegated}, _resource, _parent, _search_paths), do: []
-
-  defp view_requirements(%View{} = view, page_resource, parent, search_paths) do
+  defp view_requirements(%View{} = view, page_resource, search_paths) do
     resource = view.resource || page_resource
     origin = [:views, :view | List.wrap(List.first(List.wrap(view.name)))]
     location = Spark.Dsl.Entity.anno(view)
-
-    # A nested `:render` view without a relationship renders the row of this
-    # view: it has no read, and its loads are loads of this view.
-    {row_renders, nested} = Enum.split_with(view.views || [], &row_render?/1)
-
-    loads =
-      (view_loads(view, resource) ++ Enum.flat_map(row_renders, &Surface.paths(&1.loads)))
-      |> Enum.uniq()
-
-    filter = view_filter(view, resource) ++ if(is_nil(parent), do: search_paths, else: [])
+    loads = view_loads(view, resource)
+    filter = view_filter(view, resource) ++ search_paths
     sort = view_sort(view, resource)
 
     reads =
-      if row_render?(view) and not is_nil(parent) do
-        []
-      else
-        for action <- view_actions(view, parent) do
-          %__MODULE__{
-            resource: resource,
-            action: action,
-            origin: origin,
-            location: location,
-            loads: loads,
-            filter: Enum.uniq(filter),
-            sort: sort
-          }
-        end
+      for action <- view_actions(view) do
+        %__MODULE__{
+          resource: resource,
+          action: action,
+          origin: origin,
+          location: location,
+          loads: loads,
+          filter: Enum.uniq(filter),
+          sort: sort
+        }
       end
 
     reads ++
-      edit_requirements(view, resource, origin) ++
-      kanban_requirements(view, resource, origin, location) ++
-      Enum.flat_map(nested, &view_requirements(&1, page_resource, resource, []))
+      kanban_requirements(view, resource, origin, location)
   end
-
-  @doc "Whether a view is a nested `:render` view of the row of its parent (no relationship)."
-  @spec row_render?(View.t()) :: boolean()
-  def row_render?(%View{type: :render, relationship: nil}), do: true
-  def row_render?(_view), do: false
 
   @special_fields [
     :date_field,
@@ -143,46 +112,31 @@ defmodule PyroManiac.Surface.Requirement do
 
   defp view_loads(view, resource) do
     (source_paths(view, resource) ++
-       tone_paths(view) ++
+       decoration_paths(view) ++
        for(field <- @special_fields, name = Map.get(view, field), do: [name]) ++
        render_paths(view) ++
-       Surface.paths(PyroManiac.Info.nested_view_loads(view)) ++
        Surface.paths(view.ensure_loaded) ++
+       PyroManiac.Card.paths(view, resource) ++
+       PyroManiac.Info.link_paths(view, resource) ++
        label_paths(resource) ++ attachment_paths(resource))
     |> Enum.reject(&(&1 == []))
     |> Enum.uniq()
   end
 
-  # The sources of the columns, the fields, and the sections of a view.
-  defp source_paths(view, resource) do
-    Enum.map(view.columns || [], &List.wrap(&1.source)) ++
-      Enum.map(view.fields || [], &List.wrap(&1.source)) ++
-      Enum.flat_map(view.sections || [], fn section ->
-        Enum.map(section.fields || [], &List.wrap(&1.source)) ++
-          Enum.flat_map(section.relationships || [], &section_relationship_paths(&1, resource))
-      end)
-  end
+  # The sources of the columns of a view. The record tree is in
+  # `PyroManiac.Card.paths/2`.
+  defp source_paths(view, _resource),
+    do: Enum.map(view.columns || [], &List.wrap(&1.source))
 
-  # The fields that the `tone` expressions of a view refer to.
-  defp tone_paths(view) do
-    ((view.columns || []) ++
-       (view.fields || []) ++ Enum.flat_map(view.sections || [], &(&1.fields || [])))
-    |> Enum.flat_map(&(Map.get(&1, :__tone_refs__) || []))
+  # The fields that the `decoration` expressions of the columns of a view refer to.
+  defp decoration_paths(view) do
+    (view.columns || [])
+    |> Enum.flat_map(&((Map.get(&1, :__decoration_refs__) || []) ++ PyroManiac.Content.refs(&1)))
     |> Enum.map(&[&1])
   end
 
   defp render_paths(%View{type: :render, loads: loads}), do: Surface.paths(loads)
   defp render_paths(_view), do: []
-
-  defp section_relationship_paths(%{name: name, fields: fields}, resource)
-       when fields in [nil, []] do
-    destination = destination(resource, name)
-    [[name] | Enum.map(label_paths(destination), &[name | &1])]
-  end
-
-  defp section_relationship_paths(%{name: name, fields: fields}, _resource) do
-    Enum.map(fields, &[name | List.wrap(&1.source)])
-  end
 
   # A column on a field that Ash cannot filter (`filterable? false`) or sort
   # (`sortable? false`) has no filter or sort: the renderer turns it off.
@@ -242,29 +196,6 @@ defmodule PyroManiac.Surface.Requirement do
   defp sort_paths(key, path) when is_atom(key), do: [path ++ [key]]
   defp sort_paths(_other, _path), do: []
 
-  defp edit_requirements(view, resource, origin) do
-    for column <- view.columns || [],
-        not is_nil(column.edit_with),
-        action = edit_action(column.edit_with, resource),
-        not is_nil(action) do
-      %__MODULE__{
-        resource: resource,
-        action: action,
-        origin: origin ++ [:column, column.name, :edit_with],
-        location: Spark.Dsl.Entity.anno(column)
-      }
-    end
-  end
-
-  defp edit_action({action, _type}, _resource), do: action
-
-  defp edit_action(_type, resource) do
-    case Ash.Resource.Info.primary_action(resource, :update) do
-      nil -> nil
-      action -> action.name
-    end
-  end
-
   defp kanban_requirements(%View{type: :kanban} = view, resource, origin, location) do
     move =
       view.kanban_action ||
@@ -294,7 +225,7 @@ defmodule PyroManiac.Surface.Requirement do
 
   defp form_requirements(%Action{} = action, page_resource) do
     resource = action.resource || page_resource
-    origin = [:forms, :action, action.name]
+    origin = [:view, :action, action.name]
 
     [
       %__MODULE__{
@@ -313,7 +244,7 @@ defmodule PyroManiac.Surface.Requirement do
        do: []
 
   defp form_requirements(%BulkAction{} = bulk_action, page_resource) do
-    origin = [:forms, :bulk_action, bulk_action.name]
+    origin = [:view, :bulk_action, bulk_action.name]
 
     [
       %__MODULE__{
@@ -363,13 +294,6 @@ defmodule PyroManiac.Surface.Requirement do
     end
   rescue
     _ -> []
-  end
-
-  defp destination(resource, name) do
-    case Ash.Resource.Info.relationship(resource, name) do
-      %{destination: destination} -> destination
-      _ -> nil
-    end
   end
 
   defp attachment_paths(resource) do

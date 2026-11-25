@@ -35,6 +35,20 @@ across recent versions.
 - The `pyro_maniac do default_label :field end` block on the resource is
   **required**. `PyroManiac.Dsl` has a verifier that rejects any page whose
   resource lacks the `PyroManiac.Resource` extension.
+- There is no `views do` block and no `forms` section. `view` is top
+  level, and a view names its actions (`action`, `bulk_action`). Each
+  exposed action of the resource is used by a view or is in `page do
+  exclude [...] end`.
+- Each `action` and `bulk_action` has a required `state` (`:guard`,
+  `:recover`, or `:discard`), with no default: `action :update, :guard`,
+  or `state :guard` in its block. `edit_columns` takes it as the third
+  argument. Refer to [forms](usage-rules/forms.md).
+- Every action interface is authorized with the scope of the user. No
+  exceptions: never `authorize?: false` in UI code. What a UI shows comes
+  from `Ash.can?(subject, scope, maybe_is: true, run_queries?: false)` on
+  the server, or from AshTypescript on a client. Write policies whose
+  strict check decides (simple checks of the actor first), so the answers
+  are exact. Refer to `documentation/tutorials/policies.md`.
 - The **surface** is required: a page can use only the actions and fields
   that its resources `expose`. When a page does not compile because of the
   surface, add the action or field to the `expose` of the resource. Do not
@@ -44,13 +58,15 @@ across recent versions.
 
 | Topic                                   | When to read                                                                 |
 | --------------------------------------- | ---------------------------------------------------------------------------- |
-| [page](usage-rules/page.md)             | Defining a page module: `use PyroManiac`, the `page` section, `extra_action` |
-| [views](usage-rules/views.md)           | The `views` section: every view type and its entities                        |
-| [forms](usage-rules/forms.md)           | The `forms` section: `action`, `bulk_action`, fields, groups, steps          |
-| [searches](usage-rules/searches.md)     | The `searches` section: filter tabs                                          |
+| [page](usage-rules/page.md)             | Defining a page module: `use PyroManiac`, the `page` section, `exclude`, the filters, `extra_action` |
+| [views](usage-rules/views.md)           | `view` (top level): every view type, the record tree, `workflow`, columns, inline edits, `clone?`/`new_row?`/`reorder?`, decorations |
+| [forms](usage-rules/forms.md)           | The actions of a view: `action`, `bulk_action`, `state`, `confirm`, inputs, sections, tabs, steps, `set` |
+| [searches](usage-rules/searches.md)     | `search` (top level): filter tabs                                            |
 | [resource](usage-rules/resource.md)     | Adding `PyroManiac.Resource` to an Ash resource                              |
-| [navigation](usage-rules/navigation.md) | Declaring a `PyroManiac.Navigation` module                                   |
-| [kan_ban](usage-rules/kan_ban.md)       | Adding `PyroManiac.KanBan` to a resource for kanban support                  |
+| [navigation](usage-rules/navigation.md) | Declaring a `PyroManiac.Navigation` module, and the command palette          |
+| [kan_ban](usage-rules/kan_ban.md)       | Adding `PyroManiac.KanBan` to a resource for kanban support: static or dynamic lanes, and `PyroManiac.KanBan.Lanes` for a lane resource |
+| [ordering](usage-rules/ordering.md)     | Adding `PyroManiac.Ordering` to a resource for a user-defined order (`reorder?`) |
+| [filter_presets](usage-rules/filter_presets.md) | Adding `PyroManiac.FilterPresets` to the resource that stores saved filters |
 | [info](usage-rules/info.md)             | Runtime introspection via `PyroManiac.Info`                                  |
 
 ## Generating code

@@ -30,9 +30,10 @@ the repo.
 
 ## Usage
 
-    defmodule MyApp.Task do
+    defmodule Brewery.Batch do
       use Ash.Resource,
-        extensions: [PyroManiac.KanBan]
+        domain: Brewery.Domain,
+        extensions: [PyroManiac.Resource, PyroManiac.KanBan]
 
       kan_ban do
         lane :status
@@ -43,10 +44,55 @@ the repo.
       end
     end
 
+## Dynamic lanes
+
+A `lane` that is a `belongs_to` gives dynamic lanes: the records of the
+destination are the lanes, so the users can add them. The cards are
+ordered in each lane by the foreign key. The destination is an existing
+resource (for example the stages of a project), or a lane resource with
+`PyroManiac.KanBan.Lanes`:
+
+    defmodule Brewery.Task do
+      use Ash.Resource,
+        extensions: [PyroManiac.Resource, PyroManiac.KanBan]
+
+      relationships do
+        belongs_to :stage, Brewery.Stage
+      end
+
+      kan_ban do
+        lane :stage do
+          destroy_action false
+        end
+
+        priority :rank
+        move_action :move_card
+        read_action :kanban_read
+      end
+    end
+
+The board reads the lanes with `read_action`; adds, edits, and deletes
+them with `create_action`, `update_action`, and `destroy_action`; and
+moves them with `move_action`. Each one defaults to the primary action of
+that type on the lane resource (`move_action`: the move action of the
+lane resource when it is ordered, `PyroManiac.Ordering.Info.ordering/1`);
+they are resolved at compile time. An action that is set but missing, or
+of another type, is a compile error, and so is a lane resource without a
+read action. Another action without a default is not available, and
+`false` turns one off (`PyroManiac.KanBan.Info.lane_action/2`). The
+`move_action` of the `kan_ban` section moves the cards; the
+`move_action` of the `lane` moves the lanes.
+
+`PyroManiac.KanBan.Info.lanes/2` reads the lanes of a board. A card
+without a lane (the foreign key is `nil`, when the relationship allows
+it) is in the lane "No lane".
+
 
 ## kan_ban
 Configure kanban board support for this resource.
 
+### Nested DSLs
+ * [lane](#kan_ban-lane)
 
 
 
@@ -56,7 +102,6 @@ Configure kanban board support for this resource.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`lane`](#kan_ban-lane){: #kan_ban-lane .spark-required} | `atom` |  | The attribute used to group records into swimlanes. Must be an Ash enum type or an atom/string with `one_of` constraints. |
 | [`priority`](#kan_ban-priority){: #kan_ban-priority .spark-required} | `atom` |  | The string attribute used for card ordering within lanes (a fractional index). Created automatically if it doesn't exist on the resource. |
 | [`move_action`](#kan_ban-move_action){: #kan_ban-move_action .spark-required} | `atom` |  | The name of the update action created for kanban card moves. Accepts the lane and priority fields, and shifts other card priorities atomically. |
 | [`read_action`](#kan_ban-read_action){: #kan_ban-read_action .spark-required} | `atom` |  | The name of the read action created for per-lane kanban loading. Accepts an optional `lane_value` argument that filters to one lane, sorts by the priority, and limits results to `per_lane`. |
@@ -64,6 +109,62 @@ Configure kanban board support for this resource.
 | [`count?`](#kan_ban-count?){: #kan_ban-count? } | `boolean` | `false` | When true, display the total count of cards in each lane header. Uses a count query per lane. |
 
 
+
+### kan_ban.lane
+```elixir
+lane name
+```
+
+
+The lanes of the board. An attribute (static lanes): an Ash enum type or
+an atom/string with `one_of` constraints. Or a `belongs_to` (dynamic
+lanes): the records of its destination are the lanes.
+
+
+
+
+### Examples
+```
+lane :status
+```
+
+```
+lane :stage do
+  read_action :read
+  create_action :create
+  destroy_action false
+  move_action :reorder
+  sort "position"
+end
+
+```
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`name`](#kan_ban-lane-name){: #kan_ban-lane-name .spark-required} | `atom` |  | An attribute (static lanes) or a `belongs_to` (dynamic lanes). |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`read_action`](#kan_ban-lane-read_action){: #kan_ban-lane-read_action } | `atom` |  | Dynamic lanes: the read action of the lane resource that gives the lanes. Defaults to its primary read action. |
+| [`create_action`](#kan_ban-lane-create_action){: #kan_ban-lane-create_action } | `atom` |  | Dynamic lanes: the create action that adds a lane. Defaults to the primary create action of the lane resource; `false` or no primary action: the board does not add lanes. |
+| [`update_action`](#kan_ban-lane-update_action){: #kan_ban-lane-update_action } | `atom` |  | Dynamic lanes: the update action that edits a lane (its name, decoration). Defaults to the primary update action of the lane resource; `false` or no primary action: the board does not edit lanes. |
+| [`move_action`](#kan_ban-lane-move_action){: #kan_ban-lane-move_action } | `atom` |  | Dynamic lanes: the update action that moves a lane in the order of the lanes. Defaults to the move action of the lane resource when it is ordered (`PyroManiac.Ordering` or `PyroManiac.KanBan.Lanes`); `false` or an unordered lane resource: the board does not move lanes. |
+| [`destroy_action`](#kan_ban-lane-destroy_action){: #kan_ban-lane-destroy_action } | `atom` |  | Dynamic lanes: the destroy action that deletes a lane. Defaults to the primary destroy action of the lane resource; `false` or no primary action: the board does not delete lanes. |
+| [`destroy_confirm`](#kan_ban-lane-destroy_confirm){: #kan_ban-lane-destroy_confirm } | `String.t \| false` |  | Dynamic lanes: the confirmation of the delete of a lane, a message or `false` (no confirmation). Required when the board deletes lanes: a renderer never adds a confirmation. |
+| [`sort`](#kan_ban-lane-sort){: #kan_ban-lane-sort } | `String.t` |  | Dynamic lanes: the order of the lanes, an Ash sort input (`"position"`). Defaults to the rank of the lane resource when it is ordered (`PyroManiac.KanBan.Lanes` or `PyroManiac.Ordering`). |
+
+
+
+
+
+### Introspection
+
+Target: `PyroManiac.KanBan.Lane`
 
 
 

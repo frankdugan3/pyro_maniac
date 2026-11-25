@@ -49,11 +49,10 @@ defmodule PyroManiac.Dsl.Transformers.ValidateSurface do
       |> Enum.filter(&pyro_maniac_resource?(&1.resource))
       |> Enum.each(&validate_requirement(&1, module))
 
-      validate_action_excludes(dsl, [:views], resource, [:read], module)
-      validate_action_excludes(dsl, [:forms], resource, [:create, :update], module)
+      validate_action_excludes(dsl, resource, module)
 
       for %View{} = view <- views do
-        validate_view(view, resource, nil, module)
+        validate_view(view, resource, module)
       end
     end
 
@@ -106,11 +105,14 @@ defmodule PyroManiac.Dsl.Transformers.ValidateSurface do
     end
   end
 
-  defp validate_action_excludes(dsl, section, resource, types, module) do
+  # `exclude` of the page names exposed actions only.
+  defp validate_action_excludes(dsl, resource, module) do
+    section = [:page]
+
     for name <- Transformer.get_option(dsl, section, :exclude, []) do
       action = Ash.Resource.Info.action(resource, name)
 
-      if is_nil(action) or action.type not in types or not ResourceInfo.exposed?(resource, name) do
+      if is_nil(action) or not ResourceInfo.exposed?(resource, name) do
         Error.raise!(
           module: module,
           location:
@@ -118,32 +120,26 @@ defmodule PyroManiac.Dsl.Transformers.ValidateSurface do
               Transformer.get_section_anno(dsl, section),
           path: section ++ [:exclude],
           why:
-            "`exclude` has #{inspect(name)}, which is not an exposed " <>
-              "#{Enum.map_join(types, " or ", &inspect/1)} action of #{inspect(resource)}",
+            "`exclude` has #{inspect(name)}, which is not an exposed action of " <>
+              inspect(resource),
           fix: "remove #{inspect(name)} from `exclude`"
         )
       end
     end
   end
 
-  defp validate_view(%View{type: :delegated}, _resource, _parent, _module), do: :ok
-
-  defp validate_view(%View{} = view, page_resource, parent, module) do
+  defp validate_view(%View{} = view, page_resource, module) do
     resource = view.resource || page_resource
 
-    validate_field_excludes(view, resource, parent, module)
+    validate_field_excludes(view, resource, module)
     validate_realtime(view, resource, module)
-
-    for %View{} = nested <- view.views || [] do
-      validate_view(nested, page_resource, resource, module)
-    end
   end
 
-  defp validate_field_excludes(%View{exclude: exclude} = view, resource, parent, module)
+  defp validate_field_excludes(%View{exclude: exclude} = view, resource, module)
        when exclude not in [nil, []] do
     exposed =
       view
-      |> Requirement.view_actions(parent)
+      |> Requirement.view_actions()
       |> Enum.flat_map(fn action ->
         case ResourceInfo.exposed(resource, action) do
           nil -> []
@@ -164,7 +160,7 @@ defmodule PyroManiac.Dsl.Transformers.ValidateSurface do
     end
   end
 
-  defp validate_field_excludes(_view, _resource, _parent, _module), do: :ok
+  defp validate_field_excludes(_view, _resource, _module), do: :ok
 
   @record_options [on_create: :create, on_update: :update, on_destroy: :destroy]
 

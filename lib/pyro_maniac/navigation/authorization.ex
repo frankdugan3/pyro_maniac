@@ -4,8 +4,12 @@ defmodule PyroManiac.Navigation.Authorization do
 
   Filters navigation items based on the current user's scope by resolving
   each page item's resource and default read action, then checking
-  `Ash.can?/3` with `run_queries?: false`. Groups with no visible
-  children after filtering are removed.
+  `Ash.can?/3` with `maybe_is: true, run_queries?: false`: the strict check
+  of the policies, with no query. Groups with no visible children after
+  filtering are removed.
+
+  The answer is exact only when the strict check decides the read policy
+  (simple checks of the actor). Refer to the Policies guide.
   """
 
   alias PyroManiac.Navigation.{Group, Item}
@@ -46,7 +50,7 @@ defmodule PyroManiac.Navigation.Authorization do
   def authorized?(page_module, scope) do
     with {:ok, resource} <- fetch_resource(page_module),
          {:ok, action} <- fetch_default_read_action(page_module, resource) do
-      Ash.can?({resource, action}, scope, run_queries?: false)
+      Ash.can?({resource, action}, scope, maybe_is: true, run_queries?: false)
     else
       _ -> true
     end
@@ -61,13 +65,10 @@ defmodule PyroManiac.Navigation.Authorization do
     _ -> :error
   end
 
-  # A page can have only a board. Thus a `:kanban` view also gives the read
-  # action, after the table and the grid.
+  # The read action of the primary list view: the view that the navigation
+  # opens.
   defp fetch_default_read_action(page_module, resource) do
-    view =
-      PyroManiac.Info.primary_view(page_module, :data_table) ||
-        PyroManiac.Info.primary_view(page_module, :grid) ||
-        PyroManiac.Info.primary_view(page_module, :kanban)
+    view = PyroManiac.Info.primary_list_view(page_module)
 
     action_name =
       case view do

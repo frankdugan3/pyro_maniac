@@ -21,28 +21,112 @@ defmodule PyroManiac.Info do
     |> PyroManiac.Resource.Info.default_label()
   end
 
-  @doc "Returns the page title."
-  @spec title(PyroManiac.t()) :: String.t()
+  @doc """
+  The page title: `title`, else the plural name of the resource (or its
+  short name), humanized.
+  """
+  @spec title(PyroManiac.t()) :: String.t() | nil
   def title(pyro_maniac) do
-    Spark.Dsl.Extension.get_opt(pyro_maniac, [:page], :title)
+    case Spark.Dsl.Extension.get_opt(pyro_maniac, [:page], :title) do
+      nil -> default_title(resource(pyro_maniac))
+      title -> title
+    end
   end
 
-  @doc "Returns the page description (string, render function, or nil)."
-  @spec description(PyroManiac.t()) :: String.t() | (map() -> any()) | nil
+  defp default_title(nil), do: nil
+
+  defp default_title(resource) do
+    name = Ash.Resource.Info.plural_name(resource) || Ash.Resource.Info.short_name(resource)
+    PyroManiac.Dsl.Transformers.default_label(name)
+  end
+
+  @doc """
+  The description of the page: its `description` entities (a text, and
+  implementations for some renderers). Refer to
+  `PyroManiac.Content.resolve/2`.
+  """
+  @spec description(PyroManiac.t()) :: [PyroManiac.Description.t()]
   def description(pyro_maniac) do
-    Spark.Dsl.Extension.get_opt(pyro_maniac, [:page], :description, nil)
+    pyro_maniac
+    |> Spark.Dsl.Extension.get_entities([:page])
+    |> Enum.filter(&is_struct(&1, PyroManiac.Description))
   end
 
-  @doc "Returns the route path configured for this page, or nil."
+  @doc """
+  The module is a page: it has a `page` section, with a `route`. A module
+  without it declares views and searches that the pages reuse.
+  """
+  @spec page?(module()) :: boolean()
+  def page?(module) do
+    Spark.Dsl.is?(module, PyroManiac) and
+      Spark.Dsl.Extension.get_persisted(module, :page?, false)
+  end
+
+  @doc "The route of the page (`page do route ... end`), or nil if the module is not a page."
   @spec route(PyroManiac.t()) :: String.t() | nil
   def route(pyro_maniac) do
     Spark.Dsl.Extension.get_opt(pyro_maniac, [:page], :route, nil)
   end
 
-  @spec default_viewer(PyroManiac.t()) :: atom()
-  def default_viewer(pyro_maniac) do
-    Spark.Dsl.Extension.get_opt(pyro_maniac, [:page], :default_viewer, :data_table)
-  end
+  @doc """
+  The width of the views of the page (`PyroManiac.Dsl.Type.width/0`):
+  `width` of the `page` section, else `:full`.
+  """
+  @spec width(PyroManiac.t()) :: atom()
+  def width(pyro_maniac),
+    do: Spark.Dsl.Extension.get_opt(pyro_maniac, [:page], :width, :full)
+
+  @doc """
+  The width of a view of the page: the `width` of the view, else `:record`
+  for a `:card` that opens in a modal or a drawer (the width of the modal or
+  the drawer), else the width of the page (`width/1`).
+  """
+  @spec view_width(PyroManiac.t(), View.t()) :: atom()
+  def view_width(_pyro_maniac, %View{width: width}) when not is_nil(width), do: width
+
+  def view_width(_pyro_maniac, %View{type: :card, presentation: presentation})
+      when presentation in [:modal, :drawer],
+      do: :record
+
+  def view_width(pyro_maniac, %View{}), do: width(pyro_maniac)
+
+  @doc """
+  The width of the dialog of an action (its own tree, a modal or a drawer):
+  the `width` of the action, else `:record`.
+  """
+  @spec action_width(PyroManiac.Form.Action.t()) :: atom()
+  def action_width(%PyroManiac.Form.Action{width: nil}), do: :record
+  def action_width(%PyroManiac.Form.Action{width: width}), do: width
+
+  @doc "Whether the user builds filters (the advanced filter view)."
+  @spec custom_filters?(PyroManiac.t()) :: boolean()
+  def custom_filters?(pyro_maniac),
+    do: Spark.Dsl.Extension.get_opt(pyro_maniac, [:page], :custom_filters?, false)
+
+  @doc """
+  Where the filters that a user builds are saved: `:client`, a resource with
+  `PyroManiac.FilterPresets`, or `nil`.
+  """
+  @spec filter_storage(PyroManiac.t()) :: :client | module() | nil
+  def filter_storage(pyro_maniac),
+    do: Spark.Dsl.Extension.get_opt(pyro_maniac, [:page], :filter_storage, nil)
+
+  @doc "Whether a user can share a saved filter."
+  @spec shared_filters?(PyroManiac.t()) :: boolean()
+  def shared_filters?(pyro_maniac),
+    do: Spark.Dsl.Extension.get_opt(pyro_maniac, [:page], :shared_filters?, false)
+
+  @doc """
+  The decorations that the DSL accepts: `config :pyro_maniac, decorations:
+  [...]` (compile time), else `default_decorations/0`. A renderer maps each
+  one to a style.
+  """
+  @spec decorations() :: [atom()]
+  def decorations, do: PyroManiac.Dsl.Type.decorations()
+
+  @doc "The default decorations: `[:neutral, :info, :success, :warning, :danger]`."
+  @spec default_decorations() :: [atom()]
+  def default_decorations, do: PyroManiac.Dsl.Type.default_decorations()
 
   @spec track_presence?(PyroManiac.t()) :: boolean()
   def track_presence?(pyro_maniac) do
@@ -57,14 +141,11 @@ defmodule PyroManiac.Info do
   end
 
   @doc """
-  Returns all top-level view entities.
+  Returns all top-level view entities, in the order of the DSL.
   """
   @spec views(PyroManiac.t()) :: [View.t()]
   def views(pyro_maniac) do
-    pyro_maniac
-    |> Spark.Dsl.Extension.get_persisted(:views_by_action_and_type, %{})
-    |> Map.values()
-    |> Enum.uniq()
+    Spark.Dsl.Extension.get_persisted(pyro_maniac, :views, [])
   end
 
   @doc """
@@ -88,23 +169,34 @@ defmodule PyroManiac.Info do
   end
 
   @doc """
-  Returns the primary view for the given type.
-
-  Finds the view matching the primary read action, or `:read`,
-  or falls back to the first view of that type.
+  The primary single view of a page (a `:card`): the view of one record
+  that a link to the page opens. Refer to `PyroManiac.Card`.
   """
-  @spec primary_view(PyroManiac.t(), atom()) :: View.t() | nil
-  def primary_view(pyro_maniac, type) do
-    resource = resource(pyro_maniac)
+  @spec primary_single_view(PyroManiac.t()) :: View.t() | nil
+  def primary_single_view(pyro_maniac) do
+    Spark.Dsl.Extension.get_persisted(pyro_maniac, :__primary_single_view__, nil)
+  end
 
-    if resource do
-      primary_read = Ash.Resource.Info.primary_action(resource, :read)
-      primary_read_name = primary_read && primary_read.name
+  @doc """
+  The primary list view of a page: its primary list-only view, else its
+  primary single view (a `:card` shows one card for each record).
+  """
+  @spec primary_list_view(PyroManiac.t()) :: View.t() | nil
+  def primary_list_view(pyro_maniac) do
+    Spark.Dsl.Extension.get_persisted(pyro_maniac, :__primary_list_view__, nil)
+  end
 
-      view_for(pyro_maniac, primary_read_name, type) ||
-        view_for(pyro_maniac, :read, type) ||
-        views_of_type(pyro_maniac, type) |> List.first()
-    end
+  @doc """
+  The single views (`:card`) or the list views of a page whose name has
+  `name`. `kind` is `:single` or `:list`.
+  """
+  @spec named_views(PyroManiac.t(), :single | :list, atom()) :: [View.t()]
+  def named_views(pyro_maniac, kind, name) do
+    types = if kind == :single, do: View.single_types(), else: View.list_types()
+
+    pyro_maniac
+    |> views()
+    |> Enum.filter(&(&1.type in types and name in &1.name))
   end
 
   @doc """
@@ -133,47 +225,61 @@ defmodule PyroManiac.Info do
     Spark.Dsl.Extension.get_entities(pyro_maniac, [:searches])
   end
 
-  @spec form_for(PyroManiac.t(), atom()) :: Action.t() | nil
-  def form_for(pyro_maniac, action_name) do
+  @doc """
+  The first action entity of a page with the name `action_name` (refer to
+  `actions/1`): the action of a card first.
+  """
+  @spec action_for(PyroManiac.t(), atom()) :: Action.t() | nil
+  def action_for(pyro_maniac, action_name) do
     pyro_maniac
-    |> form_actions()
+    |> actions()
     |> Enum.find(&(&1.name == action_name))
   end
 
   @doc """
-  Returns a form action by name, scoped to a specific resource.
-
-  When `target_resource` matches the module's primary resource (or is nil),
-  returns forms without an explicit `resource` option. Otherwise returns
-  forms whose `resource` matches `target_resource`.
+  The first action entity of a page with the name `action_name`, scoped to
+  a resource (refer to `actions_for_resource/2`).
   """
-  @spec form_for(PyroManiac.t(), atom(), atom()) :: Action.t() | nil
-  def form_for(pyro_maniac, action_name, target_resource) do
+  @spec action_for(PyroManiac.t(), atom(), atom()) :: Action.t() | nil
+  def action_for(pyro_maniac, action_name, target_resource) do
     pyro_maniac
-    |> form_actions_for_resource(target_resource)
+    |> actions_for_resource(target_resource)
     |> Enum.find(&(&1.name == action_name))
   end
 
-  @spec form_actions(PyroManiac.t()) :: [Action.t()]
-  def form_actions(pyro_maniac) do
+  @doc """
+  The actions of the views of a page (`action`, the `action` of a column,
+  `edit_columns`), each with its expanded form: one entity for each action
+  name and view (`__view__`), the actions of the cards first.
+  """
+  @spec actions(PyroManiac.t()) :: [Action.t()]
+  def actions(pyro_maniac) do
     pyro_maniac
     |> Spark.Dsl.Extension.get_entities([:forms])
     |> Enum.filter(&match?(%Action{}, &1))
+    |> Enum.sort_by(&if(match?({_, :card}, &1.__view__), do: 0, else: 1))
+  end
+
+  @doc "The actions of one view of a page (refer to `actions/1`)."
+  @spec actions(PyroManiac.t(), View.t()) :: [Action.t()]
+  def actions(pyro_maniac, %View{} = view) do
+    key = {List.first(view.name), view.type}
+    pyro_maniac |> actions() |> Enum.filter(&(&1.__view__ == key))
   end
 
   @doc """
-  Returns form actions scoped to a specific resource.
+  The action entities of a page scoped to a resource.
 
-  When `target_resource` matches the module's primary resource (or is nil),
-  returns forms without an explicit `resource` option. Otherwise returns
-  forms whose `resource` matches `target_resource`.
+  When `target_resource` is the resource of the page (or `nil`), the
+  actions without a `resource` option. Otherwise the actions whose
+  `resource` is `target_resource` (the cross-resource actions).
   """
-  @spec form_actions_for_resource(PyroManiac.t(), atom()) :: [Action.t()]
-  def form_actions_for_resource(pyro_maniac, target_resource) do
+  @spec actions_for_resource(PyroManiac.t(), atom()) :: [Action.t()]
+  def actions_for_resource(pyro_maniac, target_resource) do
     primary = resource(pyro_maniac)
 
     pyro_maniac
-    |> form_actions()
+    |> actions()
     |> Enum.filter(fn action ->
       if is_nil(target_resource) or target_resource == primary do
         is_nil(action.resource)
@@ -183,15 +289,19 @@ defmodule PyroManiac.Info do
     end)
   end
 
-  @spec form_for_action_type(PyroManiac.t(), :create | :update) :: map() | nil
-  def form_for_action_type(pyro_maniac, action_type) do
+  @doc """
+  The first action entity of a page on its resource whose Ash action has
+  the type `action_type` (`:create` or `:update`).
+  """
+  @spec action_for_type(PyroManiac.t(), :create | :update) :: map() | nil
+  def action_for_type(pyro_maniac, action_type) do
     case resource(pyro_maniac) do
       nil ->
         nil
 
       resource ->
         pyro_maniac
-        |> form_actions()
+        |> actions()
         |> Enum.find(fn action ->
           is_nil(action.resource) &&
             match?(%{type: ^action_type}, Ash.Resource.Info.action(resource, action.name))
@@ -200,27 +310,32 @@ defmodule PyroManiac.Info do
   end
 
   @doc """
-  Returns the first form action matching the given action type, scoped to a specific resource.
+  The first action entity of a page whose Ash action has the type
+  `action_type`, scoped to a resource.
 
-  When `target_resource` matches the module's primary resource (or is nil),
-  behaves like `form_for_action_type/2`. Otherwise looks up forms with an
-  explicit `resource` matching `target_resource`.
+  When `target_resource` is the resource of the page (or `nil`), the same
+  as `action_for_type/2`. Otherwise the actions whose `resource` is
+  `target_resource`.
   """
-  @spec form_for_action_type(PyroManiac.t(), :create | :update, atom()) :: map() | nil
-  def form_for_action_type(pyro_maniac, action_type, target_resource) do
+  @spec action_for_type(PyroManiac.t(), :create | :update, atom()) :: map() | nil
+  def action_for_type(pyro_maniac, action_type, target_resource) do
     primary = resource(pyro_maniac)
 
     if is_nil(target_resource) or target_resource == primary do
-      form_for_action_type(pyro_maniac, action_type)
+      action_for_type(pyro_maniac, action_type)
     else
       pyro_maniac
-      |> form_actions_for_resource(target_resource)
+      |> actions_for_resource(target_resource)
       |> Enum.find(fn action ->
         match?(%{type: ^action_type}, Ash.Resource.Info.action(target_resource, action.name))
       end)
     end
   end
 
+  @doc """
+  The bulk actions of the list views of a page, each with its view
+  (`__view__`).
+  """
   @spec bulk_actions(PyroManiac.t()) :: [BulkAction.t()]
   def bulk_actions(pyro_maniac) do
     pyro_maniac
@@ -283,8 +398,8 @@ defmodule PyroManiac.Info do
   end
 
   @doc """
-  Builds the list of relationship loads required by the nested forms of a
-  form action: each distinct full path of a group, a step, or an input.
+  Builds the list of relationship loads required by the nested forms of an
+  action: each distinct full path of a section, a step, or an input.
   """
   @spec loads_for_form(Action.t()) :: [atom() | {atom(), any()}]
   def loads_for_form(%Action{fields: fields}) do
@@ -299,14 +414,15 @@ defmodule PyroManiac.Info do
   def loads_for_form(_), do: []
 
   @doc """
-  All inputs of a form action (`field`, `combobox`, `select`, `input`), in
-  DSL order, through each group, step, row, and compound.
+  All inputs of the form of an action (`field`, `combobox`, `select`,
+  `input`), in DSL order, through each section, tab, step, row, and
+  compound.
   """
   @spec form_fields(Action.t() | BulkAction.t()) :: [struct()]
   def form_fields(%{fields: fields}), do: Tree.inputs(fields)
 
   @doc """
-  The layout of a form action as a plain tree of maps, for renderers that
+  The layout of the form of an action as a plain tree of maps, for renderers that
   are not in Elixir (for example AshTypescript extensions). It has no
   functions and no structs, so it encodes as JSON. For `visible?`, a node has
   `depends_on` (the attributes and arguments that the expression refers
@@ -356,21 +472,17 @@ defmodule PyroManiac.Info do
         :collapsed?,
         :show_labels?,
         :autofocus,
-        :prompt
+        :prompt,
+        :only,
+        :count,
+        :presentation,
+        :limit,
+        :empty_text,
+        :delegate_to
       ])
       |> Map.reject(fn {_key, value} -> is_function(value) end)
 
-    extra =
-      case entity do
-        %{"__allow_nil?__": allow_nil?} -> %{required?: not allow_nil?}
-        _ -> %{}
-      end
-
-    extra =
-      case entity do
-        %{__enum_options__: [_ | _] = options} -> Map.put(extra, :options, options)
-        _ -> extra
-      end
+    extra = entity |> layout_required() |> Map.merge(layout_extra(entity))
 
     children =
       if Tree.container?(entity),
@@ -379,6 +491,35 @@ defmodule PyroManiac.Info do
 
     base |> Map.merge(layout) |> Map.merge(extra) |> Map.merge(children)
   end
+
+  defp layout_required(%{"__read_only?__": true}), do: %{}
+  defp layout_required(%{"__allow_nil?__": allow_nil?}), do: %{required?: not allow_nil?}
+  defp layout_required(_entity), do: %{}
+
+  defp layout_extra(entity) do
+    [:options, :read_only?, :relationship, :link_to, :decoration, :fields]
+    |> Enum.reduce(%{}, fn key, acc ->
+      case layout_value(key, entity) do
+        nil -> acc
+        value -> Map.put(acc, key, value)
+      end
+    end)
+  end
+
+  defp layout_value(:options, %{__enum_options__: [_ | _] = options}), do: options
+  defp layout_value(:read_only?, %{"__read_only?__": true}), do: true
+  defp layout_value(:relationship, %{__relationship__: relationship}), do: relationship
+
+  defp layout_value(:link_to, %{link_to: [_ | _] = links}),
+    do: Enum.map(links, &Map.take(&1, [:page, :single_view, :list_view]))
+
+  defp layout_value(:decoration, %{decoration: decoration}) when is_atom(decoration),
+    do: decoration
+
+  defp layout_value(:fields, %PyroManiac.Form.Related{fields: [_ | _] = fields}),
+    do: Enum.map(fields, &%{name: &1.name, label: &1.label, source: &1.source})
+
+  defp layout_value(_key, _entity), do: nil
 
   defp nest_load([single], []), do: single
   defp nest_load([single], children), do: {single, children}
@@ -390,10 +531,13 @@ defmodule PyroManiac.Info do
   Combines:
 
   * The relationship / calculation / aggregate loads implied by the view's
-    columns (`:data_table`), sections (`:grid`), fields, or explicit
+    columns (`:data_table`), record tree (the other types), or explicit
     `loads:` (`:render`).
   * The view's `ensure_loaded` load statement, so those fields are always
-    loaded regardless of the view's columns, fields, or sections.
+    loaded regardless of the view's columns or record tree.
+  * The calculations and aggregates that the `decoration` and content
+    expressions of the columns, and the `confirm` expressions of the
+    actions and bulk actions, refer to.
   * The resource's `AshStorage` attachment relationships, when the
     optional `AshStorage` extension is loaded and present on the resource —
     so a view that surfaces an attachment badge or count always has the
@@ -404,16 +548,57 @@ defmodule PyroManiac.Info do
     view
     |> do_build_loads_from_view(resource)
     |> merge_ensure_loaded(view)
-    |> with_tone_loads(view, resource)
+    |> with_expression_loads(view, resource)
+    |> with_link_loads(view, resource)
     |> with_attachment_loads(resource)
   end
 
-  # The calculations and aggregates that `tone` expressions refer to.
-  defp with_tone_loads(loads, %View{} = view, resource) do
+  @doc """
+  The paths that the links of a view load: for each column, field, and
+  `related` of a section with a `link_to`, the label of the linked record
+  (refer to `PyroManiac.Link.label_paths/2`).
+  """
+  @spec link_paths(View.t(), Ash.Resource.t()) :: [[atom()]]
+  def link_paths(%View{} = view, resource) do
+    view
+    |> PyroManiac.Card.view_links(resource)
+    |> Enum.flat_map(fn
+      %{kind: :single, record_path: [_ | _] = record_path, resource: from} ->
+        PyroManiac.Link.label_paths(from, record_path)
+
+      _link ->
+        []
+    end)
+    |> Enum.uniq()
+  end
+
+  def link_paths(_view, _resource), do: []
+
+  defp with_link_loads(loads, %View{} = view, resource) do
+    link_loads = view |> link_paths(resource) |> Enum.flat_map(&build_load_for_path(&1, resource))
+    Enum.uniq(List.wrap(loads) ++ link_loads)
+  end
+
+  defp with_link_loads(loads, _view, _resource), do: loads
+
+  # The calculations and aggregates that the `decoration` and content
+  # expressions of the columns, and the `confirm` expressions of the actions,
+  # refer to.
+  defp with_expression_loads(loads, %View{} = view, resource) do
+    column_refs =
+      Enum.flat_map(
+        view.columns || [],
+        &((Map.get(&1, :__decoration_refs__) || []) ++ PyroManiac.Content.refs(&1))
+      )
+
+    confirm_refs =
+      Enum.flat_map(
+        (view.actions || []) ++ (view.bulk_actions || []),
+        &confirm_refs(&1, resource)
+      )
+
     refs =
-      ((view.columns || []) ++
-         (view.fields || []) ++ Enum.flat_map(view.sections || [], &(&1.fields || [])))
-      |> Enum.flat_map(&(Map.get(&1, :__tone_refs__) || []))
+      (column_refs ++ confirm_refs)
       |> Enum.uniq()
       |> Enum.filter(fn name ->
         match?(
@@ -425,7 +610,17 @@ defmodule PyroManiac.Info do
     Enum.uniq(List.wrap(loads) ++ refs)
   end
 
-  defp with_tone_loads(loads, _view, _resource), do: loads
+  defp with_expression_loads(loads, _view, _resource), do: loads
+
+  defp confirm_refs(%{confirm: confirm}, resource)
+       when not is_nil(confirm) and not is_binary(confirm) do
+    case PyroManiac.Dsl.Expression.validate_refs(resource, confirm, in_memory_only?: false) do
+      {:ok, names} -> names
+      {:error, _message} -> []
+    end
+  end
+
+  defp confirm_refs(_action, _resource), do: []
 
   defp merge_ensure_loaded(loads, %View{ensure_loaded: [_ | _] = ensure_loaded}) do
     Enum.uniq(loads ++ ensure_loaded)
@@ -437,20 +632,16 @@ defmodule PyroManiac.Info do
     build_loads_from_columns(columns, resource)
   end
 
-  defp do_build_loads_from_view(%View{sections: sections, type: :grid}, resource) do
-    build_loads_from_sections(sections, resource)
+  defp do_build_loads_from_view(%View{type: type} = view, resource)
+       when type in [:grid, :card, :list, :kanban, :calendar, :gantt, :timeline] do
+    view
+    |> PyroManiac.Card.paths(resource)
+    |> Enum.flat_map(&build_load_for_path(&1, resource))
+    |> Enum.uniq()
   end
 
   defp do_build_loads_from_view(%View{loads: loads, type: :render}, _resource) do
     List.wrap(loads)
-  end
-
-  defp do_build_loads_from_view(%View{fields: fields}, resource) when is_list(fields) do
-    fields
-    |> Enum.flat_map(fn field ->
-      build_load_for_path(field.source, resource)
-    end)
-    |> Enum.uniq()
   end
 
   defp do_build_loads_from_view(_, _), do: []
@@ -492,48 +683,6 @@ defmodule PyroManiac.Info do
     |> Enum.uniq()
   end
 
-  defp build_loads_from_sections(sections, resource) do
-    sections
-    |> Enum.flat_map(fn section ->
-      field_loads =
-        (section.fields || [])
-        |> Enum.flat_map(fn field ->
-          build_load_for_path(field.source, resource)
-        end)
-
-      rel_loads =
-        (section.relationships || [])
-        |> Enum.flat_map(&build_rel_load(&1, resource))
-
-      field_loads ++ rel_loads
-    end)
-    |> Enum.uniq()
-  end
-
-  defp build_rel_load(%{fields: fields} = rel, _resource) when fields in [nil, []] do
-    [rel.name]
-  end
-
-  defp build_rel_load(rel, resource) do
-    nested_resource =
-      case Ash.Resource.Info.relationship(resource, rel.name) do
-        nil -> nil
-        r -> r.destination
-      end
-
-    nested_loads =
-      if nested_resource do
-        Enum.flat_map(rel.fields, &build_load_for_path(&1.source, nested_resource))
-      else
-        []
-      end
-
-    case nested_loads do
-      [] -> [rel.name]
-      loads -> [{rel.name, loads}]
-    end
-  end
-
   @spec column_field_path(map() | {atom(), map()}) :: [atom()]
   def column_field_path({_name, col}) when is_map(col), do: column_field_path(col)
 
@@ -549,35 +698,6 @@ defmodule PyroManiac.Info do
 
   defp ensure_atom(a) when is_atom(a), do: a
   defp ensure_atom(s) when is_binary(s), do: String.to_existing_atom(s)
-
-  @doc """
-  Builds the load list for nested views within a parent view.
-  Non-autonomous views (with relationship) contribute their relationship name.
-  Autonomous/paginated nested views fetch their own data.
-  """
-  @spec nested_view_loads(View.t()) :: [atom() | {atom(), any()}]
-  def nested_view_loads(%View{views: views}) when is_list(views) do
-    Enum.flat_map(views, fn
-      # Delegated views are fully autonomous — they load their own data
-      %View{type: :delegated} ->
-        []
-
-      # Autonomous paginated views fetch their own data
-      %View{pagination: pagination, relationship: rel}
-      when not is_nil(rel) and pagination != :none ->
-        []
-
-      # Non-autonomous relationship views need their data loaded
-      %View{relationship: rel} when not is_nil(rel) ->
-        [rel]
-
-      # Cross-resource views fetch their own data
-      _ ->
-        []
-    end)
-  end
-
-  def nested_view_loads(_), do: []
 
   defp build_load_for_path([single], resource) do
     cond do

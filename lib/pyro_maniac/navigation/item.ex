@@ -5,11 +5,14 @@ defmodule PyroManiac.Navigation.Item do
   Represents a single link in the navigation sidebar. Each item must have
   exactly one of `page`, `module`, or `href`:
 
-  - `page` — A PyroManiac page module (validated, authorization-aware)
-  - `module` — A non-PyroManiac module (always visible)
-  - `href` — An external URL (opens in new tab)
+  - `page` — A PyroManiac page (validated, authorization-aware). The item
+    opens the `route` of the page (`page do route "/recipes" end`), so it
+    has no `path`.
+  - `module` — A non-PyroManiac module (always visible). It has a `path`.
+  - `href` — An external URL (opens in new tab). It has no `path`.
 
-  Items with `page` or `module` require a `path`. Items with `href` do not.
+  Groups are not part of a route. No two routes of the navigation match the
+  same URL: `"/recipes/:id"` and `"/recipes/new"` overlap.
   """
 
   use PyroManiac.Dsl.Entity,
@@ -23,17 +26,18 @@ defmodule PyroManiac.Navigation.Item do
         type: :atom
       ],
       path: [
-        doc: "URL path for `page` or `module` items (must start with `/`).",
+        doc:
+          "URL path of a `module` item (starts with `/`). A `page` item opens the `route` of its page.",
         type: :string
       ],
       label: [
         doc: "Display text. Auto-derived from name if omitted.",
         type: :string
       ],
-      tone: [
+      decoration: [
         doc:
           "The meaning of the item: `:neutral`, `:info`, `:success`, `:warning`, or `:danger`. Each renderer maps it to its own style.",
-        type: {:one_of, PyroManiac.Dsl.Type.tones()}
+        type: {:one_of, PyroManiac.Dsl.Type.decorations()}
       ],
       icon: [
         doc: "Icon name to be passed to the renderer.",
@@ -48,7 +52,8 @@ defmodule PyroManiac.Navigation.Item do
         type: :string
       ],
       page: [
-        doc: "A PyroManiac page module. Validated and authorization-aware.",
+        doc:
+          "A PyroManiac page (a module with a `page` section). The item opens its `route`. Validated and authorization-aware.",
         type: :atom
       ],
       module: [

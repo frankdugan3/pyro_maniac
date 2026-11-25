@@ -8,16 +8,16 @@ or a field that is not exposed does not compile.
 
 ```elixir
 pyro_maniac do
-  default_label :name
+  default_label :batch_number
 
   expose :read do
-    loads [:name, :code, :status, contacts: [:name, :email]]
-    filter [:name, :code, contacts: [:name]]
-    sort [:name, :code]
+    loads [:batch_number, :status, :brew_date, recipe: [:name, :style]]
+    filter [:batch_number, :status, recipe: [:name]]
+    sort [:batch_number, :brew_date]
   end
 
   expose [:create, :update]
-  expose :archive
+  expose :start_brewing
 end
 ```
 
@@ -29,7 +29,7 @@ end
 - `:*` in a field list is all the public attributes, calculations, and
   aggregates of the resource (not its relationships). A relationship atom is
   the relationship with `:*` of its resource, one level deep: `loads [:*,
-  :owner, contacts: [:name]]`. A deeper load is always explicit. The Ash
+  :brewer, recipe: [:name]]`. A deeper load is always explicit. The Ash
   actions and fields are explicit about `public?`, so `:*` exposes only what
   the resource makes public.
 - Each option defaults to `[:*]` (`filter` and `sort` only for a read
@@ -42,32 +42,37 @@ The page checks each of these against the surface, at compile time:
 
 | Page DSL | Action | Fields |
 |---|---|---|
-| `view` | the read action (`name`, or `read_action`) | the columns, fields, sections, `tone` fields, `ensure_loaded`, the special fields (`date_field`, `group_by`, ...), and the `default_label` |
+| `view` | the read action (`name`, or `read_action`) | the columns, fields, sections, `decoration` fields, the fields of the `render`, `description`, and `label` expressions, `ensure_loaded`, the special fields (`date_field`, `group_by`, ...), and the `default_label` |
 | data table columns, `searches` | the read action | `filter` (filterable columns, search sources), `sort` (sortable columns, `default_sort`) |
-| `form` | the create or update action | the relationships of nested forms |
+| `action` of a view | the create, update, destroy, or generic action (of `resource` for a cross-resource action) | the relationships of nested forms |
 | `bulk_action` | the action | — |
 | `combobox` | the read action of the searched resource | its `label_key` and `value_key`, `search` (`filter`), `sort` |
-| column `edit_with` | the update action | — |
+| the `action` of a column, `edit_columns` | the update action | — |
 | `kanban` view | the move action | — |
 
 The loads are explicit: list each field that PyroManiac loads, also the
-`default_label` and the fields of `tone` expressions. PyroManiac does not add
+`default_label` and the fields of the `decoration`, `render`,
+`description`, `label`, and `confirm` expressions. PyroManiac does not add
 a field to the surface.
 
-A nested `:render` view without a relationship renders the row of its
-parent. Its `loads` are loads of the parent read action.
+The `loads` of a `:render` view are loads of its read action.
 
 ## Short lists
 
 The surface also keeps the `exclude` lists of the pages short:
 
 - A data table shows or excludes each exposed field of its read action (not
-  each public field). A nested view on a relationship shows the
-  relationship.
+  each public field).
 - `exclude` of a view can name only exposed fields.
-- `exclude` of `views` can name only exposed read actions; `exclude` of
-  `forms` only exposed create and update actions.
-- Only the exposed create and update actions need a form or an `exclude`.
+- `exclude` of the `page` section can name only exposed actions.
+- Each exposed action (read, create, update, destroy, generic) is used by a
+  view of each page or is in its `page do exclude [...] end`. A module
+  without the `page` section (views and searches that the pages reuse) is
+  not checked. A read action is used by a
+  view with its name (or `read_action`); the other actions by `action`,
+  `bulk_action`, the `action` of a column, or `edit_columns`, and the move
+  action by a `:kanban` view or `reorder? true`. The AshStorage actions of
+  an attachment are not checked.
 
 ## The renderers
 
@@ -97,7 +102,7 @@ end
 - `mode :auto`: PyroManiac adds the notifier and the publications (`*` for
   create, update, and destroy; `updated:<id>` and `destroyed:<id>` unless
   `record_topics? false`). Set the default PubSub module with `config
-  :pyro_maniac, :realtime, module: MyAppWeb.Endpoint`. The default `prefix` is
+  :pyro_maniac, :realtime, module: BreweryWeb.Endpoint`. The default `prefix` is
   the module name without its first segment, in snake case.
 - `except` names the actions that send no notification.
 - In both modes, each exposed create, update, and destroy action (not in
@@ -125,7 +130,7 @@ a change that Ash does not notify (for example a truncate).
 pyro_maniac do
   realtime do
     mode :auto
-    bulk [:import, :truncate]
+    bulk [:create, :truncate]
   end
 end
 ```

@@ -2,24 +2,58 @@ defmodule PyroManiac do
   @moduledoc """
   A declarative, framework-agnostic UI DSL for Ash resources.
 
-  A page module binds an Ash resource and configures the `page`, `views`,
-  `forms`, and `searches` sections that describe the UI. The DSL is consumed
-  at runtime via `PyroManiac.Info` by a renderer.
+  A module binds an Ash resource and declares its views (`view`, top level)
+  and its searches (`search`, top level). A view shows the records of a read
+  action and runs the actions that it names (`action`, `bulk_action`). With
+  the `page` section, the module is a page, with a `route`
+  (`PyroManiac.Info.page?/1`); without it, the module declares views and
+  searches that the pages reuse. A renderer reads the result at runtime with
+  `PyroManiac.Info`.
 
-      defmodule MyAppWeb.RecipeLive do
-        use PyroManiac, resource: MyApp.Brewery.Recipe
+      defmodule BreweryWeb.RecipeLive do
+        use PyroManiac, resource: Brewery.Recipe
 
         page do
+          route "/recipes"
           title "Recipes"
+          description "Recipes in production, in draft, and retired."
+          exclude [:list, :activate, :retire, :destroy]
         end
 
-        views do
-          view :read do
-            type :data_table
-            default_sort "name"
-            column :name
-            column :style
-            column :status
+        view :read do
+          type :data_table
+          primary? true
+          default_sort "name"
+
+          exclude [:id, :description, :target_abv, :target_og, :target_fg, :gravity_spread,
+                   :ingredient_count, :batch_count, :recipe_ingredients, :batches, :photos,
+                   :photos_urls]
+
+          column :name
+          column :style
+          column :status
+
+          action :create, :guard do
+            delegate_to BreweryWeb.RecipeLive
+          end
+        end
+
+        view :read do
+          type :card
+          primary? true
+          action [:create, :update], :guard
+
+          section :recipe do
+            field :name, autofocus: true
+            select :style
+            select :status
+            field :description, type: :textarea
+          end
+
+          section :targets do
+            field :target_abv
+            field :target_og
+            field :target_fg
           end
         end
       end

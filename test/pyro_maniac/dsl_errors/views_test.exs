@@ -13,8 +13,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       views -> view -> read -> data_table defined in <FILE:LINE>:
         view {:read, :data_table} is already defined. Each action + type combination must be unique.
       │
-      <LINE> │             view :read do
-      │             ~~~~~~~~~~~~~
+      <LINE> │           view :read do
+      │           ~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -23,123 +23,67 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule DuplicateViews do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
-              exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :gravity_spread
-              column :ingredient_count
-              column :batch_count
-            end
-
-            view :read do
-              type :data_table
-              default_sort "name"
-              exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :gravity_spread
-              column :ingredient_count
-              column :batch_count
-            end
-          end
-        end
-      end
-    end
-
-    test "delegated view requires delegate_to" do
-      expected = """
-      [PyroManiac.DslErrors.ViewsTest.DelegatedNeedsDelegateTo]
-      views -> view -> delegated defined in <FILE:LINE>:
-        delegated views require `delegate_to` to be set
-
-        Fix: add `delegate_to SomeModule` inside the view block, where SomeModule is a PyroManiac module
-      │
-      <LINE> │             view do
-      │             ~~~~~~~
-      │
-      └─ <FILE:LINE>: (file)\
-      """
-
-      assert_dsl_error expected do
-        defmodule DelegatedNeedsDelegateTo do
-          use PyroManiac, resource: Brewery.Recipe
-
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "name"
+            exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
+            column :name
+            column :style
+            column :description
+            column :status
+            column :target_abv
+            column :target_og
+            column :target_fg
+            column :gravity_spread
+            column :ingredient_count
+            column :batch_count
           end
 
-          views do
-            view do
-              type :delegated
-              relationship :batches
+          view :read do
+            type :data_table
+            default_sort "name"
+            exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
+            column :name
+            column :style
+            column :description
+            column :status
+            column :target_abv
+            column :target_og
+            column :target_fg
+            column :gravity_spread
+            column :ingredient_count
+            column :batch_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
       end
     end
 
-    test "delegated view must not have child entities" do
-      expected = """
-      [PyroManiac.DslErrors.ViewsTest.DelegatedHasContent]
-      views -> view -> delegated defined in <FILE:LINE>:
-        delegated views must not have columns, fields, sections, or nested views — the delegated module owns its own DSL
-
-        Fix: remove all child entities from this view, or change `type :delegated` to a regular type
-      │
-      <LINE> │             view do
-      │             ~~~~~~~
-      │
-      └─ <FILE:LINE>: (file)\
-      """
-
-      assert_dsl_error expected do
-        defmodule DelegatedHasContent do
-          use PyroManiac, resource: Brewery.Recipe
-
-          forms do
-            exclude([:create, :update, :activate, :retire])
-          end
-
-          views do
-            view do
-              type :delegated
-              relationship :batches
-              delegate_to PyroManiac.DslErrors.ViewsTest.DelegatedHasContent
-              column :name
-            end
-          end
-        end
-      end
-    end
-
-    test "non-delegated view requires name" do
+    test "a view requires a name" do
       expected = """
       [PyroManiac.DslErrors.ViewsTest.NonDelegatedNeedsName]
       views -> view defined in <FILE:LINE>:
-        non-delegated views require `name` to be set
+        a view requires `name` to be set
 
         Fix: add an action name like `view :read do ... end`
       │
-      <LINE> │             view do
-      │             ~~~~~~~
+      <LINE> │           view do
+      │           ~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -148,45 +92,23 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule NonDelegatedNeedsName do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view do
-              type :data_table
-            end
-          end
-        end
-      end
-    end
-
-    test "delegate_to only allowed on :delegated views" do
-      expected = """
-      [PyroManiac.DslErrors.ViewsTest.DelegateToOnNonDelegated]
-      views -> view -> read defined in <FILE:LINE>:
-        `delegate_to` is only allowed on `:delegated` views
-
-        Fix: use `type :delegated` to mount a full sub-Viewer, or remove `delegate_to`
-      │
-      <LINE> │               delegate_to Some.Module
-      │               ~~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ <FILE:LINE>: (file)\
-      """
-
-      assert_dsl_error expected do
-        defmodule DelegateToOnNonDelegated do
-          use PyroManiac, resource: Brewery.Recipe
-
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          view do
+            type :data_table
+            primary? true
           end
 
-          views do
-            view :read do
-              type :data_table
-              delegate_to Some.Module
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -195,16 +117,16 @@ defmodule PyroManiac.DslErrors.ViewsTest do
   end
 
   describe "view types requiring specific options" do
-    test "render view needs render or component" do
+    test "a render view needs a render" do
       expected = """
       [PyroManiac.DslErrors.ViewsTest.RenderNeedsRenderOrComponent]
       views -> view -> read defined in <FILE:LINE>:
-        render views must have either `render` or `component` set
+        a `:render` view has a `render` for each renderer of the page
 
-        Fix: set `render fn assigns -> ... end` or `component MyComponent` inside the view block
+        Fix: add `render PyroManiac.LiveView, BreweryWeb.Components.Dashboard` inside the view block
       │
-      <LINE> │             view :read do
-      │             ~~~~~~~~~~~~~
+      <LINE> │           view :read do
+      │           ~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -213,13 +135,22 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule RenderNeedsRenderOrComponent do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :render
+          view :read do
+            type :render
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -232,10 +163,10 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       views -> view -> read -> date_field defined in <FILE:LINE>:
         calendar views require `date_field` to be set
 
-        Fix: set `date_field :foo` to a date or datetime attribute on the resource
+        Fix: set `date_field :brew_date` to a date or datetime attribute on the resource
       │
-      <LINE> │             view :read do
-      │             ~~~~~~~~~~~~~
+      <LINE> │           view :read do
+      │           ~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -244,13 +175,23 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule CalendarNeedsDateField do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :calendar
+          view :read do
+            type :calendar
+            primary? true
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -263,10 +204,10 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       views -> view -> read -> start_field defined in <FILE:LINE>:
         gantt views require `start_field` to be set
 
-        Fix: set `start_field :foo` to a date or datetime attribute on the resource
+        Fix: set `start_field :brew_date` to a date or datetime attribute on the resource
       │
-      <LINE> │             view :read do
-      │             ~~~~~~~~~~~~~
+      <LINE> │           view :read do
+      │           ~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -275,13 +216,23 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule GanttNeedsStartField do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :gantt
+          view :read do
+            type :gantt
+            primary? true
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -294,10 +245,10 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       views -> view -> read -> end_field defined in <FILE:LINE>:
         gantt views require `end_field` to be set
 
-        Fix: set `end_field :foo` to a date or datetime attribute on the resource
+        Fix: set `end_field :package_date` to a date or datetime attribute on the resource
       │
-      <LINE> │             view :read do
-      │             ~~~~~~~~~~~~~
+      <LINE> │           view :read do
+      │           ~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -306,14 +257,24 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule GanttNeedsEndField do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :gantt
-              start_field :inserted_at
+          view :read do
+            type :gantt
+            primary? true
+            start_field :inserted_at
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -331,8 +292,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         Did you mean:
           * :read
       │
-      <LINE> │             view :reed do
-      │             ~~~~~~~~~~~~~
+      <LINE> │           view :reed do
+      │           ~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -341,13 +302,23 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule UnknownAction do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
           end
 
-          views do
-            view :reed do
-              type :data_table
+          view :reed do
+            type :data_table
+            primary? true
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -362,8 +333,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
 
         Fix: pick a read action, or change action :create to type :read
       │
-      <LINE> │             view :create do
-      │             ~~~~~~~~~~~~~~~
+      <LINE> │           view :create do
+      │           ~~~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -372,13 +343,23 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule WrongActionType do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
           end
 
-          views do
-            view :create do
-              type :data_table
+          view :create do
+            type :data_table
+            primary? true
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -393,8 +374,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       views -> view -> read -> column -> name defined in <FILE:LINE>:
         column :name is already defined
       │
-      <LINE> │               column :name
-      │               ~~~~~~~~~~~~
+      <LINE> │             column :name
+      │             ~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -403,26 +384,36 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule DuplicateColumnName do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
-              exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
-              column :name
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :gravity_spread
-              column :ingredient_count
-              column :batch_count
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "name"
+            exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
+            column :name
+            column :name
+            column :style
+            column :description
+            column :status
+            column :target_abv
+            column :target_og
+            column :target_fg
+            column :gravity_spread
+            column :ingredient_count
+            column :batch_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -435,8 +426,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       views -> view -> read -> column -> style defined in <FILE:LINE>:
         another column already uses the label "Name"
       │
-      <LINE> │               column :style, label: "Name"
-      │               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      <LINE> │             column :style do
+      │             ~~~~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -445,25 +436,39 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule DuplicateColumnLabel do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire, :destroy, :list]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
-              exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
-              column :name
-              column :style, label: "Name"
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :gravity_spread
-              column :ingredient_count
-              column :batch_count
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "name"
+            exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
+            column :name
+
+            column :style do
+              label "Name"
+            end
+
+            column :description
+            column :status
+            column :target_abv
+            column :target_og
+            column :target_fg
+            column :gravity_spread
+            column :ingredient_count
+            column :batch_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -479,8 +484,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         Did you mean:
           * :target_abv
       │
-      <LINE> │               column :recipe_abv, source: [:recipe, :target_abv_typo]
-      │               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      <LINE> │             column :recipe_abv, source: [:recipe, :target_abv_typo]
+      │             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -489,35 +494,45 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule ColumnSourceNotExist do
           use PyroManiac, resource: Brewery.Batch
 
-          forms do
-            exclude([:create, :update, :start_brewing, :advance_status, :complete])
+          page do
+            route "/test"
+            exclude [:create, :update, :start_brewing, :advance_status, :complete]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "batch_number"
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "batch_number"
 
-              exclude([
-                :id,
-                :recipe,
-                :recipe_id,
-                :brewer,
-                :brewer_id
-              ])
+            exclude([
+              :id,
+              :recipe,
+              :recipe_id,
+              :brewer,
+              :brewer_id
+            ])
 
-              column :batch_number
-              column :status
-              column :brew_date
-              column :package_date
-              column :actual_og
-              column :actual_fg
-              column :actual_abv
-              column :volume_liters
-              column :notes
-              column :test_count
-              column :passed_test_count
-              column :recipe_abv, source: [:recipe, :target_abv_typo]
+            column :batch_number
+            column :status
+            column :brew_date
+            column :package_date
+            column :actual_og
+            column :actual_fg
+            column :actual_abv
+            column :volume_liters
+            column :notes
+            column :test_count
+            column :passed_test_count
+            column :recipe_abv, source: [:recipe, :target_abv_typo]
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :batch_number
             end
           end
         end
@@ -532,8 +547,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
 
         Fix: mark the field public on Brewery.Staff, or pick a different source
       │
-      <LINE> │               column :tester_notes, source: [:tester, :internal_notes]
-      │               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      <LINE> │             column :tester_notes, source: [:tester, :internal_notes]
+      │             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -542,21 +557,31 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule ColumnSourcePrivate do
           use PyroManiac, resource: Brewery.QualityTest
 
-          forms do
-            exclude([:create, :update])
+          page do
+            route "/test"
+            exclude [:create, :update]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "tested_at"
-              exclude([:id, :batch, :batch_id, :tester, :tester_id, :lab_reports])
-              column :test_type
-              column :tested_at
-              column :result
-              column :passed
-              column :notes
-              column :tester_notes, source: [:tester, :internal_notes]
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "tested_at"
+            exclude([:id, :batch, :batch_id, :tester, :tester_id, :lab_reports])
+            column :test_type
+            column :tested_at
+            column :result
+            column :passed
+            column :notes
+            column :tester_notes, source: [:tester, :internal_notes]
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :test_type
             end
           end
         end
@@ -573,8 +598,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
 
         Fix: either add `column :description` or list it in `exclude([...])`
       │
-      <LINE> │             view :read do
-      │             ~~~~~~~~~~~~~
+      <LINE> │           view :read do
+      │           ~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -583,17 +608,27 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule MissingPublicAttribute do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
-              exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
-              column :name
-              column :style
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "name"
+            exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
+            column :name
+            column :style
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -610,8 +645,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
 
         Fix: list at least one column name, e.g. `default_display([:name, :status])`
       │
-      <LINE> │               default_display([])
-      │               ~~~~~~~~~~~~~~~~~~~
+      <LINE> │             default_display([])
+      │             ~~~~~~~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -620,34 +655,44 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule EmptyDefaultDisplay do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
-              default_display([])
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "name"
+            default_display([])
 
-              exclude([
-                :id,
-                :recipe_ingredients,
-                :batches,
-                :photos,
-                :photos_urls,
-                :gravity_spread
-              ])
+            exclude([
+              :id,
+              :recipe_ingredients,
+              :batches,
+              :photos,
+              :photos_urls,
+              :gravity_spread
+            ])
 
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :ingredient_count
-              column :batch_count
+            column :name
+            column :style
+            column :description
+            column :status
+            column :target_abv
+            column :target_og
+            column :target_fg
+            column :ingredient_count
+            column :batch_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -663,8 +708,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         Did you mean:
           * :status
       │
-      <LINE> │               default_display([:stat])
-      │               ~~~~~~~~~~~~~~~~~~~~~~~~
+      <LINE> │             default_display([:stat])
+      │             ~~~~~~~~~~~~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -673,34 +718,44 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule UnknownDefaultDisplay do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
-              default_display([:stat])
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "name"
+            default_display([:stat])
 
-              exclude([
-                :id,
-                :recipe_ingredients,
-                :batches,
-                :photos,
-                :photos_urls,
-                :gravity_spread
-              ])
+            exclude([
+              :id,
+              :recipe_ingredients,
+              :batches,
+              :photos,
+              :photos_urls,
+              :gravity_spread
+            ])
 
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :ingredient_count
-              column :batch_count
+            column :name
+            column :style
+            column :description
+            column :status
+            column :target_abv
+            column :target_og
+            column :target_fg
+            column :ingredient_count
+            column :batch_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -715,8 +770,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       views -> view -> read -> default_sort defined in <FILE:LINE>:
         "": must sort on at least one column
       │
-      <LINE> │               default_sort ""
-      │               ~~~~~~~~~~~~~~~
+      <LINE> │             default_sort ""
+      │             ~~~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -725,33 +780,43 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule EmptyDefaultSort do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort ""
+          view :read do
+            type :data_table
+            primary? true
+            default_sort ""
 
-              exclude([
-                :id,
-                :recipe_ingredients,
-                :batches,
-                :photos,
-                :photos_urls,
-                :gravity_spread
-              ])
+            exclude([
+              :id,
+              :recipe_ingredients,
+              :batches,
+              :photos,
+              :photos_urls,
+              :gravity_spread
+            ])
 
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :ingredient_count
-              column :batch_count
+            column :name
+            column :style
+            column :description
+            column :status
+            column :target_abv
+            column :target_og
+            column :target_fg
+            column :ingredient_count
+            column :batch_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -763,33 +828,43 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule InvalidAshSort do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "---name"
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "---name"
 
-              exclude([
-                :id,
-                :recipe_ingredients,
-                :batches,
-                :photos,
-                :photos_urls,
-                :gravity_spread
-              ])
+            exclude([
+              :id,
+              :recipe_ingredients,
+              :batches,
+              :photos,
+              :photos_urls,
+              :gravity_spread
+            ])
 
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :ingredient_count
-              column :batch_count
+            column :name
+            column :style
+            column :description
+            column :status
+            column :target_abv
+            column :target_og
+            column :target_fg
+            column :ingredient_count
+            column :batch_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -806,8 +881,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
 
         Fix: add `use PyroManiac.KanBan` to the resource
       │
-      <LINE> │             view :read do
-      │             ~~~~~~~~~~~~~
+      <LINE> │           view :read do
+      │           ~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -816,13 +891,53 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule KanbanWithoutExtension do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :kanban
+          view :read do
+            type :kanban
+            primary? true
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
+            end
+          end
+        end
+      end
+    end
+  end
+
+  describe "kanban options" do
+    test "a kanban view takes its options from the kan_ban section" do
+      assert_dsl_error ~r/a `:kanban` view takes `group_by` from the `kan_ban` section/ do
+        defmodule KanbanWithGroupBy do
+          use PyroManiac, resource: Brewery.Batch
+
+          page do
+            route "/test"
+            exclude [:create, :update, :start_brewing, :advance_status, :complete, :move_card]
+          end
+
+          view :kanban_read do
+            type :kanban
+            primary? true
+            group_by :status
+          end
+
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :batch_number
             end
           end
         end
@@ -836,53 +951,29 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule EnsureLoadedUnknownField do
           use PyroManiac, resource: Brewery.Staff
 
-          forms do
-            exclude([:create, :update, :deactivate])
+          page do
+            route "/test"
+            exclude [:create, :update, :deactivate]
           end
 
-          views do
-            view :read do
-              type :data_table
-              ensure_loaded([:bogus])
-              exclude([:id, :name_email])
-              column :name
-              column :email
-              column :role
-              column :active
-            end
-          end
-        end
-      end
-    end
-
-    test "ensure_loaded not allowed on delegated views" do
-      expected = """
-      [PyroManiac.DslErrors.ViewsTest.EnsureLoadedOnDelegated]
-      views -> view -> delegated defined in <FILE:LINE>:
-        `ensure_loaded` is not allowed on `:delegated` views — the delegated module owns its own loads
-
-        Fix: set `ensure_loaded` on the views inside the delegated module instead
-      │
-      <LINE> │               ensure_loaded([:name])
-      │               ~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ <FILE:LINE>: (file)\
-      """
-
-      assert_dsl_error expected do
-        defmodule EnsureLoadedOnDelegated do
-          use PyroManiac, resource: Brewery.Recipe
-
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          view :read do
+            type :data_table
+            primary? true
+            ensure_loaded([:bogus])
+            exclude([:id, :name_email])
+            column :name
+            column :email
+            column :role
+            column :active
           end
 
-          views do
-            view do
-              type :delegated
-              relationship :batches
-              delegate_to PyroManiac.DslErrors.ViewsTest.EnsureLoadedOnDelegated
-              ensure_loaded([:name])
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -897,8 +988,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
       views -> view -> read -> default_sort defined in <FILE:LINE>:
         key [:id] is an undefined or excluded column
       │
-      <LINE> │               default_sort "id"
-      │               ~~~~~~~~~~~~~~~~~
+      <LINE> │             default_sort "id"
+      │             ~~~~~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -907,33 +998,43 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule SortKeyNotInColumns do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "id"
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "id"
 
-              exclude([
-                :id,
-                :recipe_ingredients,
-                :batches,
-                :photos,
-                :photos_urls,
-                :gravity_spread
-              ])
+            exclude([
+              :id,
+              :recipe_ingredients,
+              :batches,
+              :photos,
+              :photos_urls,
+              :gravity_spread
+            ])
 
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :ingredient_count
-              column :batch_count
+            column :name
+            column :style
+            column :description
+            column :status
+            column :target_abv
+            column :target_og
+            column :target_fg
+            column :ingredient_count
+            column :batch_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -950,8 +1051,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
 
         Fix: either add `column :gravity_spread` or list it in `exclude([...])`
       │
-      <LINE> │             view :read do
-      │             ~~~~~~~~~~~~~
+      <LINE> │           view :read do
+      │           ~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -960,24 +1061,34 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule MissingPublicCalculation do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
-              exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :ingredient_count
-              column :batch_count
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "name"
+            exclude([:id, :recipe_ingredients, :batches, :photos, :photos_urls])
+            column :name
+            column :style
+            column :description
+            column :status
+            column :target_abv
+            column :target_og
+            column :target_fg
+            column :ingredient_count
+            column :batch_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -992,8 +1103,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
 
         Fix: either add `column :ingredient_count` or list it in `exclude([...])`
       │
-      <LINE> │             view :read do
-      │             ~~~~~~~~~~~~~
+      <LINE> │           view :read do
+      │           ~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -1002,32 +1113,42 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule MissingPublicAggregation do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "name"
 
-              exclude([
-                :id,
-                :recipe_ingredients,
-                :batches,
-                :photos,
-                :photos_urls,
-                :gravity_spread
-              ])
+            exclude([
+              :id,
+              :recipe_ingredients,
+              :batches,
+              :photos,
+              :photos_urls,
+              :gravity_spread
+            ])
 
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :batch_count
+            column :name
+            column :style
+            column :description
+            column :status
+            column :target_abv
+            column :target_og
+            column :target_fg
+            column :batch_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -1042,8 +1163,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
 
         Fix: either add a column traversing :brewer, or list it in `exclude([...])`
       │
-      <LINE> │             view :read do
-      │             ~~~~~~~~~~~~~
+      <LINE> │           view :read do
+      │           ~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -1052,35 +1173,45 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule MissingPublicRelationship do
           use PyroManiac, resource: Brewery.Batch
 
-          forms do
-            exclude([:create, :update, :start_brewing, :advance_status, :complete])
+          page do
+            route "/test"
+            exclude [:create, :update, :start_brewing, :advance_status, :complete]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "batch_number"
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "batch_number"
 
-              exclude([
-                :id,
-                :recipe,
-                :recipe_id,
-                :brewer_id,
-                :kanban_priority,
-                :pass_rate
-              ])
+            exclude([
+              :id,
+              :recipe,
+              :recipe_id,
+              :brewer_id,
+              :kanban_priority,
+              :pass_rate
+            ])
 
-              column :batch_number
-              column :status
-              column :brew_date
-              column :package_date
-              column :actual_og
-              column :actual_fg
-              column :actual_abv
-              column :volume_liters
-              column :notes
-              column :test_count
-              column :passed_test_count
+            column :batch_number
+            column :status
+            column :brew_date
+            column :package_date
+            column :actual_og
+            column :actual_fg
+            column :actual_abv
+            column :volume_liters
+            column :notes
+            column :test_count
+            column :passed_test_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :batch_number
             end
           end
         end
@@ -1097,8 +1228,8 @@ defmodule PyroManiac.DslErrors.ViewsTest do
 
         Fix: add `realtime do mode :auto end` to the `pyro_maniac` section of Brewery.Supplier
       │
-      <LINE> │               on_create :notify
-      │               ~~~~~~~~~~~~~~~~~
+      <LINE> │             on_create :notify
+      │             ~~~~~~~~~~~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -1107,23 +1238,33 @@ defmodule PyroManiac.DslErrors.ViewsTest do
         defmodule RealtimeWithoutPubSub do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:create, :update])
+          page do
+            route "/test"
+            exclude [:create, :update]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
-              exclude([:id])
-              on_create :notify
-              column :name
-              column :code
-              column :contact_email
-              column :phone
-              column :active
-              column :notes
-              column :ingredient_count
+          view :read do
+            type :data_table
+            primary? true
+            default_sort "name"
+            exclude([:id])
+            on_create :notify
+            column :name
+            column :code
+            column :contact_email
+            column :phone
+            column :active
+            column :notes
+            column :ingredient_count
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -1131,253 +1272,284 @@ defmodule PyroManiac.DslErrors.ViewsTest do
     end
   end
 
-  describe "edit_with" do
-    test "edit_with invalid input type with did-you-mean" do
-      expected = """
-      [PyroManiac.DslErrors.ViewsTest.EditWithInvalidType]
-      views -> view -> read -> column -> name defined in <FILE:LINE>:
-        edit_with input type :txt is not valid. Must be one of: [:autocomplete, :checkbox, :color, :date, :datetime, :email, :number, :password, :range, :select, :tel, :text, :textarea, :time, :url]
-
-        Did you mean:
-          * :text
-          * :textarea
-      │
-      <LINE> │               column :name, edit_with: :txt
-      │               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ <FILE:LINE>: (file)\
-      """
-
-      assert_dsl_error expected do
-        defmodule EditWithInvalidType do
+  describe "inline edits" do
+    test "the action of a column has the inputs of the cell" do
+      assert_dsl_error ~r/the `action` of column :status has no inputs/ do
+        defmodule ColumnActionNoInputs do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :activate, :retire, :destroy, :list]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
+          view :read do
+            type :data_table
+            primary? true
 
-              exclude([
-                :id,
-                :recipe_ingredients,
-                :batches,
-                :photos,
-                :photos_urls,
-                :gravity_spread
-              ])
+            exclude [
+              :id,
+              :recipe_ingredients,
+              :batches,
+              :photos,
+              :photos_urls,
+              :description,
+              :target_abv,
+              :target_og,
+              :target_fg,
+              :gravity_spread,
+              :ingredient_count,
+              :batch_count,
+              :style
+            ]
 
-              column :name, edit_with: :txt
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :ingredient_count
-              column :batch_count
+            column :name
+
+            column :status do
+              action :update, :guard
+            end
+          end
+
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
       end
     end
 
-    test "edit_with references unknown action with did-you-mean" do
-      expected = """
-      [PyroManiac.DslErrors.ViewsTest.EditWithUnknownAction]
-      views -> view -> read -> column -> name defined in <FILE:LINE>:
-        edit_with references action :updaet which does not exist or is not an update action
-
-        Did you mean:
-          * :update
-      │
-      <LINE> │               column :name, edit_with: {:updaet, :text}
-      │               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ <FILE:LINE>: (file)\
-      """
-
-      assert_dsl_error expected do
-        defmodule EditWithUnknownAction do
+    test "the inputs of a column action are inputs of the action" do
+      assert_dsl_error ~r/:batch_count is not an input of :update. An inline edit has inputs only/ do
+        defmodule ColumnActionNotAccepted do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :activate, :retire, :destroy, :list]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
+          view :read do
+            type :data_table
+            primary? true
 
-              exclude([
-                :id,
-                :recipe_ingredients,
-                :batches,
-                :photos,
-                :photos_urls,
-                :gravity_spread
-              ])
+            exclude [
+              :id,
+              :recipe_ingredients,
+              :batches,
+              :photos,
+              :photos_urls,
+              :description,
+              :target_abv,
+              :target_og,
+              :target_fg,
+              :gravity_spread,
+              :ingredient_count,
+              :style,
+              :status
+            ]
 
-              column :name, edit_with: {:updaet, :text}
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :ingredient_count
-              column :batch_count
+            column :name
+
+            column :batch_count do
+              action :update do
+                state :guard
+                field :batch_count, autofocus: true
+              end
+            end
+          end
+
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
       end
     end
 
-    test "edit_with on column whose action does not accept the field" do
-      expected = """
-      [PyroManiac.DslErrors.ViewsTest.EditWithFieldNotAccepted]
-      views -> view -> read -> column -> status defined in <FILE:LINE>:
-        edit_with on column :status but action :activate does not accept field :status
-
-        Fix: either add :status to the action's `accept` list, or pick an action that accepts it
-      │
-      <LINE> │               column :status, edit_with: {:activate, :select}
-      │               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      │
-      └─ <FILE:LINE>: (file)\
-      """
-
-      assert_dsl_error expected do
-        defmodule EditWithFieldNotAccepted do
+    test "edit_columns names columns of the view" do
+      assert_dsl_error ~r/:nope is not a column of the view/ do
+        defmodule EditColumnsUnknown do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :activate, :retire, :destroy, :list]
           end
 
-          views do
-            view :read do
-              type :data_table
-              default_sort "name"
+          view :read do
+            type :data_table
+            primary? true
 
-              exclude([
-                :id,
-                :recipe_ingredients,
-                :batches,
-                :photos,
-                :photos_urls,
-                :gravity_spread
-              ])
+            exclude [
+              :id,
+              :recipe_ingredients,
+              :batches,
+              :photos,
+              :photos_urls,
+              :description,
+              :target_abv,
+              :target_fg,
+              :gravity_spread,
+              :ingredient_count,
+              :batch_count,
+              :style,
+              :status
+            ]
 
-              column :name
-              column :style
-              column :description
-              column :status, edit_with: {:activate, :select}
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :ingredient_count
-              column :batch_count
+            column :name
+            column :target_og
+
+            edit_columns :update, [:target_og, :nope] do
+              state :guard
+              field :target_og, autofocus: true
+            end
+          end
+
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
       end
     end
 
-    test "pagination the read action does not support" do
-      expected = ~r"""
-      views -> view -> list -> pagination defined in <FILE:LINE>:
-        view declares `pagination :keyset` but action :list on Brewery\.Recipe does not support it
-
-        Fix: add `keyset\? true` to the action's `pagination` block on Brewery\.Recipe, or declare a strategy it already supports\
-      """
-
-      assert_dsl_error expected do
-        defmodule UnsupportedPagination do
+    test "a column in edit_columns has no action of its own" do
+      assert_dsl_error ~r/column :target_og is in `edit_columns`, so it has no `action` of its own/ do
+        defmodule EditColumnsAndCellAction do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          page do
+            route "/test"
+            exclude [:create, :activate, :retire, :destroy, :list]
           end
 
-          views do
-            view :list do
-              type :data_table
-              default_sort "name"
-              pagination :keyset
+          view :read do
+            type :data_table
+            primary? true
 
-              exclude([
-                :id,
-                :recipe_ingredients,
-                :batches,
-                :photos,
-                :photos_urls,
-                :gravity_spread
-              ])
+            exclude [
+              :id,
+              :recipe_ingredients,
+              :batches,
+              :photos,
+              :photos_urls,
+              :description,
+              :target_abv,
+              :target_fg,
+              :gravity_spread,
+              :ingredient_count,
+              :batch_count,
+              :style,
+              :status
+            ]
 
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :ingredient_count
-              column :batch_count
+            column :name
+
+            column :target_og do
+              action :update do
+                state :guard
+                field :target_og, autofocus: true
+              end
+            end
+
+            column :target_fg
+
+            edit_columns :update, [:target_og, :target_fg] do
+              state :guard
+              field :target_og, autofocus: true
+              field :target_fg
+            end
+          end
+
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
       end
     end
 
-    test "count? true on a read action that is not countable" do
-      expected = ~r"""
-      views -> view -> list -> count\? defined in <FILE:LINE>:
-        view declares `count\? true` but action :list on Brewery\.Recipe is not countable
+    test "a column action and edit_columns are actions of the page" do
+      defmodule InlineEditsPage do
+        use PyroManiac, resource: Brewery.Recipe
 
-        Fix: add `countable true` to the action's `pagination` block on Brewery\.Recipe, or drop `count\?` and let the strategy's default stand\
-      """
+        page do
+          route "/test"
+          exclude [:create, :activate, :retire, :destroy, :list]
+        end
 
-      assert_dsl_error expected do
-        defmodule UncountableCount do
-          use PyroManiac, resource: Brewery.Recipe
+        view :read do
+          type :data_table
+          primary? true
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          exclude [
+            :id,
+            :recipe_ingredients,
+            :batches,
+            :photos,
+            :photos_urls,
+            :description,
+            :target_abv,
+            :target_og,
+            :target_fg,
+            :gravity_spread,
+            :ingredient_count,
+            :batch_count,
+            :style
+          ]
+
+          column :name
+
+          column :status do
+            action :update do
+              state :guard
+              select :status, autofocus: true
+            end
           end
 
-          views do
-            view :list do
-              type :data_table
-              default_sort "name"
-              count? true
+          column :target_og
+          column :target_fg
 
-              exclude([
-                :id,
-                :recipe_ingredients,
-                :batches,
-                :photos,
-                :photos_urls,
-                :gravity_spread
-              ])
+          edit_columns :update, [:target_og, :target_fg] do
+            state :guard
+            field :target_og, autofocus: true
+            field :target_fg
+          end
+        end
 
-              column :name
-              column :style
-              column :description
-              column :status
-              column :target_abv
-              column :target_og
-              column :target_fg
-              column :ingredient_count
-              column :batch_count
-            end
+        view :read do
+          type :card
+          primary? true
+
+          section :main do
+            field :name
           end
         end
       end
+
+      actions = PyroManiac.Info.actions(InlineEditsPage)
+
+      assert %{__column__: :status, fields: [%{name: :status}]} =
+               Enum.find(actions, &(&1.__column__ == :status))
+
+      assert %{__columns__: [:target_og, :target_fg]} =
+               Enum.find(actions, &(&1.__columns__ != []))
     end
   end
 end

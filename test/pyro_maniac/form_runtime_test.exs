@@ -36,10 +36,16 @@ defmodule PyroManiac.FormRuntimeTest do
     @moduledoc false
     use PyroManiac, resource: Brewery.Supplier
 
-    forms do
-      exclude([:update, :rename])
+    view :read do
+      type :card
+      primary? true
+
+      section :main do
+        field :name
+      end
 
       action :create do
+        state :guard
         combobox :name, autofocus: true
 
         combobox :code do
@@ -52,18 +58,36 @@ defmodule PyroManiac.FormRuntimeTest do
         field :notes
       end
     end
+
+    page do
+      route "/test"
+      exclude [:update, :rename, :destroy, :suggest_codes, :by_prefix]
+    end
   end
 
   defmodule ShipmentPage do
     @moduledoc false
     use PyroManiac, resource: Brewery.Shipment
 
-    forms do
+    page do
+      route "/test"
+      exclude [:destroy]
+    end
+
+    view :read do
+      type :card
+      primary? true
+
+      section :main do
+        field :reference
+      end
+
       action :create do
+        state :guard
         field :reference, autofocus: true
         select :carrier
 
-        group "Lines" do
+        section :lines do
           path [:lines]
           field :description
           field :quantity
@@ -81,7 +105,7 @@ defmodule PyroManiac.FormRuntimeTest do
 
   defp input(name) do
     SupplierPage
-    |> Info.form_for(:create)
+    |> Info.action_for(:create)
     |> Info.form_fields()
     |> Enum.find(&(&1.name == name))
   end
@@ -129,7 +153,7 @@ defmodule PyroManiac.FormRuntimeTest do
     end
 
     test "parent(...) refers to the record of the parent changeset" do
-      [_reference, _carrier, group] = Info.form_for(ShipmentPage, :create).fields
+      [_reference, _carrier, group] = Info.action_for(ShipmentPage, :create).fields
       [_description, _quantity, pallets] = group.fields
 
       line =

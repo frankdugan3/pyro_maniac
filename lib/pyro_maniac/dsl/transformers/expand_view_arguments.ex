@@ -41,21 +41,16 @@ defmodule PyroManiac.Dsl.Transformers.ExpandViewArguments do
         _ -> false
       end)
 
-    Enum.reduce(expanded, dsl, &Transformer.add_entity(&2, [:views], &1, prepend: true))
+    Enum.reduce(
+      Enum.reverse(expanded),
+      dsl,
+      &Transformer.add_entity(&2, [:views], &1, prepend: true)
+    )
   end
 
-  defp expand_view(%View{} = view, context) do
-    view
-    |> Map.put(:__arguments__, arguments_for(view, context))
-    |> Map.update!(:views, fn
-      nested when is_list(nested) -> Enum.map(nested, &expand_view(&1, context))
-      other -> other
-    end)
-  end
+  defp expand_view(%View{} = view, context),
+    do: Map.put(view, :__arguments__, arguments_for(view, context))
 
-  defp expand_view(other, _context), do: other
-
-  defp arguments_for(%View{type: :delegated}, _context), do: []
   defp arguments_for(%View{resource: nil}, _context), do: []
 
   defp arguments_for(%View{} = view, context) do
@@ -91,7 +86,10 @@ defmodule PyroManiac.Dsl.Transformers.ExpandViewArguments do
   end
 
   defp put_description(opts, description) when is_binary(description) and description != "",
-    do: Keyword.put(opts, :description, description)
+    do:
+      Keyword.put(opts, :description, [
+        PyroManiac.Content.default_text(PyroManiac.Description, description)
+      ])
 
   defp put_description(opts, _description), do: opts
 end

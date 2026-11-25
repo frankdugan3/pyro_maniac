@@ -5,19 +5,18 @@ defmodule PyroManiac.Form.Row do
   semantics and no label.
 
       row do
-        field :city
-        field :state
-        field :zip
+        field :target_og
+        field :target_fg
+        field :target_abv
       end
   """
   @moduledoc group: "PyroManiac"
 
-  alias PyroManiac.Dsl.Type
-
   use PyroManiac.Dsl.Entity,
     name: :row,
     args: [],
-    describe: "Inputs that stay on one line when there is space.",
+    describe:
+      "Inputs that stay on one line when there is space. A row can also contain sections, side by side.",
     imports: [Ash.Expr],
     entities: [
       fields: [
@@ -28,12 +27,7 @@ defmodule PyroManiac.Form.Row do
         PyroManiac.Form.Compound
       ]
     ],
-    schema: [
-      visible?: [
-        doc: "Conditional visibility: an Ash expression.",
-        type: Type.expression()
-      ]
-    ],
+    schema: PyroManiac.LayoutSchema.row(),
     private_fields: [
       __full_path__: [
         default: [],

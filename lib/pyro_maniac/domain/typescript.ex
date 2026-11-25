@@ -7,7 +7,7 @@ if Code.ensure_loaded?(AshTypescript.Rpc) do
 
     This extension adds `AshTypescript.Rpc` to the domain.
 
-        defmodule MyApp.Purchasing do
+        defmodule Brewery.Domain do
           use Ash.Domain, extensions: [PyroManiac.Domain.Typescript]
 
           pyro_maniac_typescript do
@@ -25,7 +25,10 @@ if Code.ensure_loaded?(AshTypescript.Rpc) do
 
     In `:auto` mode, each resource of the domain with `AshTypescript.Resource`
     is in `typescript_rpc`, also with no exposed action. Thus it has
-    TypeScript types.
+    TypeScript types. A filter preset storage (`PyroManiac.FilterPresets`)
+    with `AshTypescript.Resource` gets an rpc action for each of its actions
+    `for_page`, `create`, `update`, and `destroy`: the renderers read and
+    save the presets of a page with them.
 
     In both modes, a verifier checks:
 
@@ -42,15 +45,25 @@ if Code.ensure_loaded?(AshTypescript.Rpc) do
 
     ## The rpc name
 
-    `default_rpc_name/2` uses the resource prefix (`resource_prefix/1`):
+    `default_rpc_name/2` uses the `short_name` and the `plural_name` of the
+    resource (`Ash.Resource.Info`; without a `plural_name`, `pluralize/1` of
+    the short name):
 
     | Action | Name |
     |---|---|
-    | `:read` | `list_` and the plural of the prefix |
-    | `:create`, `:update`, `:destroy` | the action, `_`, and the prefix |
-    | other | the prefix, `_`, and the action |
+    | `:read` | `list_` and the plural name |
+    | `:create`, `:update`, `:destroy` | the action, `_`, and the short name |
+    | other | the short name, `_`, and the action |
 
     Give a function to `rpc_name` to change the names.
+
+    ## The field names
+
+    AshTypescript refuses a field name with `?`. A resource with
+    `PyroManiac.Resource` or `PyroManiac.FilterPresets` and
+    `AshTypescript.Resource` gives each public field `name?` the client name
+    `is_name` (`isName` with the camel case formatter), unless its
+    `typescript field_names` has one. The renderers use the same names.
     """
     @moduledoc group: "PyroManiac"
 
@@ -80,38 +93,48 @@ if Code.ensure_loaded?(AshTypescript.Rpc) do
     @doc """
     The default rpc action name of an action of a resource.
 
-        iex> PyroManiac.Domain.Typescript.default_rpc_name(MyApp.Purchasing.Vendor, :read)
-        :list_purchasing_vendors
+        iex> PyroManiac.Domain.Typescript.default_rpc_name(Brewery.Supplier, :read)
+        :list_suppliers
 
-        iex> PyroManiac.Domain.Typescript.default_rpc_name(MyApp.Purchasing.Vendor, :create)
-        :create_purchasing_vendor
+        iex> PyroManiac.Domain.Typescript.default_rpc_name(Brewery.Supplier, :create)
+        :create_supplier
 
-        iex> PyroManiac.Domain.Typescript.default_rpc_name(MyApp.Purchasing.Vendor, :archive)
-        :purchasing_vendor_archive
+        iex> PyroManiac.Domain.Typescript.default_rpc_name(Brewery.Recipe, :activate)
+        :recipe_activate
 
-        iex> PyroManiac.Domain.Typescript.default_rpc_name(MyApp.Customers.Address, :read)
-        :list_customers_addresses
+        iex> PyroManiac.Domain.Typescript.default_rpc_name(Brewery.Batch, :read)
+        :list_batches
+
+        iex> PyroManiac.Domain.Typescript.default_rpc_name(Brewery.QualityTest, :read)
+        :list_quality_tests
     """
     @spec default_rpc_name(module(), atom()) :: atom()
     def default_rpc_name(resource, action) do
-      prefix = resource_prefix(resource)
+      short = to_string(Ash.Resource.Info.short_name(resource))
 
       name =
         case action do
-          :read -> "list_" <> pluralize(prefix)
-          action when action in [:create, :update, :destroy] -> "#{action}_#{prefix}"
-          action -> "#{prefix}_#{action}"
+          :read -> "list_" <> plural_name(resource, short)
+          action when action in [:create, :update, :destroy] -> "#{action}_#{short}"
+          action -> "#{short}_#{action}"
         end
 
       String.to_atom(name)
+    end
+
+    defp plural_name(resource, short) do
+      case Ash.Resource.Info.plural_name(resource) do
+        nil -> pluralize(short)
+        plural -> to_string(plural)
+      end
     end
 
     @doc """
     The resource prefix: the module name without its first segment, in snake
     case, joined with `_`.
 
-        iex> PyroManiac.Domain.Typescript.resource_prefix(MyApp.FFL.ADRecord)
-        "ffl_ad_record"
+        iex> PyroManiac.Domain.Typescript.resource_prefix(Brewery.QualityTest)
+        "quality_test"
     """
     @spec resource_prefix(module()) :: String.t()
     def resource_prefix(resource), do: PyroManiac.Realtime.default_prefix(resource)
@@ -121,17 +144,17 @@ if Code.ensure_loaded?(AshTypescript.Rpc) do
     add `es`. A consonant and `y` at the end change to `ies`. All other names
     add `s`.
 
-        iex> PyroManiac.Domain.Typescript.pluralize("customers_address")
-        "customers_addresses"
+        iex> PyroManiac.Domain.Typescript.pluralize("batch")
+        "batches"
 
-        iex> PyroManiac.Domain.Typescript.pluralize("calibration_category")
-        "calibration_categories"
+        iex> PyroManiac.Domain.Typescript.pluralize("brewery")
+        "breweries"
 
-        iex> PyroManiac.Domain.Typescript.pluralize("purchasing_day")
-        "purchasing_days"
+        iex> PyroManiac.Domain.Typescript.pluralize("brew_day")
+        "brew_days"
 
-        iex> PyroManiac.Domain.Typescript.pluralize("purchasing_vendor")
-        "purchasing_vendors"
+        iex> PyroManiac.Domain.Typescript.pluralize("supplier")
+        "suppliers"
     """
     @spec pluralize(String.t()) :: String.t()
     def pluralize(name) do

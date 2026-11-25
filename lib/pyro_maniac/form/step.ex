@@ -9,18 +9,20 @@ defmodule PyroManiac.Form.Step do
   use PyroManiac.Dsl.Entity,
     name: :step,
     args: [:name],
-    describe: "Configure a form step in the `PyroManiac` extension.",
+    describe: "One step of a long form: one step at a time in edit mode, a section in view mode.",
     imports: [Ash.Expr],
     entities: [
+      description: [PyroManiac.Description],
       fields: [
         PyroManiac.Form.Field,
         PyroManiac.Form.Combobox,
         PyroManiac.Form.Select,
         PyroManiac.Form.Input,
-        PyroManiac.Form.Group,
+        PyroManiac.Form.Section,
         PyroManiac.Form.Row,
         PyroManiac.Form.Compound
-      ]
+      ],
+      render: [PyroManiac.Render]
     ],
     schema: [
       label: [
@@ -37,11 +39,6 @@ defmodule PyroManiac.Form.Step do
         doc:
           "Base path for all inputs in this step. When set, inputs are rendered within the nested form of this path.",
         type: {:list, :atom}
-      ],
-      render: [
-        doc:
-          "A render module that replaces the rendering of the step. The renderer requires its render behaviour.",
-        type: Type.render_module()
       ],
       review?: [
         default: false,

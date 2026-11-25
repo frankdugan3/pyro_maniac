@@ -120,17 +120,25 @@ defmodule PyroManiac.NavigationTest do
     end
   end
 
-  describe "validation" do
-    test "allows page item without explicit path (auto-resolved from page route config)" do
-      defmodule V.Nav.NoPath do
-        use PyroManiac.Navigation
+  describe "routes" do
+    test "a page item opens the route of the page; groups are not part of it" do
+      recipes = Enum.find(Info.flat_items(BreweryWeb.Navigation), &(&1.name == :recipes))
+      assert recipes.path == PyroManiac.Info.route(BreweryWeb.RecipeLive)
+      assert recipes.path == "/recipes"
+    end
 
-        nav do
-          item :no_path do
-            page SomeModule
-          end
-        end
-      end
+    test "two routes overlap when one URL matches both" do
+      overlap? = &PyroManiac.Navigation.Transformers.ValidateNav.overlap?/2
+
+      assert overlap?.("/recipes", "/recipes/")
+      assert overlap?.("/recipes/:id", "/recipes/new")
+      assert overlap?.("/:section/new", "/recipes/:id")
+      assert overlap?.("/files/*path", "/files/a/b")
+      assert overlap?.("/files/*path", "/files")
+      refute overlap?.("/recipes", "/recipes/new")
+      refute overlap?.("/recipes/:id", "/batches/:id")
+      refute overlap?.("/recipes/:id/edit", "/recipes/new")
+      refute overlap?.("/", "/recipes")
     end
   end
 end

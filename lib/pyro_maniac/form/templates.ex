@@ -4,8 +4,8 @@ defmodule PyroManiac.Form.Templates do
 
   Use them with `^`, as `^arg/1` of `Ash.Expr`:
 
-      combobox :model do
-        filter expr(is_nil(^input(:make)) or make == ^input(:make))
+      combobox :lot_number do
+        filter expr(is_nil(^input(:name)) or name == ^input(:name))
       end
 
   They are Ash context templates. `PyroManiac.Form.combobox_query/4` fills

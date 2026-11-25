@@ -7,24 +7,6 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
   alias PyroManiac.Dsl.Error
   alias PyroManiac.View.{Column, View}
 
-  @valid_edit_with_input_types [
-    :autocomplete,
-    :checkbox,
-    :color,
-    :date,
-    :datetime,
-    :email,
-    :number,
-    :password,
-    :range,
-    :select,
-    :tel,
-    :text,
-    :textarea,
-    :time,
-    :url
-  ]
-
   @ash_resource_transformers Resource.Dsl.transformers()
 
   @impl true
@@ -43,20 +25,17 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
 
     {final_views, any_kanban_mutated?} =
       Enum.map_reduce(views, false, fn
-        %View{type: :delegated} = view, mutated? ->
-          validate_delegated_view(view, module)
-          {view, mutated?}
-
         %View{type: :kanban} = view, _mutated? ->
           resource = view.resource || default_resource
-          validate_non_delegated_view(view, module)
+          validate_named_view(view, module)
+          validate_no_kanban_options(view, module)
           validate_view(view, resource, module)
           view = populate_kanban_from_extension(view, resource)
           {view, true}
 
         %View{} = view, mutated? ->
           resource = view.resource || default_resource
-          validate_non_delegated_view(view, module)
+          validate_named_view(view, module)
           validate_view(view, resource, module)
           {view, mutated?}
       end)
@@ -69,7 +48,7 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
             _ -> false
           end)
 
-        Enum.reduce(final_views, dsl, fn view, dsl ->
+        Enum.reduce(Enum.reverse(final_views), dsl, fn view, dsl ->
           Transformer.add_entity(dsl, [:views], view, prepend: true)
         end)
       else
@@ -82,7 +61,6 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
   defp validate_no_duplicate_views(views, module) do
     pairs =
       for %View{name: names, type: type} = view <- views,
-          type != :delegated,
           name <- names do
         {name, type, view}
       end
@@ -105,72 +83,103 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
     end)
   end
 
-  defp validate_delegated_view(%View{type: :delegated} = view, module) do
-    if is_nil(view.delegate_to) do
-      Error.raise!(
-        module: module,
-        location: Entity.property_anno(view, :delegate_to) || Entity.anno(view),
-        path: [:views, :view, :delegated],
-        why: "delegated views require `delegate_to` to be set",
-        fix:
-          "add `delegate_to SomeModule` inside the view block, where SomeModule is a PyroManiac module"
-      )
-    end
-
-    if view.ensure_loaded != [] do
-      Error.raise!(
-        module: module,
-        location: Entity.property_anno(view, :ensure_loaded) || Entity.anno(view),
-        path: [:views, :view, :delegated],
-        why:
-          "`ensure_loaded` is not allowed on `:delegated` views — " <>
-            "the delegated module owns its own loads",
-        fix: "set `ensure_loaded` on the views inside the delegated module instead"
-      )
-    end
-
-    if delegated_view_has_children?(view) do
-      Error.raise!(
-        module: module,
-        location: Entity.anno(view),
-        path: [:views, :view, :delegated],
-        why:
-          "delegated views must not have columns, fields, sections, or nested views — " <>
-            "the delegated module owns its own DSL",
-        fix:
-          "remove all child entities from this view, or change `type :delegated` to a regular type"
-      )
-    end
-  end
-
-  defp delegated_view_has_children?(view) do
-    nested = if is_list(view.views), do: view.views, else: []
-    Enum.any?([view.columns, view.fields, view.sections, nested], &(&1 != []))
-  end
-
-  defp validate_non_delegated_view(%View{} = view, module) do
+  defp validate_named_view(%View{} = view, module) do
     if view.name == [] do
       Error.raise!(
         module: module,
         location: Entity.anno(view),
         path: [:views, :view],
-        why: "non-delegated views require `name` to be set",
+        why: "a view requires `name` to be set",
         fix: "add an action name like `view :read do ... end`"
-      )
-    end
-
-    if view.delegate_to do
-      Error.raise!(
-        module: module,
-        location: Entity.property_anno(view, :delegate_to) || Entity.anno(view),
-        path: [:views, :view, hd(view.name)],
-        why: "`delegate_to` is only allowed on `:delegated` views",
-        fix: "use `type :delegated` to mount a full sub-Viewer, or remove `delegate_to`"
       )
     end
   end
 
+  # The options of one view type. A value on another type would be ignored.
+  @type_options [
+    orientation: [:timeline, :kanban],
+    granularity: [:calendar],
+    parent_field: [:list]
+  ]
+
+  defp validate_type_options(%View{type: type} = view, module) do
+    for {option, for_types} <- @type_options,
+        type not in for_types,
+        not is_nil(Map.get(view, option)) do
+      Error.raise!(
+        module: module,
+        location: Entity.property_anno(view, option) || Entity.anno(view),
+        path: [:views, :view, hd(view.name), option],
+        why:
+          "`#{option}` is an option of a #{Enum.map_join(for_types, " or ", &"`#{inspect(&1)}`")} " <>
+            "view, but this view is `#{inspect(type)}`, so it would be ignored",
+        fix:
+          "remove `#{option}`, or make the view " <>
+            Enum.map_join(for_types, " or ", &"`type #{inspect(&1)}`")
+      )
+    end
+  end
+
+  # The orientation of a stepper needs steps: on the view (a value other
+  # than the default), the tree of the view or of one of its actions; on an
+  # action, the tree of its form.
+  defp validate_step_orientation(%View{} = view, module) do
+    if view.step_orientation != :horizontal and not steps?(view.fields) and
+         not Enum.any?(view.actions, &steps?(&1.fields)) do
+      raise_step_orientation(view, view, module)
+    end
+
+    for %PyroManiac.Form.Action{step_orientation: orientation, delegate_to: nil} = action <-
+          view.actions,
+        not is_nil(orientation),
+        not steps?(if(action.fields == [], do: view.fields, else: action.fields)) do
+      raise_step_orientation(action, view, module)
+    end
+
+    :ok
+  end
+
+  defp steps?(nodes), do: Enum.any?(nodes, &is_struct(&1, PyroManiac.Form.Step))
+
+  defp raise_step_orientation(entity, view, module) do
+    Error.raise!(
+      module: module,
+      location: Entity.property_anno(entity, :step_orientation) || Entity.anno(entity),
+      path: [:views, :view, hd(view.name), :step_orientation],
+      why:
+        "`step_orientation` is the axis of the stepper of the `step` entities of a form, " <>
+          "but this form has no `step`, so it would be ignored",
+      fix: "remove `step_orientation`, or divide the form into `step` entities"
+    )
+  end
+
+  # The tree of a `:list`: a `belongs_to` of the resource to itself.
+  defp validate_parent_field(%View{type: :list, parent_field: parent} = view, resource, module)
+       when not is_nil(parent) do
+    case Ash.Resource.Info.relationship(resource, parent) do
+      %Ash.Resource.Relationships.BelongsTo{destination: ^resource} ->
+        :ok
+
+      _other ->
+        Error.raise!(
+          module: module,
+          location: Entity.property_anno(view, :parent_field) || Entity.anno(view),
+          path: [:views, :view, hd(view.name), :parent_field],
+          why:
+            "`parent_field #{inspect(parent)}` makes a tree of the records, but it is not a " <>
+              "`belongs_to` from #{inspect(resource)} to #{inspect(resource)}",
+          fix:
+            "name the `belongs_to` of a record to its parent, for example `parent_field :parent`"
+        )
+    end
+  end
+
+  defp validate_parent_field(_view, _resource, _module), do: :ok
+
   defp validate_view(%View{} = view, resource, module) do
+    validate_type_options(view, module)
+    validate_step_orientation(view, module)
+    validate_parent_field(view, resource, module)
     validate_ensure_loaded(view, resource, module)
     do_validate_view(view, resource, module)
   end
@@ -199,18 +208,17 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
     validate_all_exposed_included(view, resource, module)
     validate_default_displays_valid(view, module)
     validate_default_sorts_valid(view, resource, module)
-    validate_edit_with_valid(view, resource, module)
-    validate_nested_views(view, module)
   end
 
   defp do_validate_view(%View{type: :render} = view, _resource, module) do
-    if is_nil(view.render) && is_nil(view.component) do
+    if view.render == [] do
       Error.raise!(
         module: module,
         location: Entity.anno(view),
         path: [:views, :view, hd(view.name)],
-        why: "render views must have either `render` or `component` set",
-        fix: "set `render fn assigns -> ... end` or `component MyComponent` inside the view block"
+        why: "a `:render` view has a `render` for each renderer of the page",
+        fix:
+          "add `render PyroManiac.LiveView, BreweryWeb.Components.Dashboard` inside the view block"
       )
     end
   end
@@ -228,8 +236,6 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
         fix: "add `use PyroManiac.KanBan` to the resource"
       )
     end
-
-    validate_nested_views(view, module)
   end
 
   defp do_validate_view(%View{type: :calendar} = view, resource, module) do
@@ -244,11 +250,24 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
         path: [:views, :view, hd(view.name), :date_field],
         why: "calendar views require `date_field` to be set",
         suggestions: candidates,
-        fix: "set `date_field :foo` to a date or datetime attribute on the resource"
+        fix: "set `date_field :brew_date` to a date or datetime attribute on the resource"
       )
     end
+  end
 
-    validate_nested_views(view, module)
+  defp do_validate_view(%View{type: :timeline} = view, resource, module) do
+    validate_action_exists(view, resource, module)
+
+    if is_nil(view.date_field) do
+      Error.raise!(
+        module: module,
+        location: Entity.property_anno(view, :date_field) || Entity.anno(view),
+        path: [:views, :view, hd(view.name), :date_field],
+        why: "timeline views require `date_field` to be set",
+        suggestions: date_attribute_names(resource),
+        fix: "set `date_field :brew_date` to a date or datetime attribute on the resource"
+      )
+    end
   end
 
   defp do_validate_view(%View{type: :gantt} = view, resource, module) do
@@ -262,7 +281,7 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
         path: [:views, :view, hd(view.name), :start_field],
         why: "gantt views require `start_field` to be set",
         suggestions: candidates,
-        fix: "set `start_field :foo` to a date or datetime attribute on the resource"
+        fix: "set `start_field :brew_date` to a date or datetime attribute on the resource"
       )
     end
 
@@ -273,20 +292,36 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
         path: [:views, :view, hd(view.name), :end_field],
         why: "gantt views require `end_field` to be set",
         suggestions: candidates,
-        fix: "set `end_field :foo` to a date or datetime attribute on the resource"
+        fix: "set `end_field :package_date` to a date or datetime attribute on the resource"
       )
     end
-
-    validate_nested_views(view, module)
   end
 
   defp do_validate_view(%View{} = view, resource, module) do
     validate_action_exists(view, resource, module)
-    validate_nested_views(view, module)
+  end
+
+  # A kanban view takes its lanes, its move action, and its order from the
+  # `kan_ban` section of the resource. A value on the view would be ignored.
+  @kanban_options [:group_by, :kanban_action, :priority, :default_sort]
+
+  defp validate_no_kanban_options(view, module) do
+    for option <- @kanban_options, not is_nil(Map.get(view, option)) do
+      Error.raise!(
+        module: module,
+        location: Entity.property_anno(view, option) || Entity.anno(view),
+        path: [:views, :view, hd(view.name), option],
+        why:
+          "a `:kanban` view takes `#{option}` from the `kan_ban` section of the resource, so " <>
+            "this value would be ignored",
+        fix:
+          "remove `#{option}` from the view, and set it in the `kan_ban` section of the resource"
+      )
+    end
   end
 
   defp populate_kanban_from_extension(view, resource) do
-    lane = PyroManiac.KanBan.Info.lane!(resource)
+    lane = PyroManiac.KanBan.Info.lane_attribute!(resource)
     priority = PyroManiac.KanBan.Info.priority!(resource)
     move_action = PyroManiac.KanBan.Info.move_action!(resource)
 
@@ -406,7 +441,7 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
         )
     end
 
-    case find_duplicate(columns, & &1.label) do
+    case find_duplicate(columns, &PyroManiac.Content.text(&1.label)) do
       nil ->
         :ok
 
@@ -415,7 +450,9 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
           module: module,
           location: Entity.property_anno(duplicate, :label) || Entity.anno(duplicate),
           path: [:views, :view, hd(view.name), :column, duplicate.name],
-          why: "another column already uses the label #{inspect(duplicate.label)}"
+          why:
+            "another column already uses the label " <>
+              inspect(PyroManiac.Content.text(duplicate.label))
         )
     end
   end
@@ -463,12 +500,8 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
 
     root = for %Column{source: [key]} <- columns, into: excluded, do: key
 
-    # A column traversing a relationship, or a nested view on it, shows it.
-    nested =
-      for(%Column{source: [head | _]} <- columns, into: excluded, do: head)
-      |> MapSet.union(
-        for %View{relationship: rel} <- view.views || [], rel, into: MapSet.new(), do: rel
-      )
+    # A column traversing a relationship shows it.
+    nested = for %Column{source: [head | _]} <- columns, into: excluded, do: head
 
     for name <- exposed_fields(view, resource) do
       {kind, shown} =
@@ -548,7 +581,13 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
 
   defp validate_default_sorts_valid(%View{default_sort: default_sort} = view, resource, module) do
     location = Entity.property_anno(view, :default_sort) || Entity.anno(view)
-    columns = MapSet.new(view.columns, &List.wrap(&1.source))
+
+    # The rank of a user-defined order (`PyroManiac.Ordering`) is the order
+    # of the records, shown or not.
+    columns =
+      view.columns
+      |> MapSet.new(&List.wrap(&1.source))
+      |> MapSet.union(rank_keys(resource))
 
     case Ash.Sort.parse_input(resource, default_sort) do
       {:ok, []} ->
@@ -582,6 +621,13 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
     end
   end
 
+  defp rank_keys(resource) do
+    case PyroManiac.Ordering.Info.ordering(resource) do
+      %{attribute: attribute} -> MapSet.new([[attribute]])
+      _ -> MapSet.new()
+    end
+  end
+
   @spec raise_unknown_sort_key(term(), [atom()], View.t(), module(), :erl_anno.anno() | nil) ::
           no_return()
   defp raise_unknown_sort_key(sort_key, column_source_keys, view, module, location) do
@@ -610,134 +656,6 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
         [path ++ [key] | acc]
     end)
   end
-
-  defp validate_edit_with_valid(%View{columns: columns} = view, resource, module) do
-    for %Column{edit_with: edit_with} = column <- columns, not is_nil(edit_with) do
-      validate_column_edit_with(column, resource, module, view)
-    end
-  end
-
-  defp validate_column_edit_with(%{edit_with: type} = column, resource, module, view)
-       when is_atom(type) do
-    validate_input_type(type, column, module, view)
-    validate_has_update_action(resource, nil, column, module, view)
-  end
-
-  defp validate_column_edit_with(
-         %{edit_with: {action_name, type}} = column,
-         resource,
-         module,
-         view
-       ) do
-    validate_input_type(type, column, module, view)
-    validate_has_update_action(resource, action_name, column, module, view)
-  end
-
-  defp validate_column_edit_with(%{edit_with: fun}, _resource, _module, _view)
-       when is_function(fun, 1),
-       do: :ok
-
-  defp validate_input_type(type, column, module, view) do
-    if type not in @valid_edit_with_input_types do
-      Error.raise!(
-        module: module,
-        location: Entity.property_anno(column, :edit_with) || Entity.anno(column),
-        path: [:views, :view, hd(view.name), :column, column.name],
-        why:
-          "edit_with input type #{inspect(type)} is not valid. " <>
-            "Must be one of: #{inspect(@valid_edit_with_input_types)}",
-        suggestions: Error.did_you_mean(type, @valid_edit_with_input_types)
-      )
-    end
-  end
-
-  defp validate_has_update_action(resource, nil, column, module, view) do
-    primary =
-      resource
-      |> Resource.Info.actions()
-      |> Enum.filter(&(&1.type == :update))
-      |> Enum.find(& &1.primary?)
-
-    if !primary do
-      Error.raise!(
-        module: module,
-        location: Entity.property_anno(column, :edit_with) || Entity.anno(column),
-        path: [:views, :view, hd(view.name), :column, column.name],
-        why:
-          "edit_with on column #{inspect(column.name)} requires a primary update action, " <>
-            "but none exists on resource #{inspect(resource)}",
-        fix:
-          "add a primary update action to the resource, or specify an explicit action via " <>
-            "`edit_with: {:action_name, :input_type}`"
-      )
-    end
-
-    validate_field_accepted(primary, column, module, view)
-  end
-
-  defp validate_has_update_action(resource, action_name, column, module, view) do
-    update_action = Resource.Info.action(resource, action_name)
-
-    if !(update_action && update_action.type == :update) do
-      Error.raise!(
-        module: module,
-        location: Entity.property_anno(column, :edit_with) || Entity.anno(column),
-        path: [:views, :view, hd(view.name), :column, column.name],
-        why:
-          "edit_with references action #{inspect(action_name)} which does not exist " <>
-            "or is not an update action",
-        suggestions: update_action_suggestions(action_name, resource)
-      )
-    end
-
-    validate_field_accepted(update_action, column, module, view)
-  end
-
-  defp validate_field_accepted(update_action, column, module, view) do
-    accepted = update_action.accept || []
-
-    if column.name not in accepted do
-      Error.raise!(
-        module: module,
-        location: Entity.property_anno(column, :edit_with) || Entity.anno(column),
-        path: [:views, :view, hd(view.name), :column, column.name],
-        why:
-          "edit_with on column #{inspect(column.name)} but action " <>
-            "#{inspect(update_action.name)} does not accept field #{inspect(column.name)}",
-        fix:
-          "either add #{inspect(column.name)} to the action's `accept` list, " <>
-            "or pick an action that accepts it"
-      )
-    end
-  end
-
-  defp validate_nested_views(%View{views: views}, module) when is_list(views) do
-    for %View{} = nested <- views, do: validate_nested_view(nested, module)
-  end
-
-  defp validate_nested_views(_, _), do: :ok
-
-  defp validate_nested_view(%View{type: :delegated} = view, module),
-    do: validate_delegated_view(view, module)
-
-  defp validate_nested_view(%View{delegate_to: delegate_to} = view, module)
-       when not is_nil(delegate_to),
-       do: validate_non_delegated_view(view, module)
-
-  defp validate_nested_view(%View{name: []} = view, module) do
-    Error.raise!(
-      module: module,
-      location: Entity.anno(view),
-      path: [:views, :view],
-      why: "non-delegated views require `name` to be set",
-      fix: "add an action name like `view :read do ... end`"
-    )
-  end
-
-  defp validate_nested_view(%View{resource: nil}, _module), do: :ok
-
-  defp validate_nested_view(%View{resource: resource} = view, module),
-    do: validate_view(view, resource, module)
 
   defp find_duplicate(entities, key_fn) do
     result =
@@ -779,16 +697,6 @@ defmodule PyroManiac.Dsl.Transformers.ValidateViews do
       resource
       |> Resource.Info.actions()
       |> Enum.filter(&(&1.type == :read))
-      |> Enum.map(& &1.name)
-
-    Error.did_you_mean(name, candidates)
-  end
-
-  defp update_action_suggestions(name, resource) do
-    candidates =
-      resource
-      |> Resource.Info.actions()
-      |> Enum.filter(&(&1.type == :update))
       |> Enum.map(& &1.name)
 
     Error.did_you_mean(name, candidates)

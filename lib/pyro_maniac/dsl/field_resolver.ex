@@ -5,11 +5,13 @@ defmodule PyroManiac.Dsl.FieldResolver do
   of a `select`, the search of a `combobox`, the options of an `input`, and
   the size. It also validates each input against the resource and the action.
 
-  Shared so that an input resolves the same wherever it is declared: a
-  `views` read argument by the same rules as a `forms` action input.
+  Shared so that an input resolves the same wherever it is declared: an
+  argument of the read action of a view by the same rules as an input of
+  an action of a view.
 
   Runs at compile time. The context has `:module` (error attribution),
-  `:path_root` (`[:forms]` or `[:views]`, where the error points), and
+  `:path_root` (`[:forms]`, the internal path of the actions, or `[:views]`,
+  where the error points), and
   optionally `:level_inputs` (a map from a full path to the names of the
   inputs at that level, for `^input/1`).
   """
@@ -42,7 +44,7 @@ defmodule PyroManiac.Dsl.FieldResolver do
   """
   @spec new_input(atom(), keyword()) :: struct()
   def new_input(kind, attrs),
-    do: Transformer.build_entity!(PyroManiac.Dsl, [:forms, :action], kind, attrs)
+    do: Transformer.build_entity!(PyroManiac.Dsl, [:views, :view], kind, attrs)
 
   @doc "Builds a `PyroManiac.Form.Field` the way the DSL would have."
   @spec new_field(keyword()) :: Field.t()
@@ -77,6 +79,8 @@ defmodule PyroManiac.Dsl.FieldResolver do
   def resolve(input, resource, action_name, context) do
     field_resource = Info.resource_by_path(resource, input.__full_path__ || [])
     attr_info = Info.action_field_info(field_resource, action_name, input.name)
+
+    context = Map.put(context, :action_name, action_name)
 
     input
     |> do_resolve(field_resource, attr_info, context)
@@ -144,9 +148,14 @@ defmodule PyroManiac.Dsl.FieldResolver do
   defp do_resolve(%Combobox{} = combobox, resource, attr_info, context) do
     belongs_to = belongs_to_for(resource, combobox.name)
 
+    managed =
+      if is_nil(belongs_to),
+        do: managed_relationship(resource, context[:action_name], combobox.name)
+
     combobox
     |> put_allow_nil(attr_info)
-    |> resolve_combobox(belongs_to, resource, attr_info, context)
+    |> resolve_combobox(belongs_to || managed, resource, attr_info, context)
+    |> Map.put(:"__multiple?__", match?(%{cardinality: :many}, managed))
     |> maybe_strip_id_label(belongs_to)
   end
 
@@ -221,7 +230,31 @@ defmodule PyroManiac.Dsl.FieldResolver do
   defp explicit_option(value),
     do: %{value: value, label: TypeInfer.fallback_label(value), description: nil}
 
-  defp resolve_combobox(combobox, %{destination: dest}, _resource, _attr_info, context) do
+  # The relationship that the action manages with the argument `name`
+  # (`change manage_relationship(:name, :relationship, ...)`).
+  defp managed_relationship(_resource, nil, _name), do: nil
+
+  defp managed_relationship(resource, action_name, name) do
+    with %{changes: changes} <- Ash.Resource.Info.action(resource, action_name),
+         opts when is_list(opts) <- Enum.find_value(changes, &manage_opts(&1, name)) do
+      Ash.Resource.Info.relationship(resource, opts[:relationship])
+    else
+      _ -> nil
+    end
+  end
+
+  defp manage_opts(%{change: {Ash.Resource.Change.ManageRelationship, opts}}, name),
+    do: if(opts[:argument] == name, do: opts)
+
+  defp manage_opts(_change, _name), do: nil
+
+  defp resolve_combobox(
+         combobox,
+         %{destination: dest} = belongs_to,
+         _resource,
+         _attr_info,
+         context
+       ) do
     value_key = combobox.value_key || primary_key_attr(dest)
 
     label_key =
@@ -231,6 +264,7 @@ defmodule PyroManiac.Dsl.FieldResolver do
     |> Map.merge(%{
       __mode__: :select,
       __resource__: dest,
+      __relationship__: belongs_to.name,
       value_key: value_key,
       label_key: label_key
     })
@@ -239,6 +273,19 @@ defmodule PyroManiac.Dsl.FieldResolver do
 
   defp resolve_combobox(combobox, nil, resource, attr_info, context) do
     validate_free_text_type!(combobox, attr_info, context)
+
+    if Enum.any?(combobox.link_to || [], &(&1.page != false)) do
+      Error.raise!(
+        module: context.module,
+        location: Entity.property_anno(combobox, :link_to) || Entity.anno(combobox),
+        path: input_path(context, combobox, :link_to),
+        why:
+          "free-text combobox #{inspect(combobox.name)} has no record to link to: " <>
+            "it is not the foreign key of a `belongs_to`",
+        fix: "remove `link_to`"
+      )
+    end
+
     value_key = combobox.value_key || combobox.name
 
     if combobox.label_key && combobox.label_key != value_key do

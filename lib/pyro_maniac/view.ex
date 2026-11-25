@@ -6,19 +6,21 @@ defmodule PyroManiac.View do
 
   alias PyroManiac.Dsl.Expression
 
-  @tones PyroManiac.Dsl.Type.tones()
+  @decorations PyroManiac.Dsl.Type.decorations()
 
   @doc """
-  The tone of a cell or a view field for a record: a tone atom, or `nil`.
+  The decoration of a cell or a view field for a record: a decoration atom, or `nil`.
 
-  A `tone` expression is evaluated in memory, with the record and the
-  actor. A result that is not a tone gives `nil`.
+  A `decoration` expression is evaluated in memory, with the record and the
+  actor. A result that is not a decoration gives `nil`.
   """
-  @spec tone(map(), struct() | map(), term()) :: atom() | nil
-  def tone(%{tone: nil}, _record, _actor), do: nil
-  def tone(%{tone: tone}, _record, _actor) when tone in @tones, do: tone
+  @spec decoration(map(), struct() | map(), term()) :: atom() | nil
+  def decoration(%{decoration: nil}, _record, _actor), do: nil
 
-  def tone(%{tone: expression}, %resource{} = record, actor) do
+  def decoration(%{decoration: decoration}, _record, _actor) when decoration in @decorations,
+    do: decoration
+
+  def decoration(%{decoration: expression}, %resource{} = record, actor) do
     filled = Expression.fill(expression, actor: actor)
 
     case Ash.Expr.eval(filled,
@@ -27,12 +29,12 @@ defmodule PyroManiac.View do
            actor: actor,
            unknown_on_unknown_refs?: true
          ) do
-      {:ok, tone} when tone in @tones -> tone
+      {:ok, decoration} when decoration in @decorations -> decoration
       _ -> nil
     end
   rescue
     _ -> nil
   end
 
-  def tone(_column, _record, _actor), do: nil
+  def decoration(_column, _record, _actor), do: nil
 end

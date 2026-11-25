@@ -3,8 +3,8 @@ defmodule PyroManiac.Form.Input do
   A form input with an app input type: a module that implements
   `PyroManiac.Form.InputType`, with options.
 
-      input :body, {MyAppWeb.Inputs.Markdown, profile: :issue}
-      input :body, MyAppWeb.Inputs.Markdown
+      input :description, {BreweryWeb.Inputs.Markdown, toolbar: :minimal}
+      input :notes, BreweryWeb.Inputs.Markdown
   """
   @moduledoc group: "PyroManiac"
 
@@ -15,6 +15,7 @@ defmodule PyroManiac.Form.Input do
     args: [:name, :type],
     describe: "A form input with an app input type.",
     imports: [Ash.Expr],
+    entities: [description: [PyroManiac.Description], render: [PyroManiac.Render]],
     schema:
       CommonInput.schema() ++
         [

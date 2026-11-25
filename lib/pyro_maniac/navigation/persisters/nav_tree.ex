@@ -9,10 +9,8 @@ defmodule PyroManiac.Navigation.Persisters.NavTree do
 
   @impl true
   def transform(dsl) do
-    entities =
-      dsl
-      |> Spark.Dsl.Transformer.get_entities([:nav])
-      |> resolve_paths_from_pages()
+    # `ValidateNav` sets the path of each `page` item to the route of the page.
+    entities = Spark.Dsl.Transformer.get_entities(dsl, [:nav])
 
     route_manifest = build_route_manifest(entities)
     flat_items = flatten_items(entities)
@@ -24,28 +22,6 @@ defmodule PyroManiac.Navigation.Persisters.NavTree do
      |> Spark.Dsl.Transformer.persist(:route_manifest, route_manifest)
      |> Spark.Dsl.Transformer.persist(:flat_items, flat_items)
      |> Spark.Dsl.Transformer.persist(:items_by_page, items_by_page)}
-  end
-
-  defp resolve_paths_from_pages(entities) do
-    Enum.map(entities, fn
-      %Item{page: page, path: nil} = item when not is_nil(page) ->
-        case resolve_route_from_page(page) do
-          nil -> item
-          route -> %{item | path: route}
-        end
-
-      %Group{items: items} = group ->
-        %{group | items: resolve_paths_from_pages(items || [])}
-
-      other ->
-        other
-    end)
-  end
-
-  defp resolve_route_from_page(page_module) do
-    PyroManiac.Info.route(page_module)
-  rescue
-    _ -> nil
   end
 
   defp build_route_manifest(entities) do

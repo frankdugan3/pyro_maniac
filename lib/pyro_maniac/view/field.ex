@@ -1,18 +1,26 @@
 defmodule PyroManiac.View.Field do
   @moduledoc """
-  A view field configuration in `PyroManiac`.
+  A column of the records of a `related` (`type :data_table`, `:list`, or
+  `:grid`): one value of each related record, with `source` for a path.
 
-  Fields display individual values from a record within non-table view types
-  (`:grid`, `:list`, `:kanban`, `:calendar`, `:gantt`). Unlike columns, fields
-  are pre-laid-out by the developer and not interactively managed by the user.
+      related :recipe_ingredients do
+        type :data_table
+        field :quantity
+        field :notes
+      end
+
+  The `field` of a view (its record tree, also at the top of a `:list`,
+  `:kanban`, `:calendar`, or `:gantt` view) is `PyroManiac.Form.Field`,
+  with `path` for a related value.
   """
   @moduledoc group: "PyroManiac"
 
   use PyroManiac.Dsl.Entity,
     name: :field,
     args: [:name],
-    describe: "Declare a field to display within a view.",
+    describe: "A value of each related record: a column of a `related`.",
     imports: [Ash.Expr],
+    entities: [link_to: [PyroManiac.LinkTo], render: [PyroManiac.Render]],
     schema: [
       empty_text: [
         default: "—",
@@ -28,10 +36,6 @@ defmodule PyroManiac.View.Field do
         required: true,
         type: :atom
       ],
-      render: [
-        doc: "A render module for the value. The renderer requires its render behaviour.",
-        type: PyroManiac.Dsl.Type.render_module()
-      ],
       size: [
         default: :auto,
         doc:
@@ -42,15 +46,16 @@ defmodule PyroManiac.View.Field do
         doc: "Source path for data (defaults to [name]). Use for relationship traversal.",
         type: {:list, :atom}
       ],
-      tone: [
-        doc: "The meaning of the value: a tone, or an Ash expression that gives a tone or `nil`.",
+      decoration: [
+        doc:
+          "The meaning of the value: a decoration, or an Ash expression that gives a decoration or `nil`.",
         type: :any
       ]
     ],
     private_fields: [
-      __tone_refs__: [
+      __decoration_refs__: [
         default: [],
-        doc: "The fields that the `tone` expression needs. Set by the transformer.",
+        doc: "The fields that the `decoration` expression needs. Set by the transformer.",
         type: {:list, :atom}
       ]
     ],

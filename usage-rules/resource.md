@@ -7,9 +7,9 @@ verifier that rejects pages whose resource lacks the extension.
 ## Adding the extension
 
 ```elixir
-defmodule MyApp.Brewery.Recipe do
+defmodule Brewery.Recipe do
   use Ash.Resource,
-    domain: MyApp.Brewery,
+    domain: Brewery.Domain,
     data_layer: AshPostgres.DataLayer,
     extensions: [PyroManiac.Resource]
 
@@ -32,7 +32,7 @@ pyro_maniac do
 end
 
 pyro_maniac do
-  default_label :full_name      # calculation
+  default_label :name_email     # calculation
 end
 ```
 
@@ -45,16 +45,16 @@ If it doesn't, compilation fails with a clear error.
 ## `expose` (the surface)
 
 A page can use only the actions and fields that the resource exposes. The
-lists are explicit: also list the `default_label` and the fields of `tone`
-expressions that a page loads.
+lists are explicit: also list the `default_label` and the fields of
+`decoration` and `confirm` expressions that a page loads.
 
 ```elixir
 pyro_maniac do
   default_label :name
 
   expose :read do
-    loads [:name, :status, supplier: [:name]]
-    filter [:name, :status]
+    loads [:name, :type, supplier: [:name]]
+    filter [:name, :type]
     sort [:name]
   end
 
@@ -64,17 +64,20 @@ end
 
 - `filter` and `sort` are only for read actions.
 - `:*` in a field list is all the public attributes, calculations, and
-  aggregates (not the relationships): `loads [:*, owner: [:name]]`. Prefer it
+  aggregates (not the relationships): `loads [:*, supplier: [:name]]`. Prefer it
   to a list of all the fields. In `filter` and `sort`, `:*` skips the fields
   with `filterable? false` / `sortable? false`. Set those on a field (for
   example a password) that no filter or sort may use, also through RPC.
-- A relationship atom (`:owner`) is the relationship with `:*` of its
+- A relationship atom (`:supplier`) is the relationship with `:*` of its
   resource, one level deep. A deeper load is always explicit.
 - Each option defaults to `[:*]` (`filter` and `sort` only for a read action):
   `expose :read` exposes all the fields. Opt out explicitly: `filter []`.
   There is no `expose :*` for all actions.
 - Each field must be public. Each action must be public.
-- `exclude` lists on pages can name only exposed things.
+- The `exclude` of a view names only exposed fields. The `exclude` of the
+  `page` section names only exposed actions, and each exposed action is
+  used by a view of the page or is in it. A module without the `page`
+  section (not a page) is not checked.
 
 ## `realtime`
 
@@ -86,10 +89,10 @@ Use `PyroManiac.Realtime.topic/2` for topic strings in app code.
 pyro_maniac do
   realtime do
     mode :auto
-    except [:punch_in]
+    except [:activate]
     # One `PyroManiac.Realtime.Bulk` message for each bulk operation of
-    # :import, and an event for `PyroManiac.Realtime.broadcast_bulk/3`.
-    bulk [:import, :truncate]
+    # :create, and an event for `PyroManiac.Realtime.broadcast_bulk/3`.
+    bulk [:create, :truncate]
   end
 end
 ```
@@ -114,10 +117,18 @@ extensions. Common combinations:
 
 - `[PyroManiac.Resource, AshAuthentication]` — auth-protected resources
 - `[PyroManiac.Resource, PyroManiac.KanBan]` — kanban-aware resources
+  (refer to [kan_ban](kan_ban.md))
+- `[PyroManiac.Resource, PyroManiac.Ordering]` — records in a user-defined
+  order, for `reorder? true` (refer to [ordering](ordering.md))
+- `[PyroManiac.Resource, AshStateMachine]` (or AshWorkflow) — the
+  `workflow` node of a record tree (refer to [views](views.md))
 - `[PyroManiac.Resource, AshStorage]` — file-attachment resources
 
-When using `PyroManiac.KanBan`, you still need `PyroManiac.Resource` —
-they're separate extensions.
+When using `PyroManiac.KanBan` or `PyroManiac.Ordering`, you still need
+`PyroManiac.Resource` — they're separate extensions.
+`PyroManiac.FilterPresets` is for the resource that stores the filter
+presets of the users; it needs no `PyroManiac.Resource` (refer to
+[filter_presets](filter_presets.md)).
 
 ## Common mistakes
 

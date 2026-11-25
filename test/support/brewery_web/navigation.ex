@@ -16,19 +16,16 @@ defmodule BreweryWeb.Navigation do
       icon :beer
 
       item :recipes do
-        path "/recipes"
         page BreweryWeb.RecipeLive
         icon :recipe
       end
 
       item :batches do
-        path "/batches"
         page BreweryWeb.BatchLive
         icon :batch
       end
 
       item :quality_tests do
-        path "/quality-tests"
         page BreweryWeb.QualityTestLive
         icon :check
       end

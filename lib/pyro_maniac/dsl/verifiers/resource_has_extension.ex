@@ -35,7 +35,7 @@ defmodule PyroManiac.Dsl.Verifiers.ResourceHasExtension do
               "which must use the PyroManiac.Resource extension with a default_label configured",
           fix:
             "add `extensions: [PyroManiac.Resource]` to #{inspect(destination)} and configure " <>
-              "`pyro_maniac do default_label :foo end`"
+              "`pyro_maniac do default_label :name end`"
         )}}
     end
   end
@@ -53,7 +53,7 @@ defmodule PyroManiac.Dsl.Verifiers.ResourceHasExtension do
              "default_label configured",
          fix:
            "add `extensions: [PyroManiac.Resource]` to #{inspect(resource)} and configure " <>
-             "`pyro_maniac do default_label :foo end`"
+             "`pyro_maniac do default_label :name end`"
        )}
     end
   end
@@ -74,8 +74,7 @@ defmodule PyroManiac.Dsl.Verifiers.ResourceHasExtension do
 
   defp walk_view(%View{} = view, resource) do
     collect_column_rels(view.columns || [], resource) ++
-      collect_section_rels(view.sections || [], resource) ++
-      collect_nested_rels(view.views || [], resource)
+      collect_tree_rels(view.__tree__ || [], resource)
   end
 
   defp collect_column_rels(columns, resource) do
@@ -87,30 +86,24 @@ defmodule PyroManiac.Dsl.Verifiers.ResourceHasExtension do
     end
   end
 
-  defp collect_section_rels(sections, resource) do
-    for section <- sections,
-        rel_entity <- section.relationships || [],
-        rel = Ash.Resource.Info.relationship(resource, rel_entity.name),
+  defp collect_tree_rels(tree, resource) do
+    # A `related` shows the labels of its records without fields.
+    for %PyroManiac.Form.Related{fields: [], delegate_to: nil} = related <-
+          PyroManiac.Form.Tree.all(tree),
+        rel =
+          Ash.Resource.Info.relationship(
+            resource_at(resource, related.__full_path__),
+            related.name
+          ),
         rel != nil do
-      {rel_entity.name, rel.destination}
+      {related.name, rel.destination}
     end
   end
 
-  defp collect_nested_rels(views, resource) do
-    Enum.flat_map(views, fn nested ->
-      walk_nested_view(nested, resource)
-    end)
-  end
-
-  defp walk_nested_view(%{relationship: nil} = nested, resource) do
-    walk_view(nested, nested.resource || resource)
-  end
-
-  defp walk_nested_view(%{relationship: rel_name} = nested, resource) do
-    case Ash.Resource.Info.relationship(resource, rel_name) do
-      nil -> []
-      rel -> [{rel_name, rel.destination} | walk_view(nested, rel.destination)]
-    end
+  defp resource_at(resource, path) do
+    PyroManiac.Info.resource_by_path(resource, path)
+  rescue
+    ArgumentError -> resource
   end
 
   defp collect_form_relationships(dsl, resource) do
@@ -122,7 +115,7 @@ defmodule PyroManiac.Dsl.Verifiers.ResourceHasExtension do
     end
   end
 
-  # Each entity with a relative `path` (a group, a step, or a nested input)
+  # Each entity with a relative `path` (a section, a step, or a nested input)
   # follows the relationships of that path.
   defp walk_fields(fields, resource) do
     Enum.flat_map(fields || [], fn entity ->

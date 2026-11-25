@@ -46,9 +46,33 @@ defmodule PyroManiac.MixProject do
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
+  # The order of the sidebar. Other guides follow, in file order.
+  @guides [
+    "documentation/about.md",
+    "documentation/suite.md",
+    "ROADMAP.md",
+    "documentation/tutorials/get-started.md",
+    "documentation/tutorials/surface.md",
+    "documentation/tutorials/pages.md",
+    "documentation/tutorials/views.md",
+    "documentation/tutorials/record-layout.md",
+    "documentation/tutorials/navigation.md",
+    "documentation/tutorials/decorations.md",
+    "documentation/tutorials/policies.md",
+    "documentation/tutorials/custom-renders.md",
+    "documentation/renderers/renderer-overview.md",
+    "documentation/renderers/renderer-pages.md",
+    "documentation/renderers/renderer-filters-and-sorts.md",
+    "documentation/renderers/renderer-views.md",
+    "documentation/renderers/renderer-actions.md",
+    "documentation/renderers/renderer-record-tree.md",
+    "documentation/renderers/renderer-navigation.md",
+    "documentation/renderers/renderer-decorations.md",
+    "documentation/renderers/renderer-custom-renders.md"
+  ]
+
   defp extras do
-    "documentation/**/*.md"
-    |> Path.wildcard()
+    Enum.uniq(@guides ++ Path.wildcard("documentation/**/*.md"))
     |> Enum.map(fn
       "documentation/dsls/DSL-PyroManiac.md" = path ->
         {String.to_atom(path),
@@ -65,6 +89,31 @@ defmodule PyroManiac.MixProject do
         {String.to_atom(path),
          [title: "KanBan", search_data: Spark.Docs.search_data_for(PyroManiac.KanBan)]}
 
+      "documentation/dsls/DSL-PyroManiac.KanBan.Lanes.md" = path ->
+        {String.to_atom(path),
+         [
+           title: "KanBan Lanes",
+           search_data: Spark.Docs.search_data_for(PyroManiac.KanBan.Lanes)
+         ]}
+
+      "documentation/dsls/DSL-PyroManiac.Ordering.md" = path ->
+        {String.to_atom(path),
+         [title: "Ordering", search_data: Spark.Docs.search_data_for(PyroManiac.Ordering)]}
+
+      "documentation/dsls/DSL-PyroManiac.FilterPresets.md" = path ->
+        {String.to_atom(path),
+         [
+           title: "Filter Presets",
+           search_data: Spark.Docs.search_data_for(PyroManiac.FilterPresets)
+         ]}
+
+      "documentation/dsls/DSL-PyroManiac.Domain.Typescript.md" = path ->
+        {String.to_atom(path),
+         [
+           title: "Domain TypeScript",
+           search_data: Spark.Docs.search_data_for(PyroManiac.Domain.Typescript)
+         ]}
+
       "documentation/dsls/DSL-PyroManiac.Navigation.md" = path ->
         {String.to_atom(path),
          [
@@ -72,10 +121,14 @@ defmodule PyroManiac.MixProject do
            search_data: Spark.Docs.search_data_for(PyroManiac.Navigation.Dsl)
          ]}
 
+      "ROADMAP.md" = path ->
+        {String.to_atom(path), [title: "Roadmap"]}
+
       path ->
         title =
           path
           |> Path.basename(".md")
+          |> String.replace_prefix("renderer-", "")
           |> String.split(~r/[-_]/)
           |> Enum.map_join(" ", &String.capitalize/1)
 
@@ -89,10 +142,9 @@ defmodule PyroManiac.MixProject do
 
   defp groups_for_extras do
     [
-      Tutorials: [
-        "documentation/tutorials/get-started.md",
-        ~r'documentation/tutorials'
-      ],
+      Tutorials: [~r'documentation/tutorials'],
+      Renderers: [~r'documentation/renderers/'],
+      Plans: [~r'documentation/plans/'],
       DSL: [
         ~r'documentation/dsls'
       ]
@@ -122,9 +174,86 @@ defmodule PyroManiac.MixProject do
         PyroManiac.KanBan,
         PyroManiac.Navigation,
         PyroManiac.Resource
-      ]
+      ],
+      before_closing_body_tag: &before_closing_body_tag/1
     ]
   end
+
+  # A figure (an inline SVG in a guide) opens large: click it, or focus it and
+  # press Enter. Escape, a click, or the close button closes it.
+  defp before_closing_body_tag(:html) do
+    ~S"""
+    <style>
+    #content figure > svg{width:100%;height:auto;cursor:zoom-in}
+    #content figure > svg:focus-visible{outline:2px solid var(--link-color,#2563eb);outline-offset:4px}
+    .pm-zoom{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--background,Canvas);color:var(--textBody,CanvasText);cursor:zoom-out}
+    .pm-zoom > svg{flex:1;width:100%;min-height:0}
+    .pm-zoom > figcaption{text-align:center;font-size:.9em}
+    .pm-zoom-close{position:absolute;top:8px;right:12px;font-size:28px;line-height:1;background:none;border:0;color:inherit;cursor:pointer}
+    </style>
+    <script>
+    (() => {
+      const sel = "#content figure > svg";
+      const init = () => document.querySelectorAll(sel).forEach((svg) => {
+        if (svg.hasAttribute("tabindex")) return;
+        const title = svg.querySelector("title");
+        svg.setAttribute("tabindex", "0");
+        svg.setAttribute("role", "button");
+        svg.setAttribute("aria-label", "Enlarge the figure" + (title ? ": " + title.textContent : ""));
+        svg.removeAttribute("aria-labelledby");
+      });
+      const open = (svg) => {
+        const overlay = document.createElement("div");
+        const close = document.createElement("button");
+        const copy = svg.cloneNode(true);
+        const caption = svg.closest("figure").querySelector("figcaption");
+        const title = svg.querySelector("title");
+        overlay.className = "pm-zoom";
+        overlay.setAttribute("role", "dialog");
+        overlay.setAttribute("aria-modal", "true");
+        overlay.setAttribute("aria-label", title ? title.textContent : "Figure");
+        close.type = "button";
+        close.className = "pm-zoom-close";
+        close.setAttribute("aria-label", "Close");
+        close.textContent = "×";
+        ["tabindex", "aria-label"].forEach((a) => copy.removeAttribute(a));
+        copy.setAttribute("role", "img");
+        copy.querySelectorAll("[id]").forEach((e) => e.removeAttribute("id"));
+        overlay.append(close, copy);
+        if (caption) overlay.append(caption.cloneNode(true));
+        const shut = () => {
+          overlay.remove();
+          document.removeEventListener("keydown", key, true);
+          svg.focus();
+        };
+        const key = (e) => {
+          if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); shut(); }
+          else if (e.key === "Tab") { e.preventDefault(); close.focus(); }
+        };
+        overlay.addEventListener("click", shut);
+        document.addEventListener("keydown", key, true);
+        document.body.append(overlay);
+        close.focus();
+      };
+      document.addEventListener("click", (e) => {
+        const svg = e.target.closest && e.target.closest(sel);
+        if (svg) open(svg);
+      });
+      document.addEventListener("keydown", (e) => {
+        if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(sel)) {
+          e.preventDefault();
+          open(e.target);
+        }
+      });
+      window.addEventListener("exdoc:loaded", init);
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+      else init();
+    })();
+    </script>
+    """
+  end
+
+  defp before_closing_body_tag(_format), do: ""
 
   defp package do
     [
@@ -134,7 +263,7 @@ defmodule PyroManiac.MixProject do
       links: %{GitHub: @source_url},
       files: ~w(
         lib documentation
-        README* CHANGELOG* LICENSE*
+        README* CHANGELOG* LICENSE* ROADMAP*
         usage-rules.md usage-rules
         mix.exs .formatter.exs
       )
@@ -170,6 +299,8 @@ defmodule PyroManiac.MixProject do
       {:usage_rules, ">= 0.0.0", only: :dev},
       {:mix_audit, ">= 0.0.0", only: :dev, runtime: false},
       {:mix_test_watch, ">= 0.0.0", only: :test, runtime: false},
+      # The SAT solver of the Ash policies in the tests
+      {:picosat_elixir, "~> 0.2", only: :test},
       # Build tooling
       {:ex_doc, ">= 0.0.0", only: :docs, runtime: false},
       {:mix_watch_docs, ">= 0.0.0", only: :docs, runtime: false},
@@ -182,6 +313,7 @@ defmodule PyroManiac.MixProject do
       {:ash, "~> 3.20"},
       {:spark, "~> 2.0"},
       {:ash_postgres, "~> 2.0"},
+      {:phoenix, "~> 1.8"},
       # Optional deps
       {:ash_storage, github: "ash-project/ash_storage", branch: "main", optional: true},
       {:ash_typescript, "~> 0.19", optional: true},
@@ -189,7 +321,7 @@ defmodule PyroManiac.MixProject do
     ]
   end
 
-  @extensions "PyroManiac.Dsl,PyroManiac.Resource,PyroManiac.Navigation.Dsl,PyroManiac.KanBan,PyroManiac.Domain.Typescript"
+  @extensions "PyroManiac.Dsl,PyroManiac.Resource,PyroManiac.Navigation.Dsl,PyroManiac.KanBan,PyroManiac.KanBan.Lanes,PyroManiac.Domain.Typescript,PyroManiac.Ordering,PyroManiac.FilterPresets"
   defp aliases do
     [
       usage: "usage_rules.sync --yes",

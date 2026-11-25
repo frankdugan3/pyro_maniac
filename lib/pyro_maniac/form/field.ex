@@ -1,10 +1,15 @@
 defmodule PyroManiac.Form.Field do
   @moduledoc """
-  A form input for an attribute or an argument of the action.
+  One value of the record tree of a view: its value in view mode (the read
+  action of the view), and an input in the form of each write action that
+  accepts it. A field that is not an input of the action (a calculation, an
+  aggregate, an attribute that the action does not accept) is read-only.
+  With `path`, the value of a related record (`field :name, path:
+  [:recipe]`).
 
-  The input type is inferred from the Ash type, or set with `type`. A field
-  cannot be the foreign key of a `belongs_to` (use `combobox`) or have a
-  closed set of values (use `select`), except as a `:checkbox` group.
+  The input type is inferred from the Ash type, or set with `type`. An
+  input cannot be the foreign key of a `belongs_to` (use `combobox`) or have
+  a closed set of values (use `select`), except as a `:checkbox` group.
   """
   @moduledoc group: "PyroManiac"
 
@@ -15,6 +20,11 @@ defmodule PyroManiac.Form.Field do
     args: [:name],
     describe: "A form input for an attribute or an argument of the action.",
     imports: [Ash.Expr],
+    entities: [
+      description: [PyroManiac.Description],
+      link_to: [PyroManiac.LinkTo],
+      render: [PyroManiac.Render]
+    ],
     schema:
       CommonInput.schema() ++
         [

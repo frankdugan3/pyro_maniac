@@ -15,6 +15,7 @@ defmodule PyroManiac.Form.Select do
     args: [:name],
     describe: "A form input for a closed set of values.",
     imports: [Ash.Expr],
+    entities: [description: [PyroManiac.Description], render: [PyroManiac.Render]],
     schema:
       CommonInput.schema() ++
         [

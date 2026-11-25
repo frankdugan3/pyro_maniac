@@ -96,11 +96,11 @@ defmodule PyroManiac.TypeInfer do
 
   ## Examples
 
-      iex> PyroManiac.TypeInfer.closed_values(:atom, one_of: [:open, :closed_now])
-      [%{value: :open, label: "open", description: nil}, %{value: :closed_now, label: "closed now", description: nil}]
+      iex> PyroManiac.TypeInfer.closed_values(:atom, one_of: [:brewer, :head_brewer])
+      [%{value: :brewer, label: "brewer", description: nil}, %{value: :head_brewer, label: "head brewer", description: nil}]
 
-      iex> PyroManiac.TypeInfer.closed_values({:array, :atom}, items: [one_of: [:a]])
-      [%{value: :a, label: "a", description: nil}]
+      iex> PyroManiac.TypeInfer.closed_values({:array, :atom}, items: [one_of: [:grain]])
+      [%{value: :grain, label: "grain", description: nil}]
 
       iex> PyroManiac.TypeInfer.closed_values(:string, [])
       nil

@@ -22,11 +22,6 @@ defmodule PyroManiac.Form.CommonInput do
         doc: "The label of the input (defaults to the capitalized name).",
         type: :string
       ],
-      description: [
-        doc:
-          "Help text for the input (defaults to the description of the attribute or argument).",
-        type: Type.inheritable(:string)
-      ],
       autofocus: [
         default: false,
         doc: "Focus this input when the form opens. Exactly one input of an action has it.",
@@ -35,7 +30,7 @@ defmodule PyroManiac.Form.CommonInput do
       path: [
         default: [],
         doc:
-          "A relative path of relationships. The input is in the nested form of that path, with no group.",
+          "A relative path of relationships. The input is in the nested form of that path, with no section.",
         type: {:list, :atom}
       ],
       size: [
@@ -44,10 +39,25 @@ defmodule PyroManiac.Form.CommonInput do
           "The content role: `:code`, `:term`, `:name`, `:phrase`, or `:prose`. `:auto` is resolved from the type and the constraints.",
         type: Type.size()
       ],
+      only: [
+        doc:
+          "The actions that show it: the read action of the view (view mode) and the actions of the tree. `nil`: all.",
+        type: Type.only()
+      ],
       visible?: [
         doc:
           "Conditional visibility: an Ash expression (`expr(...)`). It can refer to the attributes at the path of the input, `^arg(:name)`, and `^actor(...)`.",
         type: Type.expression()
+      ],
+      decoration: [
+        doc:
+          "The meaning of the value in view mode: a decoration, or an Ash expression that gives a decoration or `nil`.",
+        type: :any
+      ],
+      empty_text: [
+        default: "—",
+        doc: "The text in view mode when the value is `nil`.",
+        type: :string
       ]
     ]
   end
@@ -70,6 +80,17 @@ defmodule PyroManiac.Form.CommonInput do
         doc:
           "The attributes and arguments that `visible?` refers to, and `{:parent, name}` for `parent(name)`. Set by the transformer.",
         type: {:list, :any}
+      ],
+      __decoration_refs__: [
+        default: [],
+        doc: "The fields that the `decoration` expression needs. Set by the transformer.",
+        type: {:list, :atom}
+      ],
+      "__read_only?__": [
+        default: false,
+        doc:
+          "The node is not an input of the action (a calculation, an aggregate, an attribute that the action does not accept, or a relationship): it shows its value in both modes. Set by the transformer.",
+        type: :boolean
       ]
     ]
   end

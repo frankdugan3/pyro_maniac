@@ -11,7 +11,6 @@ defmodule PyroManiac.Form.Combobox.Argument do
       combobox :supplier_id do
         read_action :by_prefix
         argument :prefix, search()
-        argument :active, true
         search false
       end
   """

@@ -5,21 +5,42 @@ defmodule PyroManiac.View.Column do
   Columns are used exclusively in `:data_table` views. Unlike fields, columns
   are interactive — users can sort, filter, hide, and reorder them at runtime.
 
-  For custom cell rendering, give a render module. Each renderer requires
-  that the module implements its render behaviour:
+  The header (`label`, default: the capitalized name), its help text
+  (`description`), and the cell (`render`) are entities: a text or an Ash
+  expression for every renderer, and an implementation for one renderer
+  (refer to `PyroManiac.Content`):
 
   ```elixir
-  column :code do
-    render MyAppWeb.Cells.Code
+  column :actual_abv do
+    label "ABV"
+    description "Measured alcohol by volume."
+  end
+
+  column :batch_number do
+    render PyroManiac.LiveView, BreweryWeb.Components.BatchNumber
   end
   ```
 
-  `tone` gives the meaning of each cell: a tone, or an Ash expression that
-  gives a tone or `nil`:
+  `decoration` gives the meaning of each cell: a decoration, or an Ash
+  expression that gives a decoration or `nil`. The decorations are
+  `PyroManiac.Info.decorations/0` (configurable):
 
   ```elixir
   column :status do
-    tone expr(if status == :overdue, do: :danger, else: nil)
+    decoration expr(if status == :cancelled, do: :danger, else: nil)
+  end
+  ```
+
+  `action :update` with the inputs of the cell (`field`, `select`,
+  `combobox`, `input`, `compound`; no `delegate_to` or `resource`) edits
+  the cell inline. A create action in a column is an input of the inline
+  new row of the view (`new_row? true`):
+
+  ```elixir
+  column :status do
+    action :update, :discard do
+      select :status, autofocus: true
+    end
   end
   ```
   """
@@ -30,16 +51,14 @@ defmodule PyroManiac.View.Column do
     args: [:name],
     describe: "Declare non-default behavior for a specific data table column.",
     imports: [Ash.Expr],
+    entities: [
+      label: [PyroManiac.Label],
+      description: [PyroManiac.Description],
+      link_to: [PyroManiac.LinkTo],
+      render: [PyroManiac.Render],
+      actions: [PyroManiac.Form.Action]
+    ],
     schema: [
-      description: [
-        doc: "Description of column.",
-        type: PyroManiac.Dsl.Type.inheritable(:string)
-      ],
-      edit_with: [
-        doc:
-          "Inline edit config. An atom (e.g. `:text`) uses primary update action. A tuple `{:action, :type}` specifies both. `nil` disables editing.",
-        type: PyroManiac.Dsl.Type.edit_with()
-      ],
       filterable?: [
         default: true,
         doc:
@@ -52,19 +71,10 @@ defmodule PyroManiac.View.Column do
           "Enable keyset-paged sorting. Note: If technically unsortable, automatically set to false.",
         type: :boolean
       ],
-      label: [
-        doc: "The label of the column (defaults to capitalized name).",
-        type: :string
-      ],
       name: [
         doc: "The name of the column.",
         required: true,
         type: :atom
-      ],
-      render: [
-        doc:
-          "A render module for the cell. The renderer requires its render behaviour. Without it, the cell shows `render_cell_data/1`.",
-        type: PyroManiac.Dsl.Type.render_module()
       ],
       sortable?: [
         default: true,
@@ -76,7 +86,7 @@ defmodule PyroManiac.View.Column do
         doc: "Source path for data (defaults to name).",
         type: {:list, :atom}
       ],
-      tone: [
+      decoration: [
         doc:
           "The meaning of each cell: `:neutral`, `:info`, `:success`, `:warning`, `:danger`, or an Ash expression that gives one of them or `nil`.",
         type: :any
@@ -96,9 +106,9 @@ defmodule PyroManiac.View.Column do
         doc: "The Ash.Type.Enum module for enum columns. Set by the transformer.",
         type: :any
       ],
-      __tone_refs__: [
+      __decoration_refs__: [
         default: [],
-        doc: "The fields that the `tone` expression needs. Set by the transformer.",
+        doc: "The fields that the `decoration` expression needs. Set by the transformer.",
         type: {:list, :atom}
       ]
     ],
@@ -145,9 +155,13 @@ defmodule PyroManiac.View.Column do
        nil -> List.wrap(column.name)
        source -> source
      end)
-     |> Map.update!(:label, fn
-       nil -> Transformers.default_label(column.name)
-       label -> label
+     |> Map.update!(:label, fn label ->
+       if PyroManiac.Content.portable(label) do
+         label
+       else
+         text = Transformers.default_label(column.name)
+         [PyroManiac.Content.default_text(PyroManiac.Label, text) | label]
+       end
      end)}
   end
 end

@@ -18,7 +18,7 @@ defmodule PyroManiac.SurfaceTest do
       extensions: [PyroManiac.Resource]
 
     pyro_maniac do
-      default_label :name
+      default_label(:name)
 
       expose :read do
         loads [:name, :code, owner: [:name]]
@@ -26,7 +26,7 @@ defmodule PyroManiac.SurfaceTest do
         sort [:name]
       end
 
-      expose [:create, :update]
+      expose([:create, :update])
     end
 
     attributes do
@@ -56,9 +56,9 @@ defmodule PyroManiac.SurfaceTest do
         extensions: [PyroManiac.Resource]
 
       pyro_maniac do
-        default_label :name
+        default_label(:name)
 
-        expose :read
+        expose(:read)
 
         expose :list do
           sort [:name]
@@ -75,7 +75,7 @@ defmodule PyroManiac.SurfaceTest do
           sort owner: [:name]
         end
 
-        expose [:create, :update]
+        expose([:create, :update])
       end
 
       attributes do
@@ -136,8 +136,8 @@ defmodule PyroManiac.SurfaceTest do
         extensions: [PyroManiac.Resource]
 
       pyro_maniac do
-        default_label :name
-        expose :read
+        default_label(:name)
+        expose(:read)
       end
 
       attributes do
@@ -170,7 +170,7 @@ defmodule PyroManiac.SurfaceTest do
               extensions: [PyroManiac.Resource]
 
             pyro_maniac do
-              default_label :name
+              default_label(:name)
 
               expose :read do
                 filter [:name, :pin]
@@ -263,13 +263,23 @@ defmodule PyroManiac.SurfaceTest do
         defmodule DestroyPage do
           use PyroManiac, resource: PyroManiac.SurfaceTest.Thing
 
-          page do
-            title "Things"
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
+
+            bulk_action :destroy, :guard do
+              confirm false
+            end
           end
 
-          forms do
+          page do
+            route "/test"
             exclude [:create, :update]
-            bulk_action :destroy
+            title "Things"
           end
         end
       end
@@ -281,17 +291,27 @@ defmodule PyroManiac.SurfaceTest do
           use PyroManiac, resource: PyroManiac.SurfaceTest.Thing
 
           page do
+            route "/test"
             title "Things"
           end
 
-          views do
-            view :read do
-              type :grid
+          view :read do
+            type :grid
+            primary? true
 
-              section "Main" do
-                field :name
-                field :note
-              end
+            section :main do
+              field :name
+              field :note
+            end
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -304,14 +324,24 @@ defmodule PyroManiac.SurfaceTest do
           use PyroManiac, resource: PyroManiac.SurfaceTest.Thing
 
           page do
+            route "/test"
             title "Things"
           end
 
-          views do
-            view :read do
-              type :data_table
-              exclude [:id, :owner, :code]
-              column :name
+          view :read do
+            type :data_table
+            primary? true
+            exclude [:id, :owner, :code]
+            column :name
+          end
+
+          view :read do
+            type :card
+
+            primary? true
+
+            section :main do
+              field :name
             end
           end
         end
@@ -319,21 +349,29 @@ defmodule PyroManiac.SurfaceTest do
     end
 
     test "an action exclude that is not exposed" do
-      assert_dsl_error ~r/`exclude` has :destroy, which is not an exposed :create or :update action/ do
+      assert_dsl_error ~r/`exclude` has :destroy, which is not an exposed action/ do
         defmodule FormExcludePage do
           use PyroManiac, resource: PyroManiac.SurfaceTest.Thing
 
-          page do
-            title "Things"
-          end
+          view :read do
+            type :card
+            primary? true
 
-          forms do
-            exclude [:destroy, :update]
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               field :code
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:destroy, :update]
+            title "Things"
           end
         end
       end
@@ -351,8 +389,8 @@ defmodule PyroManiac.SurfaceTest do
               extensions: [PyroManiac.Resource]
 
             pyro_maniac do
-              default_label :name
-              expose :reed
+              default_label(:name)
+              expose(:reed)
             end
 
             attributes do
@@ -378,7 +416,7 @@ defmodule PyroManiac.SurfaceTest do
               extensions: [PyroManiac.Resource]
 
             pyro_maniac do
-              default_label :name
+              default_label(:name)
 
               expose :read do
                 loads [:secret]
@@ -409,7 +447,7 @@ defmodule PyroManiac.SurfaceTest do
               extensions: [PyroManiac.Resource]
 
             pyro_maniac do
-              default_label :name
+              default_label(:name)
 
               expose :create do
                 filter [:name]
@@ -439,9 +477,9 @@ defmodule PyroManiac.SurfaceTest do
               extensions: [PyroManiac.Resource]
 
             pyro_maniac do
-              default_label :name
-              expose :read
-              expose [:read]
+              default_label(:name)
+              expose(:read)
+              expose([:read])
             end
 
             attributes do
@@ -467,10 +505,10 @@ defmodule PyroManiac.SurfaceTest do
               extensions: [PyroManiac.Resource]
 
             pyro_maniac do
-              default_label :name
+              default_label(:name)
 
               realtime do
-                mode :validate
+                mode(:validate)
               end
             end
 
@@ -499,11 +537,11 @@ defmodule PyroManiac.SurfaceTest do
               extensions: [PyroManiac.Resource]
 
             pyro_maniac do
-              default_label :name
-              expose [:create, :update]
+              default_label(:name)
+              expose([:create, :update])
 
               realtime do
-                mode :validate
+                mode(:validate)
               end
             end
 
@@ -537,11 +575,11 @@ defmodule PyroManiac.SurfaceTest do
         extensions: [PyroManiac.Resource]
 
       pyro_maniac do
-        default_label :name
-        expose [:create, :update, :punch]
+        default_label(:name)
+        expose([:create, :update, :punch])
 
         realtime do
-          mode :auto
+          mode(:auto)
           module PyroManiac.SurfaceTest
           except [:punch]
         end
@@ -624,7 +662,7 @@ defmodule PyroManiac.SurfaceTest do
       end
 
       pyro_maniac do
-        default_label :name
+        default_label(:name)
 
         expose :read do
           loads [:name, :name_length, owner: [:name]]
@@ -632,12 +670,15 @@ defmodule PyroManiac.SurfaceTest do
           sort []
         end
 
-        expose [:create, :archive]
+        expose([:create, :archive])
       end
 
       attributes do
         uuid_primary_key :id, public?: true
         attribute :name, :string, public?: true
+        attribute :done?, :boolean, public?: true
+        attribute :is_open?, :boolean, public?: true
+        attribute :hidden?, :boolean
       end
 
       relationships do
@@ -646,6 +687,7 @@ defmodule PyroManiac.SurfaceTest do
 
       calculations do
         calculate :name_length, :integer, expr(string_length(name)), public?: true
+        calculate :late?, :boolean, expr(done? == false), public?: true
       end
 
       actions do
@@ -657,6 +699,32 @@ defmodule PyroManiac.SurfaceTest do
       end
     end
 
+    defmodule TsPlural do
+      @moduledoc false
+      use Ash.Resource, domain: nil, data_layer: Ash.DataLayer.Ets
+
+      resource do
+        short_name :member
+        plural_name :staff
+      end
+
+      attributes do
+        uuid_primary_key :id
+      end
+    end
+
+    defmodule TsPreset do
+      @moduledoc false
+      use Ash.Resource,
+        domain: nil,
+        data_layer: Ash.DataLayer.Ets,
+        extensions: [PyroManiac.FilterPresets, AshTypescript.Resource]
+
+      typescript do
+        type_name("SurfaceTestTsPreset")
+      end
+    end
+
     defmodule TsDomain do
       @moduledoc false
       use Ash.Domain,
@@ -664,7 +732,7 @@ defmodule PyroManiac.SurfaceTest do
         validate_config_inclusion?: false
 
       pyro_maniac_typescript do
-        mode :auto
+        mode(:auto)
       end
 
       typescript_rpc do
@@ -676,7 +744,39 @@ defmodule PyroManiac.SurfaceTest do
       resources do
         resource PyroManiac.SurfaceTest.TsThing
         resource PyroManiac.SurfaceTest.TsOwner
+        resource PyroManiac.SurfaceTest.TsPreset
       end
+    end
+
+    test "a field name with `?` has the client name `is_` (also in a filter preset storage)" do
+      assert AshTypescript.Resource.Info.typescript_field_names!(TsThing) == [
+               done?: "isDone",
+               is_open?: "isOpen",
+               late?: "isLate"
+             ]
+
+      assert AshTypescript.Resource.Info.typescript_field_names!(TsPreset) == [
+               interactive?: "isInteractive",
+               shared?: "isShared"
+             ]
+
+      assert AshTypescript.FieldFormatter.format_field_for_client(:late?, TsThing, :camel_case) ==
+               "isLate"
+    end
+
+    test "the actions of a filter preset storage have rpc actions" do
+      assert [
+               {:create, :create_ts_preset},
+               {:destroy, :destroy_ts_preset},
+               {:for_page, :ts_preset_for_page},
+               {:update, :update_ts_preset}
+             ] =
+               TsDomain
+               |> AshTypescript.Rpc.Info.typescript_rpc()
+               |> Enum.find(&(&1.resource == TsPreset))
+               |> Map.fetch!(:rpc_actions)
+               |> Enum.map(&{&1.action, &1.name})
+               |> Enum.sort()
     end
 
     test "lists each resource with AshTypescript.Resource, also with no exposed action" do
@@ -713,7 +813,7 @@ defmodule PyroManiac.SurfaceTest do
             end
 
             pyro_maniac do
-              default_label :id
+              default_label(:id)
 
               expose :read do
                 loads [:id, owner: [:name]]
@@ -739,7 +839,7 @@ defmodule PyroManiac.SurfaceTest do
               validate_config_inclusion?: false
 
             pyro_maniac_typescript do
-              mode :auto
+              mode(:auto)
             end
 
             resources do
@@ -757,13 +857,14 @@ defmodule PyroManiac.SurfaceTest do
       rpc_actions =
         TsDomain
         |> AshTypescript.Rpc.Info.typescript_rpc()
+        |> Enum.filter(&(&1.resource == TsThing))
         |> Enum.flat_map(& &1.rpc_actions)
         |> Map.new(&{&1.name, &1})
 
       assert Map.keys(rpc_actions) |> Enum.sort() ==
-               [:list_surface_test_ts_things, :make_ts_thing, :surface_test_ts_thing_archive]
+               [:list_ts_things, :make_ts_thing, :ts_thing_archive]
 
-      list = rpc_actions[:list_surface_test_ts_things]
+      list = rpc_actions[:list_ts_things]
       assert list.action == :read
       assert list.allowed_loads == [:name_length, :owner]
       assert list.enable_filter?
@@ -777,7 +878,14 @@ defmodule PyroManiac.SurfaceTest do
                :make_ts_thing
 
       assert PyroManiac.Domain.Typescript.Info.rpc_name(TsThing, :archive, TsDomain) ==
-               :surface_test_ts_thing_archive
+               :ts_thing_archive
+    end
+
+    test "the rpc name of a resource uses its short name and its plural name" do
+      assert PyroManiac.Domain.Typescript.default_rpc_name(TsPlural, :read) == :list_staff
+      assert PyroManiac.Domain.Typescript.default_rpc_name(TsPlural, :create) == :create_member
+      assert PyroManiac.Domain.Typescript.default_rpc_name(TsPlural, :hire) == :member_hire
+      assert PyroManiac.Domain.Typescript.default_rpc_name(TsOwner, :read) == :list_ts_owners
     end
   end
 end

@@ -42,8 +42,7 @@ if Code.ensure_loaded?(AshTypescript.Rpc) do
       written = MapSet.new((existing && existing.rpc_actions) || [], & &1.action)
 
       new_rpc_actions =
-        for expose <- PyroManiac.Resource.Info.exposed(resource),
-            not MapSet.member?(written, expose.name) do
+        for expose <- exposed(resource), not MapSet.member?(written, expose.name) do
           rpc_action(resource, expose, rpc_name)
         end
 
@@ -73,6 +72,27 @@ if Code.ensure_loaded?(AshTypescript.Rpc) do
             %{entity | rpc_actions: new_rpc_actions},
             type: :append
           )
+      end
+    end
+
+    @preset_actions [:for_page, :create, :update, :destroy]
+
+    # The exposed actions; for a filter preset storage with TypeScript types,
+    # its actions (the renderers read and save the presets with them).
+    defp exposed(resource) do
+      extensions = Spark.extensions(resource)
+
+      cond do
+        PyroManiac.Resource in extensions ->
+          PyroManiac.Resource.Info.exposed(resource)
+
+        PyroManiac.FilterPresets in extensions and AshTypescript.Resource in extensions ->
+          for name <- @preset_actions, Ash.Resource.Info.action(resource, name) do
+            %{name: name, loads: [], filter: [], sort: []}
+          end
+
+        true ->
+          []
       end
     end
 

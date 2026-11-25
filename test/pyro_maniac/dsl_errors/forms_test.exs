@@ -10,7 +10,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "action not found in resource (with did-you-mean)" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.UnknownAction]
-      forms -> action -> craete defined in <FILE:LINE>:
+      view -> action -> craete defined in <FILE:LINE>:
         action :craete not found in resource Brewery.Recipe
 
         Did you mean:
@@ -27,10 +27,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule UnknownAction do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :craete do
+              state :guard
               field :name, autofocus: true
               select :style
               field :description
@@ -40,6 +46,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               select :status
             end
           end
+
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire]
+          end
         end
       end
     end
@@ -47,10 +58,10 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "action wrong type" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.WrongActionType]
-      forms -> action -> read defined in <FILE:LINE>:
-        action :read is an unsupported type: :read
+      view -> action -> read defined in <FILE:LINE>:
+        :read is a read action. The read action of a view is its name (or `read_action`); `action` names a write action
 
-        Fix: form actions must reference a create or update action; pick a different action
+        Fix: name a create, update, destroy, or generic action
       │
       <LINE> │             action :read do
       │             ~~~~~~~~~~~~~~~
@@ -62,12 +73,23 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule WrongActionType do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :read do
+              state :guard
               field :name, autofocus: true
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
           end
         end
       end
@@ -76,7 +98,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "action listed in exclude" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.ActionExcluded]
-      forms -> action -> create defined in <FILE:LINE>:
+      view -> action -> create defined in <FILE:LINE>:
         action :create is listed in exclude
 
         Fix: either remove :create from `exclude([...])`, or remove this `action :create` block
@@ -91,10 +113,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule ActionExcluded do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:create, :update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               select :style
               field :description
@@ -103,6 +131,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :target_fg
               select :status
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:create, :update, :activate, :retire, :destroy, :list]
           end
         end
       end
@@ -113,13 +146,13 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "create/update actions not defined or excluded" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.MissingActions]
-      forms defined in <FILE:LINE>:
-        the following exposed :create/:update actions are not defined or excluded: [:update, :activate, :retire]
+      page defined in <FILE:LINE>:
+        the exposed actions [:destroy, :list, :update, :activate, :retire] of Brewery.Recipe are not used by a view and not excluded
 
-        Fix: either define `action` blocks for these actions, or add them to `exclude([...])`
+        Fix: name each one in a view (the name of a view for a read action, `action` for the others), or add it to `page do exclude [...] end`
       │
-      <LINE> │           forms do
-      │           ~~~~~~~~
+      <LINE> │           page do
+      │           ~~~~~~~
       │
       └─ <FILE:LINE>: (file)\
       """
@@ -128,8 +161,20 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule MissingActions do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
+          page do
+            route "/recipes"
+          end
+
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
+
             action :create do
+              state :guard
               field :name, autofocus: true
               select :style
               field :description
@@ -144,11 +189,33 @@ defmodule PyroManiac.DslErrors.FormsTest do
     end
   end
 
+  describe "a module without a page section" do
+    test "reuses some views, so it does not use each exposed action" do
+      defmodule ReusedViews do
+        use PyroManiac, resource: Brewery.Recipe
+
+        view :read do
+          type :card
+          primary? true
+
+          section :main do
+            field :name
+          end
+        end
+      end
+
+      refute PyroManiac.Info.page?(ReusedViews)
+      assert PyroManiac.Info.route(ReusedViews) == nil
+      assert PyroManiac.Info.page?(BreweryWeb.RecipeLive)
+      refute PyroManiac.Info.page?(Brewery.Recipe)
+    end
+  end
+
   describe "duplicate actions" do
     test "duplicate action name" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.DuplicateActionName]
-      forms -> action -> create defined in <FILE:LINE>:
+      view -> action -> create defined in <FILE:LINE>:
         action :create is already defined for this resource
       │
       <LINE> │             action :create do
@@ -161,10 +228,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule DuplicateActionName do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               select :style
               field :description
@@ -175,6 +248,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
             end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               select :style
               field :description
@@ -183,6 +257,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :target_fg
               select :status
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
           end
         end
       end
@@ -193,8 +272,8 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "steps and bare fields are mutually exclusive" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.StepsAndBare]
-      forms -> action -> create defined in <FILE:LINE>:
-        action must have either steps or inputs and groups at the top level, not both
+      view -> action -> create defined in <FILE:LINE>:
+        action must have either steps or inputs and sections at the top level, not both
 
         Fix: wrap the other entities in a `step` block, or remove the steps
       │
@@ -208,10 +287,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule StepsAndBare do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :description
               field :target_abv
               field :target_og
@@ -224,6 +309,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               end
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
+          end
         end
       end
     end
@@ -233,7 +323,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "zero autofocus fields" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.ZeroAutofocus]
-      forms -> action -> create defined in <FILE:LINE>:
+      view -> action -> create defined in <FILE:LINE>:
         exactly one field must have autofocus
 
         Fix: add `autofocus: true` to exactly one field in this action
@@ -248,10 +338,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule ZeroAutofocus do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name
               select :style
               field :description
@@ -261,6 +357,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               select :status
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
+          end
         end
       end
     end
@@ -268,7 +369,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "two autofocus fields" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.TwoAutofocus]
-      forms -> action -> create defined in <FILE:LINE>:
+      view -> action -> create defined in <FILE:LINE>:
         exactly one field must have autofocus
 
         Fix: add `autofocus: true` to exactly one field in this action
@@ -283,10 +384,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule TwoAutofocus do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               select :style, autofocus: true
               field :description
@@ -295,6 +402,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :target_fg
               select :status
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
           end
         end
       end
@@ -305,7 +417,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "duplicate field name" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.DuplicateFieldName]
-      forms -> action -> create defined in <FILE:LINE>:
+      view -> action -> create defined in <FILE:LINE>:
         field :style is already defined
       │
       <LINE> │               select :style, label: "Style 2"
@@ -318,10 +430,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule DuplicateFieldName do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               select :style
               select :style, label: "Style 2"
@@ -332,6 +450,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               select :status
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
+          end
         end
       end
     end
@@ -339,7 +462,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "duplicate field label" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.DuplicateFieldLabel]
-      forms -> action -> create defined in <FILE:LINE>:
+      view -> action -> create defined in <FILE:LINE>:
         another field already uses the label "Name"
       │
       <LINE> │               select :style, label: "Name"
@@ -352,10 +475,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule DuplicateFieldLabel do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               select :style, label: "Name"
               field :description
@@ -364,6 +493,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :target_fg
               select :status
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
           end
         end
       end
@@ -374,7 +508,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "field not in accepts/arguments (with did-you-mean)" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.UnknownField]
-      forms -> action -> create -> field -> nam defined in <FILE:LINE>:
+      view -> action -> create -> field -> nam defined in <FILE:LINE>:
         field :nam is not an accepted attribute or argument for this action
 
         Did you mean:
@@ -390,10 +524,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule UnknownField do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :nam, autofocus: true
               select :style
               field :description
@@ -403,6 +543,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               select :status
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
+          end
         end
       end
     end
@@ -410,7 +555,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "accepted attribute missing as form field" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.MissingAccept]
-      forms -> action -> create defined in <FILE:LINE>:
+      view -> action -> create defined in <FILE:LINE>:
         accepted attribute :description is not a form field
 
         Fix: add `field :description` to this action, exclude :description from the action's `accept` list, or add it as a `set`
@@ -425,13 +570,24 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule MissingAccept do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               select :style
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
           end
         end
       end
@@ -440,7 +596,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "unknown field type with did-you-mean" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.UnknownFieldType]
-      forms -> field -> target_abv -> type defined in <FILE:LINE>:
+      view -> field -> target_abv -> type defined in <FILE:LINE>:
         unknown field type :tex for field :target_abv. Accepted types: [:attachment, :boolean, :checkbox, :date, :datetime, :default, :email, :interval, :naive_datetime, :nested_form, :number, :password, :search, :tel, :text, :textarea, :time, :toggle, :url]
 
         Did you mean:
@@ -460,10 +616,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule UnknownFieldType do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               select :style
               field :description
@@ -474,6 +636,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :photos, type: :attachment
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
+          end
         end
       end
     end
@@ -481,7 +648,7 @@ defmodule PyroManiac.DslErrors.FormsTest do
     test "argument missing as form field" do
       expected = """
       [PyroManiac.DslErrors.FormsTest.MissingArgument]
-      forms -> action -> create defined in <FILE:LINE>:
+      view -> action -> create defined in <FILE:LINE>:
         argument :recipe_id is not a form field
 
         Fix: add `field :recipe_id` to this action, or set it via `set`
@@ -496,16 +663,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule MissingArgument do
           use PyroManiac, resource: Brewery.Batch
 
-          forms do
-            exclude([
-              :update,
-              :start_brewing,
-              :advance_status,
-              :complete,
-              :move_card
-            ])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :batch_number
+            end
 
             action :create do
+              state :guard
               field :batch_number, autofocus: true
               select :status
               field :brew_date
@@ -516,6 +683,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :volume_liters
               field :notes
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :start_brewing, :advance_status, :complete, :move_card]
           end
         end
       end
@@ -528,10 +700,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule FieldOnForeignKey do
           use PyroManiac, resource: Brewery.Batch
 
-          forms do
-            exclude([:update, :start_brewing, :advance_status, :complete, :move_card])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :batch_number
+            end
 
             action :create do
+              state :guard
               field :batch_number, autofocus: true
               select :status
               field :brew_date
@@ -545,6 +723,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               combobox :brewer_id
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :start_brewing, :advance_status, :complete, :move_card]
+          end
         end
       end
     end
@@ -554,10 +737,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule FieldOnEnum do
           use PyroManiac, resource: Brewery.Recipe
 
-          forms do
-            exclude([:update, :activate, :retire])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               select :style
               field :description
@@ -568,6 +757,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :photos, type: :attachment
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :activate, :retire]
+          end
         end
       end
     end
@@ -577,10 +771,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule ComboboxType do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, type: :combobox, autofocus: true
               field :code
               field :contact_email
@@ -588,6 +788,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :active
               field :notes
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
           end
         end
       end
@@ -600,10 +805,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule FreeTextNotString do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               field :code
               field :contact_email
@@ -611,6 +822,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               combobox :active
               field :notes
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
           end
         end
       end
@@ -621,10 +837,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule MissingReadAction do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -637,6 +859,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -646,10 +873,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule NotReadAction do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -662,6 +895,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -671,10 +909,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule MissingArgument do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -687,6 +931,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -696,10 +945,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule BadArgumentKey do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -714,6 +969,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -723,10 +983,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule DuplicateArgument do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -741,6 +1007,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -750,10 +1021,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule SearchNotUsed do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -766,6 +1043,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -775,10 +1057,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule SearchNotString do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -791,6 +1079,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -800,10 +1093,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule EmptySort do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -816,6 +1115,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -825,10 +1129,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule FreeTextSort do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -841,6 +1151,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -850,10 +1165,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule BigLimit do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -866,6 +1187,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -875,10 +1201,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule BadInputRef do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -891,6 +1223,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -900,10 +1237,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule BadFilter do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -916,6 +1259,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -925,10 +1273,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule FreeTextLabelKey do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               combobox :code do
@@ -941,6 +1295,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -950,13 +1309,24 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule FreeTextArgument do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:create, :update])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :rename do
+              state :guard
               field :name, autofocus: true
               combobox :reason
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:create, :update]
           end
         end
       end
@@ -966,10 +1336,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
       defmodule FreeTextArgumentOk do
         use PyroManiac, resource: Brewery.Supplier
 
-        forms do
-          exclude([:create, :update])
+        view :read do
+          type :card
+          primary? true
+
+          section :main do
+            field :name
+          end
 
           action :rename do
+            state :guard
             field :name, autofocus: true
 
             combobox :reason do
@@ -978,11 +1354,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
             end
           end
         end
+
+        page do
+          route "/test"
+          exclude [:create, :update, :destroy, :suggest_codes, :by_prefix]
+        end
       end
 
       combobox =
         FreeTextArgumentOk
-        |> PyroManiac.Info.form_for(:rename)
+        |> PyroManiac.Info.action_for(:rename)
         |> PyroManiac.Info.form_fields()
         |> Enum.find(&(&1.name == :reason))
 
@@ -997,10 +1378,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule ShortRow do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
               row do
@@ -1013,6 +1400,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -1022,13 +1414,19 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule ShortCompound do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
-              compound "Code" do
+              compound :code do
                 field :code
               end
 
@@ -1037,6 +1435,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :active
               field :notes
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
           end
         end
       end
@@ -1047,13 +1450,19 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule ProseCompound do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
-              compound "Contact" do
+              compound :contact do
                 field :phone
                 field :notes, type: :textarea
               end
@@ -1063,22 +1472,33 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :active
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
 
     test "collapsed? needs collapsible?" do
-      assert_dsl_error ~r/group "More" has `collapsed\? true` but not `collapsible\? true`/ do
+      assert_dsl_error ~r/section "More" has `collapsed\? true` but not `collapsible\? true`/ do
         defmodule CollapsedOnly do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
 
-              group "More" do
+              section :more do
                 collapsed? true
                 field :notes
               end
@@ -1089,20 +1509,32 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :active
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
 
-    test "autofocus cannot be in a closed group" do
-      assert_dsl_error ~r/group "More" starts closed, but it contains the input with `autofocus`/ do
+    test "autofocus cannot be in a closed section" do
+      assert_dsl_error ~r/section "More" starts closed, but it contains the input with `autofocus`/ do
         defmodule AutofocusClosed do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
-              group "More" do
+              state :guard
+
+              section :more do
                 collapsible? true
                 collapsed? true
                 field :name, autofocus: true
@@ -1115,6 +1547,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :notes
             end
           end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
+          end
         end
       end
     end
@@ -1123,14 +1560,20 @@ defmodule PyroManiac.DslErrors.FormsTest do
       defmodule RowOfCompounds do
         use PyroManiac, resource: Brewery.Supplier
 
-        forms do
-          exclude([:update, :rename])
+        view :read do
+          type :card
+          primary? true
+
+          section :main do
+            field :name
+          end
 
           action :create do
+            state :guard
             field :name, autofocus: true
 
             row do
-              compound "Identity" do
+              compound :identity do
                 field :code
                 field :phone
               end
@@ -1141,10 +1584,15 @@ defmodule PyroManiac.DslErrors.FormsTest do
             end
           end
         end
+
+        page do
+          route "/test"
+          exclude [:update, :rename, :destroy, :suggest_codes, :by_prefix]
+        end
       end
 
       [_, %PyroManiac.Form.Row{fields: [compound | _] = children}] =
-        RowOfCompounds |> PyroManiac.Info.form_for(:create) |> Map.get(:fields)
+        RowOfCompounds |> PyroManiac.Info.action_for(:create) |> Map.get(:fields)
 
       assert length(children) == 4
       assert %PyroManiac.Form.Compound{label: "Identity"} = compound
@@ -1157,10 +1605,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule WhenParentTopLevel do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               field :code, visible?: expr(parent(active) == true)
               field :contact_email
@@ -1168,6 +1622,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :active
               field :notes
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
           end
         end
       end
@@ -1178,11 +1637,19 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule VisibleParentUnknown do
           use PyroManiac, resource: Brewery.Shipment
 
-          forms do
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :reference
+            end
+
             action :create do
+              state :guard
               field :reference, autofocus: true
 
-              group "Lines" do
+              section :lines do
                 path [:lines]
                 field :description, visible?: expr(parent(no_such_field) == 1)
               end
@@ -1197,11 +1664,19 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule VisibleParentAggregate do
           use PyroManiac, resource: Brewery.Shipment
 
-          forms do
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :reference
+            end
+
             action :create do
+              state :guard
               field :reference, autofocus: true
 
-              group "Lines" do
+              section :lines do
                 path [:lines]
                 field :description, visible?: expr(parent(line_count) > 0)
               end
@@ -1216,10 +1691,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule WhenFunction do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               field :code, visible?: fn _form -> true end
               field :contact_email
@@ -1227,6 +1708,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :active
               field :notes
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
           end
         end
       end
@@ -1237,10 +1723,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule WhenRelationship do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               field :code, visible?: expr(ingredients.name == "Hops")
               field :contact_email
@@ -1248,6 +1740,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :active
               field :notes
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
           end
         end
       end
@@ -1258,10 +1755,16 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule WhenAggregate do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
+              state :guard
               field :name, autofocus: true
               field :code, visible?: expr(ingredient_count > 0)
               field :contact_email
@@ -1269,6 +1772,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :active
               field :notes
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
           end
         end
       end
@@ -1279,13 +1787,24 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule WhenUnknownArg do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:create, :update])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :rename do
+              state :guard
               field :name, autofocus: true, visible?: expr(not is_nil(^arg(:reasn)))
               field :reason
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:create, :update]
           end
         end
       end
@@ -1298,8 +1817,13 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule SetPrivate do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
               field :name, autofocus: true, "__allow_nil?__": true
@@ -1309,6 +1833,11 @@ defmodule PyroManiac.DslErrors.FormsTest do
               field :active
               field :notes
             end
+          end
+
+          page do
+            route "/test"
+            exclude [:update, :rename]
           end
         end
       end
@@ -1320,8 +1849,17 @@ defmodule PyroManiac.DslErrors.FormsTest do
         defmodule PyroManiac.DslErrors.FormsTest.ClassOption do
           use PyroManiac, resource: Brewery.Supplier
 
-          forms do
-            exclude([:update, :rename])
+          page do
+            exclude [:update, :rename]
+          end
+
+          view :read do
+            type :card
+            primary? true
+
+            section :main do
+              field :name
+            end
 
             action :create do
               field :name, autofocus: true

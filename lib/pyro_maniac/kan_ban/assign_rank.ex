@@ -10,7 +10,7 @@ defmodule PyroManiac.KanBan.AssignRank do
 
   ## Options
 
-    * `:lane` — the attribute name for lane grouping
+    * `:lane` — the attribute name for lane grouping (the scope of the order), or `nil`
     * `:priority` — the attribute name for the rank string
   """
   use Ash.Resource.Change
@@ -26,7 +26,7 @@ defmodule PyroManiac.KanBan.AssignRank do
       changeset
     else
       Ash.Changeset.before_action(changeset, fn changeset ->
-        lane_value = Ash.Changeset.get_attribute(changeset, lane_field)
+        lane_value = lane_field && Ash.Changeset.get_attribute(changeset, lane_field)
         rank = rank_after_last(changeset, lane_field, priority_field, lane_value, context)
         Ash.Changeset.force_change_attribute(changeset, priority_field, rank)
       end)
@@ -43,13 +43,15 @@ defmodule PyroManiac.KanBan.AssignRank do
     |> FractionalIndex.generate_key_between(nil)
   end
 
-  defp last_rank(_changeset, _lane_field, _priority_field, nil, _context), do: nil
+  defp last_rank(_changeset, lane_field, _priority_field, nil, _context)
+       when not is_nil(lane_field),
+       do: nil
 
   # The actor goes with the read, because a domain can require an actor also
   # for a read that does not authorize.
   defp last_rank(changeset, lane_field, priority_field, lane_value, context) do
     changeset.resource
-    |> Ash.Query.filter_input(%{lane_field => %{"eq" => lane_value}})
+    |> filter_lane(lane_field, lane_value)
     |> exclude_self(changeset)
     |> Ash.Query.sort([{priority_field, :desc}])
     |> Ash.Query.limit(1)
@@ -60,6 +62,12 @@ defmodule PyroManiac.KanBan.AssignRank do
       _ -> nil
     end
   end
+
+  # Without a lane (a `PyroManiac.Ordering` without `scope`), one order.
+  defp filter_lane(query, nil, _value), do: query
+
+  defp filter_lane(query, field, value),
+    do: Ash.Query.filter_input(query, %{field => %{"eq" => value}})
 
   defp exclude_self(query, %{action_type: :update, data: data}) do
     pkey = Ash.Resource.Info.primary_key(query.resource)

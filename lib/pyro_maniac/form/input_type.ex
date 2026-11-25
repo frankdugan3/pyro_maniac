@@ -2,7 +2,7 @@ defmodule PyroManiac.Form.InputType do
   @moduledoc """
   The behaviour of an app input type, for the `input` entity.
 
-      input :body, {MyAppWeb.Inputs.Markdown, profile: :issue}
+      input :description, {BreweryWeb.Inputs.Markdown, toolbar: :minimal}
 
   The behaviour has no rendering, so that PyroManiac stays
   renderer-agnostic. Each renderer has its own render behaviour.

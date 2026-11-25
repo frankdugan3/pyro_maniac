@@ -3,31 +3,41 @@ defmodule BreweryWeb.QualityTestLive do
 
   use PyroManiac, resource: Brewery.QualityTest
 
-  views do
-    view :read do
-      type :data_table
-      default_sort "-tested_at"
+  view :read do
+    type :data_table
+    primary? true
+    default_sort "-tested_at"
 
-      exclude [
-        :id,
-        :batch_id,
-        :tester_id,
-        :batch,
-        :tester,
-        :passed_text,
-        :lab_reports,
-        :lab_reports_urls
-      ]
+    exclude [
+      :id,
+      :batch_id,
+      :tester_id,
+      :batch,
+      :tester,
+      :passed_text,
+      :lab_reports,
+      :lab_reports_urls
+    ]
 
-      column :test_type
-      column :tested_at
-      column :result
-      column :passed
-      column :notes
+    column :test_type
+    column :tested_at
+    column :result
+    column :passed
+    column :notes
+  end
+
+  view :read do
+    type :card
+
+    primary? true
+
+    section :main do
+      field :test_type
     end
   end
 
-  forms do
-    exclude [:create, :update, :archive]
+  page do
+    route "/quality-tests"
+    exclude [:create, :update, :archive, :destroy]
   end
 end

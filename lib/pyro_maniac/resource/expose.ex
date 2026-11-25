@@ -11,8 +11,8 @@ defmodule PyroManiac.Resource.Expose do
     default_label :name
 
     expose :read do
-      loads [:name, :code, contacts: [:name]]
-      filter [:name, :code]
+      loads [:name, :style, recipe_ingredients: [:quantity]]
+      filter [:name, :style]
       sort [:name]
     end
 
@@ -20,7 +20,7 @@ defmodule PyroManiac.Resource.Expose do
       loads [:name]
     end
 
-    expose :archive
+    expose :activate
   end
   ```
 
@@ -32,16 +32,16 @@ defmodule PyroManiac.Resource.Expose do
     refuses them). Set these options on a field (for example a password)
     that no filter or sort may use.
   - A field: an attribute, a calculation, or an aggregate.
-  - A relationship: `:owner` is the relationship with `:*` of its resource,
-    one level deep (the same as `owner: [:*]`).
-  - A relationship with a field list: `owner: [:name, address: [:city]]`. A
+  - A relationship: `:batches` is the relationship with `:*` of its resource,
+    one level deep (the same as `batches: [:*]`).
+  - A relationship with a field list: `recipe_ingredients: [:quantity, ingredient: [:name]]`. A
     deeper load is always explicit.
 
   All the fields and relationships must be public.
 
   ```elixir
   expose :read do
-    loads [:*, :owner, contacts: [:name]]
+    loads [:*, :batches, recipe_ingredients: [:quantity]]
     sort [:name]
   end
   ```
@@ -57,7 +57,7 @@ defmodule PyroManiac.Resource.Expose do
   expose [:create, :update]
 
   # loads [:name], filter all the fields, no sort
-  expose :search do
+  expose :list do
     loads [:name]
     sort []
   end
@@ -70,7 +70,7 @@ defmodule PyroManiac.Resource.Expose do
   for each action, applies the defaults, and expands the `:*` of the
   resource, after all the transformers (thus also the fields that other
   extensions add). `PyroManiac.Resource.Info.exposed/1` also expands the
-  relationships (`:owner`, and `:*` in `owner: [...]`): that needs the fields
+  relationships (`:batches`, and `:*` in `batches: [...]`): that needs the fields
   of other resources, which a resource cannot read while it compiles (two
   related resources would wait for each other).
   """

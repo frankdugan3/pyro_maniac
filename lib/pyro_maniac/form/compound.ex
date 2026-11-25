@@ -1,54 +1,37 @@
 defmodule PyroManiac.Form.Compound do
   @moduledoc """
-  One value that the user enters in two or more tiny inputs, for example a
-  length and its unit. Each part is a separate attribute or argument.
+  One value that the user enters in two or more tiny inputs, for example the
+  original and the final gravity of a batch. Each part is a separate attribute or argument.
 
   The label is the name of the value (a `<fieldset>` legend in HTML). The
   labels of the parts are for assistive technology only, unless
   `show_labels?` is `true`. The errors of the parts show together.
 
-      compound "Temperature" do
-        field :temperature, label: "Value"
-        field :temperature_unit, label: "Unit"
+      compound :gravity do
+        separator " → "
+        field :actual_og, label: "OG"
+        field :actual_fg, label: "FG"
       end
   """
   @moduledoc group: "PyroManiac"
 
-  alias PyroManiac.Dsl.Type
-
   use PyroManiac.Dsl.Entity,
     name: :compound,
-    args: [:label],
+    args: [:name],
     describe: "One value made of two or more tiny inputs.",
     imports: [Ash.Expr],
     entities: [
+      description: [PyroManiac.Description],
       fields: [
         PyroManiac.Form.Field,
         PyroManiac.Form.Combobox,
         PyroManiac.Form.Select,
         PyroManiac.Form.Input
-      ]
+      ],
+      render: [PyroManiac.Render]
     ],
-    schema: [
-      label: [
-        doc: "The name of the value.",
-        required: true,
-        type: :string
-      ],
-      description: [
-        doc: "Help text for the value.",
-        type: :string
-      ],
-      show_labels?: [
-        default: false,
-        doc: "Show the labels of the parts. If `false`, they are only for assistive technology.",
-        type: :boolean
-      ],
-      visible?: [
-        doc: "Conditional visibility: an Ash expression.",
-        type: Type.expression()
-      ]
-    ],
+    schema: PyroManiac.LayoutSchema.compound(),
+    transform: {PyroManiac.LayoutSchema, :set_label, []},
     private_fields: [
       __full_path__: [
         default: [],

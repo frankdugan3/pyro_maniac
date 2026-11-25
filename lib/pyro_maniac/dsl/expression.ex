@@ -2,7 +2,7 @@ defmodule PyroManiac.Dsl.Expression do
   @moduledoc false
 
   # Helpers for the Ash expressions of the DSL: `visible?`, the `filter` and the
-  # `argument` values of a combobox, and `tone`.
+  # `argument` values of a combobox, and `decoration`.
   #
   # Ash does not fill a `^context(...)` template in a filter that is added to
   # a query (tested 2026-11-18: AshSql raises "Unsupported expression").
@@ -111,7 +111,7 @@ defmodule PyroManiac.Dsl.Expression do
   end
 
   @doc """
-  Validates a `visible?` expression or a `tone` expression. With
+  Validates a `visible?` expression or a `decoration` expression. With
   `in_memory_only?: true` (the default), each reference is an attribute,
   because the expression is evaluated in memory with no query. With
   `in_memory_only?: false`, a reference can also be a calculation or an

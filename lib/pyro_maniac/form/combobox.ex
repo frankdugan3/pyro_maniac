@@ -6,6 +6,9 @@ defmodule PyroManiac.Form.Combobox do
 
   - **Select**: the field is the foreign key of a `belongs_to`. The user
     selects a record of the destination.
+  - **Select many**: the field is an argument that the action passes to
+    `manage_relationship` (for example of a `many_to_many`). The user
+    selects the related records: attach and detach.
   - **Free text**: the field is a `:string` or `:ci_string`. The typed text
     is the value, and the options are the values that the records of the
     form resource already have.
@@ -18,8 +21,8 @@ defmodule PyroManiac.Form.Combobox do
   value is not in an expression, so its templates have no `^`, as in
   `set_attribute(:status, arg(:status))` of Ash.
 
-      combobox :model do
-        filter expr(is_nil(^input(:make)) or make == ^input(:make))
+      combobox :lot_number do
+        filter expr(is_nil(^input(:name)) or name == ^input(:name))
       end
 
       combobox :supplier_id do
@@ -38,7 +41,12 @@ defmodule PyroManiac.Form.Combobox do
     args: [:name],
     describe: "A form input that searches for its value.",
     imports: [Ash.Expr, PyroManiac.Form.Templates],
-    entities: [arguments: [PyroManiac.Form.Combobox.Argument]],
+    entities: [
+      description: [PyroManiac.Description],
+      arguments: [PyroManiac.Form.Combobox.Argument],
+      link_to: [PyroManiac.LinkTo],
+      render: [PyroManiac.Render]
+    ],
     schema:
       CommonInput.schema() ++
         [
@@ -87,6 +95,17 @@ defmodule PyroManiac.Form.Combobox do
           __resource__: [
             doc: "The searched resource. Set by the transformer.",
             type: :atom
+          ],
+          __relationship__: [
+            doc:
+              "Select mode: the relationship whose records the combobox selects (the `belongs_to` of the foreign key, or the relationship that the action manages with the argument), which view mode shows. Set by the transformer.",
+            type: :atom
+          ],
+          "__multiple?__": [
+            default: false,
+            doc:
+              "Whether the combobox selects many records: an argument that the action passes to `manage_relationship` of a relationship to many records (attach and detach). Set by the transformer.",
+            type: :boolean
           ],
           __inputs__: [
             default: [],

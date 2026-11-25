@@ -1,27 +1,31 @@
 # Searches
 
-The `searches` section declares preconfigured filter tabs that map text
+The `search` entities declare preconfigured filter tabs that map text
 input to Ash filter predicates. Each tab is non-removable in the renderer
 UI; users can add/remove their own filters separately.
 
 ```elixir
-searches do
-  search :by_name do
-    field :name
-  end
+search :by_number do
+  field :batch_number
+end
 
-  search :by_status do
-    operator :or
+search :by_status do
+  operator :or
 
-    field :status do
-      operator :eq
-    end
+  field :status do
+    operator :eq
   end
 end
 ```
 
-`searches` is a top-level section — it sits at the page module's
-top-level alongside `page`, `views`, `forms`.
+`search` is a top-level entity — it sits at the page module's top level
+alongside `page` and `view`.
+
+Every list view has the same filter experience: the searches as simple
+chips, and, with `custom_filters? true` on the page, the advanced filter
+view, where the user builds and saves filters (`filter_storage`,
+`shared_filters?`; refer to [page](page.md) and
+[filter_presets](filter_presets.md)).
 
 ## `search`
 
@@ -37,14 +41,17 @@ Each `search` contains one or more `field` entities.
 ## `field`
 
 ```elixir
-field :name
+field :batch_number
 field :brewer do
-  source [:brewer, :first_name]
+  source [:brewer, :name]
 end
 
-field :tags do
+field :recipe do
+  source [:notes, [:recipe, :name]]
+end
+
+field :status do
   operator :in
-  source [:tags, [:related_tags, :name]]
 end
 ```
 
@@ -59,21 +66,21 @@ end
 `source` accepts either a single path or a list:
 
 ```elixir
-# Search both `:title` and `:body`
+# Search both `:batch_number` and `:notes`
 field :q do
-  source [:title, :body]
+  source [:batch_number, :notes]
 end
 
 # Search nested relationship fields
-field :brewer_name do
-  source [[:brewer, :first_name], [:brewer, :last_name]]
+field :recipe_or_brewer do
+  source [[:recipe, :name], [:brewer, :name]]
 end
 ```
 
 ## Common mistakes
 
-- Forgetting that `searches` is **top-level** — placing it inside `page`
-  or `views` breaks compilation.
+- Forgetting that `search` is **top-level** — placing it inside `page`
+  or a `view`, or wrapping it in `searches do`, breaks compilation.
 - Operator atoms are not validated against Ash's known operators; a typo
   (`:contians`) will only fail at runtime when the filter is built.
 - `source` for a relationship traversal must be a list-of-lists when you

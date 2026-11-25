@@ -27,9 +27,10 @@ defmodule PyroManiac.KanBan do
 
   ## Usage
 
-      defmodule MyApp.Task do
+      defmodule Brewery.Batch do
         use Ash.Resource,
-          extensions: [PyroManiac.KanBan]
+          domain: Brewery.Domain,
+          extensions: [PyroManiac.Resource, PyroManiac.KanBan]
 
         kan_ban do
           lane :status
@@ -39,18 +40,56 @@ defmodule PyroManiac.KanBan do
           per_lane 20
         end
       end
+
+  ## Dynamic lanes
+
+  A `lane` that is a `belongs_to` gives dynamic lanes: the records of the
+  destination are the lanes, so the users can add them. The cards are
+  ordered in each lane by the foreign key. The destination is an existing
+  resource (for example the stages of a project), or a lane resource with
+  `PyroManiac.KanBan.Lanes`:
+
+      defmodule Brewery.Task do
+        use Ash.Resource,
+          extensions: [PyroManiac.Resource, PyroManiac.KanBan]
+
+        relationships do
+          belongs_to :stage, Brewery.Stage
+        end
+
+        kan_ban do
+          lane :stage do
+            destroy_action false
+          end
+
+          priority :rank
+          move_action :move_card
+          read_action :kanban_read
+        end
+      end
+
+  The board reads the lanes with `read_action`; adds, edits, and deletes
+  them with `create_action`, `update_action`, and `destroy_action`; and
+  moves them with `move_action`. Each one defaults to the primary action of
+  that type on the lane resource (`move_action`: the move action of the
+  lane resource when it is ordered, `PyroManiac.Ordering.Info.ordering/1`);
+  they are resolved at compile time. An action that is set but missing, or
+  of another type, is a compile error, and so is a lane resource without a
+  read action. Another action without a default is not available, and
+  `false` turns one off (`PyroManiac.KanBan.Info.lane_action/2`). The
+  `move_action` of the `kan_ban` section moves the cards; the
+  `move_action` of the `lane` moves the lanes.
+
+  `PyroManiac.KanBan.Info.lanes/2` reads the lanes of a board. A card
+  without a lane (the foreign key is `nil`, when the relationship allows
+  it) is in the lane "No lane".
   """
 
   @kan_ban %Spark.Dsl.Section{
     describe: "Configure kanban board support for this resource.",
     name: :kan_ban,
+    entities: [PyroManiac.KanBan.Lane.__entity__()],
     schema: [
-      lane: [
-        type: :atom,
-        required: true,
-        doc:
-          "The attribute used to group records into swimlanes. Must be an Ash enum type or an atom/string with `one_of` constraints."
-      ],
       priority: [
         type: :atom,
         required: true,

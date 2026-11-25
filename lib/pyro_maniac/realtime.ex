@@ -9,8 +9,8 @@ defmodule PyroManiac.Realtime do
   The full topic of a resource, from its `Ash.Notifier.PubSub` prefix and
   delimiter. Use it in place of a literal topic string.
 
-      PyroManiac.Realtime.topic(MyApp.Brewery.Recipe, "*")
-      #=> "brewery_recipe:*"
+      PyroManiac.Realtime.topic(Brewery.Recipe, "*")
+      #=> "brewery:recipe:*"
   """
   @spec topic(Ash.Resource.t(), String.t() | [String.t()]) :: String.t()
   def topic(resource, suffix) do
@@ -29,11 +29,11 @@ defmodule PyroManiac.Realtime do
   The default topic prefix of a resource: the module name without its first
   segment, in snake case, joined with `_`.
 
-      iex> PyroManiac.Realtime.default_prefix(MyApp.Purchasing.Vendor)
-      "purchasing_vendor"
+      iex> PyroManiac.Realtime.default_prefix(Brewery.Recipe)
+      "recipe"
 
-      iex> PyroManiac.Realtime.default_prefix(MyApp.FFL.ADRecord)
-      "ffl_ad_record"
+      iex> PyroManiac.Realtime.default_prefix(Brewery.QualityTest)
+      "quality_test"
   """
   @spec default_prefix(module()) :: String.t()
   def default_prefix(module) do
@@ -54,7 +54,7 @@ defmodule PyroManiac.Realtime do
   Sends one `PyroManiac.Realtime.Bulk` message for `resource`. Use it after
   a bulk change that Ash does not notify, for example a truncate:
 
-      PyroManiac.Realtime.broadcast_bulk(MyApp.Brewery.Recipe, :truncate)
+      PyroManiac.Realtime.broadcast_bulk(Brewery.Recipe, :truncate)
 
   `event` must be in `bulk` of the `realtime` section. `PyroManiac.Realtime.BulkNotifier`
   calls this function for the bulk actions.

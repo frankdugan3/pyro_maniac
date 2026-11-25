@@ -93,7 +93,7 @@ defmodule Brewery.Batch do
   relationships do
     belongs_to :recipe, Brewery.Recipe, allow_nil?: false, public?: true
     belongs_to :brewer, Brewery.Staff, allow_nil?: true, public?: true
-    has_many :quality_tests, Brewery.QualityTest
+    has_many :quality_tests, Brewery.QualityTest, public?: true
   end
 
   aggregates do

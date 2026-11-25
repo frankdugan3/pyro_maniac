@@ -5,12 +5,12 @@ defmodule PyroManiac.Surface do
 
   A field list (`loads`, `filter`, `sort`) is a list of atoms and
   `{relationship, field_list}` tuples. This module works with the **paths** of
-  a field list: `[:name, contacts: [:email]]` gives `[[:name], [:contacts,
-  :email]]`.
+  a field list: `[:name, batches: [:batch_number]]` gives `[[:name],
+  [:batches, :batch_number]]`.
 
   A path is **covered** by a field list when it is one of the paths of the
-  list, or the start of one of them. Thus `[:contacts]` (the relationship) is
-  covered by `contacts: [:email]`. This is the `allowed_loads` rule of
+  list, or the start of one of them. Thus `[:batches]` (the relationship) is
+  covered by `batches: [:batch_number]`. This is the `allowed_loads` rule of
   AshTypescript.
   """
   @moduledoc group: "PyroManiac"
@@ -25,11 +25,11 @@ defmodule PyroManiac.Surface do
   (`{calculation, %{...}}`, or a keyword of arguments) gives the path of the
   field only.
 
-      iex> PyroManiac.Surface.paths([:name, contacts: [:email, phone: [:number]]])
-      [[:name], [:contacts, :email], [:contacts, :phone, :number]]
+      iex> PyroManiac.Surface.paths([:name, recipe_ingredients: [:quantity, ingredient: [:name]]])
+      [[:name], [:recipe_ingredients, :quantity], [:recipe_ingredients, :ingredient, :name]]
 
-      iex> PyroManiac.Surface.paths([:contacts, total: %{currency: :usd}])
-      [[:contacts], [:total]]
+      iex> PyroManiac.Surface.paths([:batches, gravity_spread: %{precision: 3}])
+      [[:batches], [:gravity_spread]]
   """
   @spec paths(term()) :: [path()]
   def paths(list), do: list |> List.wrap() |> Enum.flat_map(&item_paths/1) |> Enum.uniq()
@@ -54,8 +54,8 @@ defmodule PyroManiac.Surface do
   @doc """
   Builds a field list from paths. The inverse of `paths/1`.
 
-      iex> PyroManiac.Surface.from_paths([[:name], [:contacts, :email], [:contacts], [:code]])
-      [:code, :name, contacts: [:email]]
+      iex> PyroManiac.Surface.from_paths([[:style], [:batches, :batch_number], [:batches], [:name]])
+      [:name, :style, batches: [:batch_number]]
   """
   @spec from_paths([path()]) :: field_list()
   def from_paths(paths) do
@@ -77,10 +77,10 @@ defmodule PyroManiac.Surface do
   @doc """
   Whether a field list covers a path.
 
-      iex> PyroManiac.Surface.covered?([:contacts], [contacts: [:email]])
+      iex> PyroManiac.Surface.covered?([:batches], [batches: [:batch_number]])
       true
 
-      iex> PyroManiac.Surface.covered?([:contacts, :phone], [contacts: [:email]])
+      iex> PyroManiac.Surface.covered?([:batches, :status], [batches: [:batch_number]])
       false
   """
   @spec covered?(path(), field_list() | [path()]) :: boolean()
@@ -103,8 +103,8 @@ defmodule PyroManiac.Surface do
   @doc """
   The first field of each path of a field list.
 
-      iex> PyroManiac.Surface.top_level([:name, contacts: [:email]])
-      [:name, :contacts]
+      iex> PyroManiac.Surface.top_level([:name, batches: [:batch_number]])
+      [:name, :batches]
   """
   @spec top_level(field_list()) :: [atom()]
   def top_level(list), do: list |> paths() |> Enum.map(&hd/1) |> Enum.uniq()
@@ -132,7 +132,7 @@ defmodule PyroManiac.Surface do
   def restrict_sort(_resource, _action, sort), do: sort
 
   @doc """
-  Removes the entries of an Ash sort input string (`"name,-employee.code"`)
+  Removes the entries of an Ash sort input string (`"batch_number,-recipe.name"`)
   that the exposed `sort` of the action does not cover. Use it for the sort
   that a user selects, before `Ash.Sort.parse_input/2`: after it, a sort on a
   relationship field is an expression, without its path. Returns `nil` when

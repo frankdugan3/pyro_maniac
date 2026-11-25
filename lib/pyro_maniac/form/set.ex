@@ -4,6 +4,10 @@ defmodule PyroManiac.Form.Set do
 
   Used with the `resource` option on `action` to explicitly declare which
   values from the parent record should be passed to the target resource's action.
+
+  With `overridable? true`, the value is set once, when the form opens: the
+  user can change it in an input of the form. Without it, the value is set
+  on submit, and the form has no input for it.
   """
 
   use PyroManiac.Dsl.Entity,
@@ -21,6 +25,12 @@ defmodule PyroManiac.Form.Set do
         doc: "The field to read from the parent record.",
         required: true,
         type: :atom
+      ],
+      overridable?: [
+        default: false,
+        doc:
+          "The value is set when the form opens, and the user can change it (an input of the form shows it). By default the value is set on submit and the user cannot change it.",
+        type: :boolean
       ]
     ]
 end

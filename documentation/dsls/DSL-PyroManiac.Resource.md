@@ -17,8 +17,9 @@ Adds a `pyro_maniac` section with:
 
 ## Usage
 
-    defmodule MyApp.Brewery.Recipe do
+    defmodule Brewery.Recipe do
       use Ash.Resource,
+        domain: Brewery.Domain,
         extensions: [PyroManiac.Resource]
 
       pyro_maniac do
@@ -29,12 +30,12 @@ Adds a `pyro_maniac` section with:
         end
 
         expose :read do
-          loads [:name, :style]
-          filter [:name]
-          sort [:name]
+          loads [:name, :style, :status, :ingredient_count]
+          filter [:name, :style, :status]
+          sort [:name, :style]
         end
 
-        expose [:create, :update]
+        expose [:create, :update, :activate, :retire]
       end
     end
 
@@ -70,8 +71,8 @@ transformer reads it at compile time. A change to it does not recompile
 the resources.
 
 The default `prefix` is the module name without its first segment, in
-snake case, joined with `_`: `MyApp.Brewery.Recipe` gives
-`"brewery_recipe"`.
+snake case, joined with `_`: `Brewery.Recipe` gives
+`"recipe"`.
 
 ## Bulk notifications
 
@@ -86,7 +87,7 @@ not notify (for example a truncate).
 
     realtime do
       mode :auto
-      bulk [:import, :truncate]
+      bulk [:create, :truncate]
     end
 
 A view gets the message with `on_bulk` (`:reload` or `:notify`).

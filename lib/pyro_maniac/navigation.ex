@@ -4,15 +4,15 @@ defmodule PyroManiac.Navigation do
 
   Define your app's navigation in a single module:
 
-      defmodule MyAppWeb.Navigation do
+      defmodule BreweryWeb.Navigation do
         use PyroManiac.Navigation
 
         nav do
           item :home do
             path "/"
-            module MyAppWeb.DashboardLive
+            module BreweryWeb.HomeLive
             image "/images/logo.svg"
-            image_alt "Acme Co"
+            image_alt "Acme Brewery"
           end
 
           group :brewery do
@@ -20,13 +20,11 @@ defmodule PyroManiac.Navigation do
             icon :beer
 
             item :recipes do
-              path "/recipes"
-              page MyAppWeb.RecipeLive
+              page BreweryWeb.RecipeLive
             end
 
             item :batches do
-              path "/batches"
-              page MyAppWeb.BatchLive
+              page BreweryWeb.BatchLive
             end
           end
 
@@ -38,9 +36,22 @@ defmodule PyroManiac.Navigation do
         end
       end
 
-  The compiled module exposes a nav tree and a route manifest via
-  `PyroManiac.Navigation.Info`. Routing and layout rendering are the
-  responsibility of the chosen renderer.
+  A `page` item opens the `route` of its page (`page do route "/recipes"
+  end`), so the route is in the page, not in the navigation. A `module`
+  item has a `path`, and an `href` item opens a URL. Groups are not part of
+  a route. No two routes match the same URL (`"/recipes/:id"` and
+  `"/recipes/new"` overlap), and a `page` item opens a route without
+  parameters.
+
+  Items and groups have a `decoration` (the meaning of the item; each
+  renderer maps it to a style). The `command_palette` section adds a
+  palette, opened with a hotkey (default `"mod+k"`), that finds the items
+  of the navigation (`navigation? true`) and the `command` entities (refer
+  to `PyroManiac.Navigation.Command`).
+
+  The compiled module exposes a nav tree, a route manifest, and the command
+  palette via `PyroManiac.Navigation.Info`. Routing and layout rendering
+  are the responsibility of the chosen renderer.
   """
   use Spark.Dsl,
     default_extensions: [extensions: [PyroManiac.Navigation.Dsl]]

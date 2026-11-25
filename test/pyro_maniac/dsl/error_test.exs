@@ -130,33 +130,43 @@ defmodule PyroManiac.Dsl.ErrorTest do
     defmodule InlineFixture do
       use PyroManiac, resource: Brewery.Recipe
 
-      forms do
-        exclude([:create, :update, :activate, :retire])
+      page do
+        route "/test"
+        exclude [:create, :update, :activate, :retire, :destroy, :list]
       end
 
-      views do
-        view :read do
-          type :data_table
-          default_sort "name"
+      view :read do
+        type :data_table
+        primary? true
+        default_sort "name"
 
-          exclude([
-            :id,
-            :recipe_ingredients,
-            :batches,
-            :photos,
-            :photos_urls,
-            :gravity_spread
-          ])
+        exclude([
+          :id,
+          :recipe_ingredients,
+          :batches,
+          :photos,
+          :photos_urls,
+          :gravity_spread
+        ])
 
-          column :name
-          column :style
-          column :description
-          column :status
-          column :target_abv
-          column :target_og
-          column :target_fg
-          column :ingredient_count
-          column :batch_count
+        column :name
+        column :style
+        column :description
+        column :status
+        column :target_abv
+        column :target_og
+        column :target_fg
+        column :ingredient_count
+        column :batch_count
+      end
+
+      view :read do
+        type :card
+
+        primary? true
+
+        section :main do
+          field :name
         end
       end
     end
@@ -166,7 +176,7 @@ defmodule PyroManiac.Dsl.ErrorTest do
     end
 
     test "view entity has a non-nil :erl_anno location with file and line" do
-      [view] = PyroManiac.Info.views(InlineFixture)
+      view = PyroManiac.Info.primary_list_view(InlineFixture)
       anno = Spark.Dsl.Entity.anno(view)
       assert anno, "expected non-nil anno; got #{inspect(view.__spark_metadata__)}"
       assert :erl_anno.file(anno) != :undefined

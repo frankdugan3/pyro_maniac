@@ -6,7 +6,8 @@ defmodule PyroManiac.KanBan.MoveCard do
   to compute the new rank in a single UPDATE. All neighbor lookups
   happen inside the DB function.
 
-  Reads `kanban_target_id` and `kanban_position` from changeset context.
+  Reads the arguments of the move action: `:target_id` (the card to move
+  before or after) and `:placement` (`:before`, `:after`, or `:last`).
 
   ## Options
 
@@ -23,8 +24,8 @@ defmodule PyroManiac.KanBan.MoveCard do
     priority_field = Keyword.fetch!(opts, :priority)
     resource = changeset.resource
 
-    target_id = changeset.context[:kanban_target_id]
-    position = changeset.context[:kanban_position] || "last"
+    target_id = Ash.Changeset.get_argument(changeset, :target_id)
+    position = PyroManiac.Ordering.MoveRank.placement(changeset)
     new_lane = Ash.Changeset.get_attribute(changeset, lane_field)
     record_id = changeset.data.id
 

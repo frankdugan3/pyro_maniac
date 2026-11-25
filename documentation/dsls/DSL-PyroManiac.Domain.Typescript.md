@@ -9,7 +9,7 @@ AshTypescript. Available only when AshTypescript is a dependency.
 
 This extension adds `AshTypescript.Rpc` to the domain.
 
-    defmodule MyApp.Purchasing do
+    defmodule Brewery.Domain do
       use Ash.Domain, extensions: [PyroManiac.Domain.Typescript]
 
       pyro_maniac_typescript do
@@ -27,7 +27,10 @@ This extension adds `AshTypescript.Rpc` to the domain.
 
 In `:auto` mode, each resource of the domain with `AshTypescript.Resource`
 is in `typescript_rpc`, also with no exposed action. Thus it has
-TypeScript types.
+TypeScript types. A filter preset storage (`PyroManiac.FilterPresets`)
+with `AshTypescript.Resource` gets an rpc action for each of its actions
+`for_page`, `create`, `update`, and `destroy`: the renderers read and
+save the presets of a page with them.
 
 In both modes, a verifier checks:
 
@@ -44,15 +47,25 @@ cannot restrict attributes.
 
 ## The rpc name
 
-`default_rpc_name/2` uses the resource prefix (`resource_prefix/1`):
+`default_rpc_name/2` uses the `short_name` and the `plural_name` of the
+resource (`Ash.Resource.Info`; without a `plural_name`, `pluralize/1` of
+the short name):
 
 | Action | Name |
 |---|---|
-| `:read` | `list_` and the plural of the prefix |
-| `:create`, `:update`, `:destroy` | the action, `_`, and the prefix |
-| other | the prefix, `_`, and the action |
+| `:read` | `list_` and the plural name |
+| `:create`, `:update`, `:destroy` | the action, `_`, and the short name |
+| other | the short name, `_`, and the action |
 
 Give a function to `rpc_name` to change the names.
+
+## The field names
+
+AshTypescript refuses a field name with `?`. A resource with
+`PyroManiac.Resource` or `PyroManiac.FilterPresets` and
+`AshTypescript.Resource` gives each public field `name?` the client name
+`is_name` (`isName` with the camel case formatter), unless its
+`typescript field_names` has one. The renderers use the same names.
 
 
 ## pyro_maniac_typescript

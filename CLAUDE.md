@@ -33,23 +33,26 @@ Formatting and linting is automatically handled by hooks.
 
 All UI config flows through Spark's compile-time pipeline:
 
-1. **DSL Sections** defined in `PyroManiac.Dsl`: `views`, `forms`, `searches`, `page`
-2. **Transformers** (compile-time validation/mutation): `ResolveViewResources` → `ValidateViews` → `ExpandFormActions` → `ValidatePage`
-3. **Verifiers** (deferred checks): `ResourceHasExtension`
+1. **DSL Sections** defined in `PyroManiac.Dsl`: `page` (optional; `route` is required in it), and the top-level sections `views` (`view` entities) and `searches` (`search` entities). The actions of the views are lifted into the internal `[:forms]` path by `LiftViewActions`. A module with the `page` section is a page (`PyroManiac.Info.page?/1`, the persisted `:page?`); a module without it has no route and declares views and searches that the pages reuse. The check that every exposed action is used (and `exclude`) applies to pages only.
+2. **Transformers** (compile-time validation/mutation): `ResolveViewResources` → `ExpandViewArguments` → `ValidateViews` → `LiftViewActions` → `ExpandFormActions` → `ValidatePage` (validates the route, persists `:page?`) → `ValidateCard` → `ValidateRenders` → `ValidateSurface` → `ValidatePrimaryViews`
+3. **Verifiers** (deferred checks): `ResourceHasExtension`, `VerifyLinks`, `VerifyFilterStorage`
 4. **Persisters** (indexing): `Views` indexes by `{action_name, type}` tuple
 5. **Info API** (`PyroManiac.Info`): runtime introspection of compiled DSL data
 
 ### Other Extensions
 
-- **Navigation** (`lib/pyro_maniac/navigation/`): DSL-based nav tree with authorization checks
+- **Navigation** (`lib/pyro_maniac/navigation/`): DSL-based nav tree with authorization checks. A `page` item opens `PyroManiac.Info.route/1` of its page (no `path`; the route has no parameters); a `module` item has a `path`. Groups are not part of a route. `ValidateNav` rejects overlapping routes (`"/recipes/:id"` and `"/recipes/new"`)
 - **Resource** (`lib/pyro_maniac/resource/`): `PyroManiac.Resource` extension on Ash resources, requires `default_label`
-- **KanBan** (`lib/pyro_maniac/kan_ban/`): `PyroManiac.KanBan` extension on Ash resources
+- **KanBan** (`lib/pyro_maniac/kan_ban/`): `PyroManiac.KanBan` extension on Ash resources: static lanes (an enum attribute) or dynamic lanes (a `belongs_to`), set by the `lane` entity (`PyroManiac.KanBan.Lane`; for dynamic lanes `read_action`, `create_action`, `update_action`, `destroy_action` (lane management), `move_action` (lane order; the `kan_ban` `move_action` moves cards), and `sort`, resolved at compile time to the primary actions, or the ordering move, of the lane resource); `PyroManiac.KanBan.Lanes` is the extension of a lane resource (`kan_ban_lanes`: id, name, decoration, the order, and the actions)
+- **Ordering** (`lib/pyro_maniac/ordering/`): `PyroManiac.Ordering` extension on Ash resources: a user-defined order (rank attribute, move action) for `reorder?`; KanBan shares its setup (`PyroManiac.Ordering.Setup`)
+- **FilterPresets** (`lib/pyro_maniac/filter_presets/`): `PyroManiac.FilterPresets` extension on the Ash resource that stores the saved filters of a page (`filter_storage`)
 
 ## Key Conventions
 
 - Spark DSL entity keyword options CANNOT be passed inline when a `do` block is present. Use `type` inside the block: `view :read do\n  type :data_table\nend`
 - DSL validation tests use `assert_raise` + inline `defmodule` — validation must happen in **transformers** (not verifiers) to be caught this way
-- Test domain is a Craft Brewery (`test/support/fixtures/brewery/`): Staff, Supplier, Ingredient, Recipe, RecipeIngredient, Batch, QualityTest
+- Authorization: every action interface runs with the scope of the user, never `authorize?: false`. A UI decides what it shows with `Ash.can?(subject, scope, maybe_is: true, run_queries?: false)` (server) or AshTypescript (client). The contract is in `documentation/renderers/renderer-overview.md#authorization`; the policy advice in `documentation/tutorials/policies.md`. The tests have a SAT solver (`picosat_elixir`, test only) for the policies
+- Test domain is a Craft Brewery (`test/support/brewery/`, pages in `test/support/brewery_web/`): Staff, Supplier, Ingredient, Recipe, RecipeIngredient, Batch, QualityTest, Shipment
 
 ## Style Guide
 

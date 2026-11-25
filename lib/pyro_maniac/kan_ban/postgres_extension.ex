@@ -9,11 +9,16 @@ defmodule PyroManiac.KanBan.PostgresExtension do
   - 2: `pyro_fractional_key_between` compares the keys with `COLLATE "C"`.
     Version 1 used the collation of the database. Then a card could not
     move before the first card of a lane (`midpoint overflow`).
+  - 3: `pyro_order_compute_rank`, the rank of a move of
+    `PyroManiac.Ordering`, with an optional scope.
+  - 4: the rank functions compare the lane and the scope as text. Version 3
+    compared a `uuid` column (a lane that is a record, a scope that is a
+    foreign key) with a text, which Postgres refuses.
   """
 
   use AshPostgres.CustomExtension,
     name: "pyro_kanban",
-    latest_version: 2
+    latest_version: 4
 
   @base_digits "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
@@ -24,11 +29,17 @@ defmodule PyroManiac.KanBan.PostgresExtension do
     end)
   end
 
-  # Version 1 to 2: only the main function changed. `CREATE OR REPLACE`
-  # replaces it.
-  def install(1) do
-    "execute(#{inspect(main_function())})"
-  end
+  # An upgrade from a version to the latest. `CREATE OR REPLACE` replaces
+  # each function that changed after that version: the main function in 2,
+  # the rank function of `PyroManiac.Ordering` in 3, and both rank functions
+  # in 4.
+  def install(1),
+    do: executes([main_function(), compute_rank_function(), compute_order_function()])
+
+  def install(2), do: executes([compute_rank_function(), compute_order_function()])
+  def install(3), do: executes([compute_rank_function(), compute_order_function()])
+
+  defp executes(sqls), do: Enum.map_join(sqls, "\n\n", &"execute(#{inspect(&1)})")
 
   @impl true
   def uninstall(_version) do
@@ -39,7 +50,9 @@ defmodule PyroManiac.KanBan.PostgresExtension do
     end)
   end
 
-  defp sql_functions do
+  # The functions of the latest version: `{signature, CREATE OR REPLACE}`.
+  @doc false
+  def sql_functions do
     [
       {"pyro_fi_get_integer_part(text)", get_integer_part()},
       {"pyro_fi_smallest_integer()", smallest_integer()},
@@ -49,7 +62,9 @@ defmodule PyroManiac.KanBan.PostgresExtension do
       {"pyro_fi_midpoint(text, text, text, int)", midpoint()},
       {"pyro_fractional_key_between(text, text)", main_function()},
       {"pyro_kanban_compute_rank(text, text, text, text, text, text, text)",
-       compute_rank_function()}
+       compute_rank_function()},
+      {"pyro_order_compute_rank(text, text, text, text, text, text, text)",
+       compute_order_function()}
     ]
   end
 
@@ -241,7 +256,7 @@ defmodule PyroManiac.KanBan.PostgresExtension do
     BEGIN
       IF p_position = 'last' OR p_target_id IS NULL THEN
         EXECUTE format(
-          'SELECT %I FROM %I WHERE %I = $1 AND id != $2::uuid ORDER BY %I COLLATE "C" DESC LIMIT 1',
+          'SELECT %I FROM %I WHERE %I::text = $1 AND id != $2::uuid ORDER BY %I COLLATE "C" DESC LIMIT 1',
           p_priority_col, p_table, p_lane_col, p_priority_col
         ) INTO prev_rank USING p_lane_value, p_record_id;
         RETURN pyro_fractional_key_between(prev_rank, NULL);
@@ -252,7 +267,7 @@ defmodule PyroManiac.KanBan.PostgresExtension do
 
       IF p_position = 'before' THEN
         EXECUTE format(
-          'SELECT %I FROM %I WHERE %I = $1 AND id != $2::uuid AND %I COLLATE "C" < $3 ORDER BY %I COLLATE "C" DESC LIMIT 1',
+          'SELECT %I FROM %I WHERE %I::text = $1 AND id != $2::uuid AND %I COLLATE "C" < $3 ORDER BY %I COLLATE "C" DESC LIMIT 1',
           p_priority_col, p_table, p_lane_col, p_priority_col, p_priority_col
         ) INTO prev_rank USING p_lane_value, p_record_id, target_rank;
         RETURN pyro_fractional_key_between(prev_rank, target_rank);
@@ -260,9 +275,64 @@ defmodule PyroManiac.KanBan.PostgresExtension do
 
       IF p_position = 'after' THEN
         EXECUTE format(
-          'SELECT %I FROM %I WHERE %I = $1 AND id != $2::uuid AND %I COLLATE "C" > $3 ORDER BY %I COLLATE "C" ASC LIMIT 1',
+          'SELECT %I FROM %I WHERE %I::text = $1 AND id != $2::uuid AND %I COLLATE "C" > $3 ORDER BY %I COLLATE "C" ASC LIMIT 1',
           p_priority_col, p_table, p_lane_col, p_priority_col, p_priority_col
         ) INTO next_rank USING p_lane_value, p_record_id, target_rank;
+        RETURN pyro_fractional_key_between(target_rank, next_rank);
+      END IF;
+
+      RETURN pyro_fractional_key_between(NULL, NULL);
+    END; $fn$
+    """
+  end
+
+  # The rank of a move of `PyroManiac.Ordering`: as `pyro_kanban_compute_rank`,
+  # with an optional scope (`p_scope_col` `NULL`: one order).
+  defp compute_order_function do
+    """
+    CREATE OR REPLACE FUNCTION pyro_order_compute_rank(
+      p_table text,
+      p_scope_col text,
+      p_rank_col text,
+      p_scope_value text,
+      p_record_id text,
+      p_target_id text,
+      p_position text
+    )
+    RETURNS text LANGUAGE plpgsql STABLE PARALLEL SAFE AS $fn$
+    DECLARE
+      prev_rank text;
+      next_rank text;
+      target_rank text;
+      scope_cond text := CASE
+        WHEN p_scope_col IS NULL THEN '$1 IS NULL OR TRUE'
+        ELSE format('%I::text = $1', p_scope_col)
+      END;
+    BEGIN
+      IF p_position = 'last' OR p_target_id IS NULL THEN
+        EXECUTE format(
+          'SELECT %I FROM %I WHERE ' || scope_cond || ' AND id != $2::uuid ORDER BY %I COLLATE "C" DESC LIMIT 1',
+          p_rank_col, p_table, p_rank_col
+        ) INTO prev_rank USING p_scope_value, p_record_id;
+        RETURN pyro_fractional_key_between(prev_rank, NULL);
+      END IF;
+
+      EXECUTE format('SELECT %I FROM %I WHERE id = $1::uuid', p_rank_col, p_table)
+        INTO target_rank USING p_target_id;
+
+      IF p_position = 'before' THEN
+        EXECUTE format(
+          'SELECT %I FROM %I WHERE ' || scope_cond || ' AND id != $2::uuid AND %I COLLATE "C" < $3 ORDER BY %I COLLATE "C" DESC LIMIT 1',
+          p_rank_col, p_table, p_rank_col, p_rank_col
+        ) INTO prev_rank USING p_scope_value, p_record_id, target_rank;
+        RETURN pyro_fractional_key_between(prev_rank, target_rank);
+      END IF;
+
+      IF p_position = 'after' THEN
+        EXECUTE format(
+          'SELECT %I FROM %I WHERE ' || scope_cond || ' AND id != $2::uuid AND %I COLLATE "C" > $3 ORDER BY %I COLLATE "C" ASC LIMIT 1',
+          p_rank_col, p_table, p_rank_col, p_rank_col
+        ) INTO next_rank USING p_scope_value, p_record_id, target_rank;
         RETURN pyro_fractional_key_between(target_rank, next_rank);
       END IF;
 
